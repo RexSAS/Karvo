@@ -27,15 +27,22 @@ android {
     signingConfigs {
         if (keystorePropsFile.exists()) {
             create("release") {
-                val path = keystoreProps.getProperty("storeFile")
-                storeFile = if (path.startsWith("~")) {
+                fun prop(key: String): String =
+                    keystoreProps.getProperty(key)?.takeIf { it.isNotBlank() }
+                        ?: throw GradleException("keystore.properties is missing '$key'")
+                val path = prop("storeFile")
+                val resolved = if (path.startsWith("~/")) {
                     file(System.getProperty("user.home") + path.removePrefix("~"))
                 } else {
                     file(path)
                 }
-                storePassword = keystoreProps.getProperty("storePassword")
-                keyAlias = keystoreProps.getProperty("keyAlias")
-                keyPassword = keystoreProps.getProperty("keyPassword")
+                if (!resolved.exists()) {
+                    throw GradleException("keystore.properties: storeFile '$path' does not exist")
+                }
+                storeFile = resolved
+                storePassword = prop("storePassword")
+                keyAlias = prop("keyAlias")
+                keyPassword = prop("keyPassword")
             }
         }
     }
