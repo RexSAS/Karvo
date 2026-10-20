@@ -17,7 +17,14 @@ class FakeLessonRepository(initial: List<Lesson> = emptyList()) : LessonReposito
     override fun observeLessons(): Flow<List<Lesson>> = lessons.map { sorted(it) }
 
     override fun observeStudentNames(): Flow<List<String>> =
-        lessons.map { list -> sorted(list).map { it.student }.distinct() }
+        lessons.map { list ->
+            list.groupBy { it.student }.entries
+                .sortedWith(
+                    compareByDescending<Map.Entry<String, List<Lesson>>> { e -> e.value.maxOf { it.date } }
+                        .thenByDescending { e -> e.value.maxOf { it.id } },
+                )
+                .map { it.key }
+        }
 
     override suspend fun get(id: Long): Lesson? = lessons.value.firstOrNull { it.id == id }
 

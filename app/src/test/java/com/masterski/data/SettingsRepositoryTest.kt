@@ -1,6 +1,10 @@
 package com.masterski.data
 
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -14,11 +18,11 @@ import java.io.File
 class SettingsRepositoryTest {
     @get:Rule val tmp = TemporaryFolder()
     private lateinit var repo: DataStoreSettingsRepository
+    private lateinit var store: DataStore<Preferences>
 
     @Before fun setUp() {
-        repo = DataStoreSettingsRepository(
-            PreferenceDataStoreFactory.create { File(tmp.root, "settings.preferences_pb") },
-        )
+        store = PreferenceDataStoreFactory.create { File(tmp.root, "settings.preferences_pb") }
+        repo = DataStoreSettingsRepository(store)
     }
 
     @Test fun setAndClear() = runTest {
@@ -35,4 +39,9 @@ class SettingsRepositoryTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun invalidZoneRejected() = runTest { repo.setTimeZoneId("Mars/Base") }
+
+    @Test fun invalidStoredZoneFallsBackToDefault() = runTest {
+        store.edit { it[stringPreferencesKey("time_zone_id")] = "Mars/Base" }
+        assertEquals("Europe/Rome", repo.timeZoneId.first())
+    }
 }
