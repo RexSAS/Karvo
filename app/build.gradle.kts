@@ -1,8 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+}
+
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
 }
 
 android {
@@ -15,6 +22,30 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+    }
+
+    signingConfigs {
+        if (keystorePropsFile.exists()) {
+            create("release") {
+                val path = keystoreProps.getProperty("storeFile")
+                storeFile = if (path.startsWith("~")) {
+                    file(System.getProperty("user.home") + path.removePrefix("~"))
+                } else {
+                    file(path)
+                }
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (keystorePropsFile.exists()) signingConfig = signingConfigs.getByName("release")
+        }
     }
 
     compileOptions {
