@@ -25,6 +25,7 @@ import com.masterski.ui.edit.EditLessonScreen
 import com.masterski.ui.lessons.LessonsScreen
 import com.masterski.ui.overview.MonthDetailScreen
 import com.masterski.ui.overview.OverviewScreen
+import com.masterski.ui.settings.SettingsScreen
 import java.time.YearMonth
 
 const val ROUTE_LESSONS = "lessons"
@@ -88,7 +89,7 @@ fun MasterSkiNavHost() {
                     onOpenSettings = { navController.navigate(ROUTE_SETTINGS) },
                 )
             }
-            composable(ROUTE_SETTINGS) { Text("Settings") }
+            composable(ROUTE_SETTINGS) { SettingsScreen() }
             composable(
                 ROUTE_EDIT,
                 arguments = listOf(navArgument("id") { type = NavType.LongType; defaultValue = -1L }),
