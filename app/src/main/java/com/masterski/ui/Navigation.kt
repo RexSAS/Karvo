@@ -23,6 +23,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.masterski.ui.edit.EditLessonScreen
 import com.masterski.ui.lessons.LessonsScreen
+import com.masterski.ui.overview.MonthDetailScreen
+import com.masterski.ui.overview.OverviewScreen
 import java.time.YearMonth
 
 const val ROUTE_LESSONS = "lessons"
@@ -80,7 +82,12 @@ fun MasterSkiNavHost() {
                     onEdit = { navController.navigate(editRoute(it)) },
                 )
             }
-            composable(ROUTE_OVERVIEW) { Text("Overview") }
+            composable(ROUTE_OVERVIEW) {
+                OverviewScreen(
+                    onOpenMonth = { navController.navigate(monthRoute(it)) },
+                    onOpenSettings = { navController.navigate(ROUTE_SETTINGS) },
+                )
+            }
             composable(ROUTE_SETTINGS) { Text("Settings") }
             composable(
                 ROUTE_EDIT,
@@ -95,7 +102,15 @@ fun MasterSkiNavHost() {
                     navArgument("year") { type = NavType.IntType },
                     navArgument("month") { type = NavType.IntType },
                 ),
-            ) { Text("Month") }
+            ) { entry ->
+                val year = entry.arguments?.getInt("year") ?: return@composable
+                val month = entry.arguments?.getInt("month") ?: return@composable
+                MonthDetailScreen(
+                    month = YearMonth.of(year, month),
+                    onEdit = { navController.navigate(editRoute(it)) },
+                    onBack = { navController.popBackStack() },
+                )
+            }
         }
     }
 }
