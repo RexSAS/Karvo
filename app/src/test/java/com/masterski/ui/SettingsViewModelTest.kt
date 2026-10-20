@@ -6,6 +6,7 @@ import com.masterski.testing.FakeSettingsRepository
 import com.masterski.testing.MainDispatcherRule
 import com.masterski.ui.settings.SettingsViewModel
 import com.masterski.ui.settings.availableTimeZones
+import com.masterski.ui.settings.exportedMessage
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -72,5 +73,30 @@ class SettingsViewModelTest {
     @Test fun csvContainsLessons() = runTest {
         repo.save(Lesson(date = LocalDate.of(2026, 10, 20), durationMinutes = 90, student = "Anna"))
         assertTrue(SettingsViewModel(FakeSettingsRepository(), repo).buildCsv().contains("2026-10-20,Anna,90,1.5,"))
+    }
+
+    @Test fun saveRateTwiceIsIdempotent() = runTest {
+        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo)
+        vm.onRateChange("30"); vm.saveRate(); vm.saveRate()
+        assertEquals(3000L, s.hourlyRateCents.first()); assertEquals(1, s.rateWrites)
+    }
+
+    @Test fun saveRateWithoutEditDoesNotWrite() = runTest {
+        val s = FakeSettingsRepository(2500); val vm = SettingsViewModel(s, repo)
+        vm.saveRate()
+        assertEquals(2500L, s.hourlyRateCents.first()); assertEquals(0, s.rateWrites)
+    }
+
+    @Test fun typedRateSavedWithoutDone() = runTest {
+        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo)
+        vm.onRateChange("30")
+        vm.saveRate() // what the screen's onDispose / ON_STOP path calls
+        assertEquals(3000L, s.hourlyRateCents.first())
+    }
+
+    @Test fun exportMessagePluralizes() {
+        assertEquals("Exported 1 lesson", exportedMessage(1))
+        assertEquals("Exported 0 lessons", exportedMessage(0))
+        assertEquals("Exported 3 lessons", exportedMessage(3))
     }
 }

@@ -46,4 +46,17 @@ class OverviewViewModelTest {
         val vm = OverviewViewModel(repo, FakeSettingsRepository(1000)); vm.toggleReveal()
         assertTrue(vm.uiState.first { it.revealed }.revealed)
     }
+
+    @Test fun hideAfterRevealHides() = runTest {
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000)); vm.toggleReveal()
+        vm.uiState.first { it.revealed }
+        vm.hide()
+        assertFalse(vm.uiState.first { !it.revealed }.revealed)
+    }
+
+    @Test fun loadingUntilDataArrives() = runTest {
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000))
+        assertTrue(vm.uiState.value.loading)
+        assertFalse(vm.uiState.first { !it.loading }.loading)
+    }
 }

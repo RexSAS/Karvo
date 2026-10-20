@@ -4,6 +4,7 @@ import com.masterski.data.Lesson
 import com.masterski.domain.LessonError
 import com.masterski.testing.FakeLessonRepository
 import com.masterski.testing.FakeSettingsRepository
+import com.masterski.testing.GatedLessonRepository
 import com.masterski.testing.MainDispatcherRule
 import com.masterski.ui.edit.EditLessonViewModel
 import java.time.Clock
@@ -71,5 +72,23 @@ class EditLessonViewModelTest {
         assertEquals(setOf(LessonError.StudentBlank, LessonError.DurationZero), vm.uiState.value.errors)
         vm.onMinutesChange("75")
         assertTrue(LessonError.MinutesOver59 in vm.uiState.value.errors)
+    }
+    @Test fun doubleSaveInsertsOnce() = runTest {
+        val gated = GatedLessonRepository(repo)
+        val vm = EditLessonViewModel(gated, FakeSettingsRepository(), null)
+        vm.onStudentChange("Anna"); vm.onQuickPick(60)
+        var doneCount = 0
+        vm.save { doneCount++ }; vm.save { doneCount++ }
+        gated.gate.complete(Unit)
+        assertEquals(1, repo.allLessons().size); assertEquals(1, doneCount)
+    }
+    @Test fun doubleDeleteCallsDoneOnce() = runTest {
+        val id = repo.save(Lesson(date = LocalDate.of(2026, 1, 1), durationMinutes = 60, student = "Bob"))
+        val gated = GatedLessonRepository(repo)
+        val vm = EditLessonViewModel(gated, FakeSettingsRepository(), id)
+        var doneCount = 0
+        vm.delete { doneCount++ }; vm.delete { doneCount++ }
+        gated.gate.complete(Unit)
+        assertTrue(repo.allLessons().isEmpty()); assertEquals(1, doneCount)
     }
 }

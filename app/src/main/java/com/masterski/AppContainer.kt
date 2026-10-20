@@ -1,7 +1,9 @@
 package com.masterski
 
 import android.content.Context
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.masterski.data.DataStoreSettingsRepository
@@ -18,7 +20,10 @@ class AppContainer(context: Context) {
     }
 
     private val dataStore by lazy {
-        PreferenceDataStoreFactory.create { appContext.preferencesDataStoreFile("settings") }
+        PreferenceDataStoreFactory.create(
+            corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+            produceFile = { appContext.preferencesDataStoreFile("settings") },
+        )
     }
 
     val lessonRepository: LessonRepository by lazy { RoomLessonRepository(database.lessonDao()) }

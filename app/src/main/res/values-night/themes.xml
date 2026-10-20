@@ -1,0 +1,4 @@
+<resources>
+    <!-- Dark window background in night mode so dark-theme users see no white flash at launch. -->
+    <style name="Theme.MasterSki" parent="android:Theme.Material.NoActionBar" />
+</resources>

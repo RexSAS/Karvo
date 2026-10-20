@@ -18,10 +18,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -29,7 +25,6 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -39,41 +34,34 @@ import com.masterski.data.Lesson
 import com.masterski.ui.components.LessonRow
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun LessonsScreen(
     onAdd: () -> Unit,
     onEdit: (Long) -> Unit,
+    /** Called after a swipe-delete; the caller shows the Undo snackbar (hoisted so it outlives this screen). */
+    onDeleted: (Lesson) -> Unit,
     viewModel: LessonsViewModel = viewModel(factory = LessonsViewModel.Factory),
 ) {
-    val groups by viewModel.groups.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    val groupsOrNull by viewModel.groups.collectAsStateWithLifecycle()
     val monthFormatter = remember { DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()) }
 
-    fun onDeleted(lesson: Lesson) {
+    fun delete(lesson: Lesson) {
         viewModel.delete(lesson)
-        scope.launch {
-            snackbarHostState.currentSnackbarData?.dismiss()
-            val result = snackbarHostState.showSnackbar(
-                "Lesson deleted",
-                actionLabel = "Undo",
-                duration = SnackbarDuration.Short,
-            )
-            if (result == SnackbarResult.ActionPerformed) viewModel.undoDelete(lesson)
-        }
+        onDeleted(lesson)
     }
 
     Scaffold(
         topBar = { CenterAlignedTopAppBar(title = { Text("Lessons") }) },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAdd) { Icon(Icons.Default.Add, contentDescription = "Add lesson") }
         },
     ) { padding ->
-        if (groups.isEmpty()) {
+        val groups = groupsOrNull
+        if (groups == null) {
+            // Still loading: show nothing rather than flashing the empty state.
+        } else if (groups.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(padding).padding(32.dp), contentAlignment = Alignment.Center) {
                 Text("No lessons yet. Tap + to add your first one.", style = MaterialTheme.typography.bodyLarge)
             }
@@ -92,7 +80,7 @@ fun LessonsScreen(
                         )
                     }
                     items(group.lessons, key = { it.id }) { lesson ->
-                        SwipeToDeleteRow(lesson, onDelete = { onDeleted(lesson) }, onClick = { onEdit(lesson.id) })
+                        SwipeToDeleteRow(lesson, onDelete = { delete(lesson) }, onClick = { onEdit(lesson.id) })
                         HorizontalDivider()
                     }
                 }

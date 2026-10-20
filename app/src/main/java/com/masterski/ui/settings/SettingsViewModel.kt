@@ -39,6 +39,8 @@ val availableTimeZones: List<String> = ZoneId.getAvailableZoneIds()
 /** CSV text plus the number of lesson rows it contains. */
 data class CsvExport(val csv: String, val lessonCount: Int)
 
+fun exportedMessage(count: Int): String = if (count == 1) "Exported 1 lesson" else "Exported $count lessons"
+
 class SettingsViewModel(
     private val settings: SettingsRepository,
     private val lessons: LessonRepository,
@@ -48,9 +50,20 @@ class SettingsViewModel(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
+    /** True when the rate text was edited since it was loaded or last saved. */
+    private var rateDirty = false
+
+    /** Last known stored rate (valid once [storedKnown]), used to skip redundant writes. */
+    private var storedRate: Long? = null
+    private var storedKnown = false
+
     init {
         viewModelScope.launch {
             val stored = settings.hourlyRateCents.first()
+            if (!storedKnown) {
+                storedRate = stored
+                storedKnown = true
+            }
             if (stored != null) {
                 // Do not clobber text the user has already started typing.
                 _uiState.update { if (it.rateText.isEmpty()) it.copy(rateText = formatRateText(stored)) else it }
@@ -62,23 +75,30 @@ class SettingsViewModel(
     }
 
     fun onRateChange(input: String) {
+        rateDirty = true
         _uiState.update { it.copy(rateText = normalizeRateInput(input), rateError = false) }
     }
 
+    /**
+     * Saves the typed rate. Idempotent: called on Done, focus loss, ON_STOP and when the screen leaves;
+     * it writes only if the text was edited and differs from the stored rate. Invalid text leaves storage unchanged.
+     */
     fun saveRate() {
-        viewModelScope.launch {
-            when (val result = parseRateCents(_uiState.value.rateText)) {
-                RateParseResult.Cleared -> {
-                    settings.setHourlyRateCents(null)
-                    _uiState.update { it.copy(rateText = "", rateError = false) }
-                }
-                is RateParseResult.Valid -> {
-                    settings.setHourlyRateCents(result.cents)
-                    _uiState.update { it.copy(rateText = formatRateText(result.cents), rateError = false) }
-                }
-                RateParseResult.Invalid -> _uiState.update { it.copy(rateError = true) }
+        if (!rateDirty) return
+        val cents = when (val result = parseRateCents(_uiState.value.rateText)) {
+            RateParseResult.Cleared -> null
+            is RateParseResult.Valid -> result.cents
+            RateParseResult.Invalid -> {
+                _uiState.update { it.copy(rateError = true) }
+                return
             }
         }
+        rateDirty = false
+        _uiState.update { it.copy(rateText = cents?.let(::formatRateText).orEmpty(), rateError = false) }
+        if (storedKnown && cents == storedRate) return
+        storedRate = cents
+        storedKnown = true
+        viewModelScope.launch { settings.setHourlyRateCents(cents) }
     }
 
     fun onTimeZoneSelected(id: String) {

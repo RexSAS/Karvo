@@ -27,6 +27,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masterski.domain.earningsLabel
@@ -46,11 +48,19 @@ fun OverviewScreen(
     viewModel: OverviewViewModel = viewModel(factory = OverviewViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val onEarningsTap = if (state.rateSet) viewModel::toggleReveal else onOpenSettings
+    // Earnings go back to hidden whenever the screen stops (app sent to background, or navigated away).
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.hide() }
+    val onEarningsTap: () -> Unit = when {
+        state.loading -> ({})
+        state.rateSet -> viewModel::toggleReveal
+        else -> onOpenSettings
+    }
 
     Scaffold(
         topBar = { CenterAlignedTopAppBar(title = { Text("Overview") }) },
     ) { padding ->
+        // Still loading: show nothing rather than flashing 0m / — €.
+        if (state.loading) return@Scaffold
         Column(Modifier.padding(padding).fillMaxSize()) {
             ElevatedCard(Modifier.fillMaxWidth().padding(16.dp)) {
                 Column(Modifier.padding(16.dp)) {

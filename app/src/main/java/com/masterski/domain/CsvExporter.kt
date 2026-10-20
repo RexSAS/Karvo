@@ -26,3 +26,8 @@ fun lessonsToCsv(lessons: List<Lesson>): String = buildString {
 
 private fun csvField(value: String): String =
     if (value.any { it == ',' || it == '"' || it == '\r' || it == '\n' }) "\"" + value.replace("\"", "\"\"") + "\"" else value
+
+private val UTF8_BOM = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
+
+/** Bytes written to the export file: UTF-8 BOM (so Excel detects UTF-8) followed by [csv]. */
+fun csvFileBytes(csv: String): ByteArray = UTF8_BOM + csv.toByteArray(Charsets.UTF_8)

@@ -32,6 +32,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,9 +47,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masterski.BuildConfig
+import com.masterski.domain.csvFileBytes
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -67,6 +71,18 @@ fun SettingsScreen(
     var showZonePicker by remember { mutableStateOf(false) }
     var rateFocused by remember { mutableStateOf(false) }
 
+    // Besides Done and focus loss, save a typed rate when the app stops or the screen leaves
+    // (saveRate is idempotent; the ViewModel outlives this composition, so the write completes).
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.saveRate() }
+    DisposableEffect(viewModel) { onDispose { viewModel.saveRate() } }
+
+    suspend fun showMessage(message: String) {
+        snackbarHostState.currentSnackbarData?.dismiss()
+        snackbarHostState.showSnackbar(message)
+    }
+
+    fun failureMessage(e: Exception) = "Export failed: ${e.message ?: e.javaClass.simpleName}"
+
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
@@ -75,16 +91,15 @@ fun SettingsScreen(
                 withContext(Dispatchers.IO) {
                     val out = context.contentResolver.openOutputStream(uri)
                         ?: throw java.io.IOException("Cannot open file")
-                    out.use { it.write(export.csv.toByteArray(Charsets.UTF_8)) }
+                    out.use { it.write(csvFileBytes(export.csv)) }
                 }
-                "Exported ${export.lessonCount} lessons"
+                exportedMessage(export.lessonCount)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                "Export failed: ${e.message ?: e.javaClass.simpleName}"
+                failureMessage(e)
             }
-            snackbarHostState.currentSnackbarData?.dismiss()
-            snackbarHostState.showSnackbar(message)
+            showMessage(message)
         }
     }
 
@@ -132,7 +147,17 @@ fun SettingsScreen(
 
             Button(
                 onClick = {
-                    scope.launch { exportLauncher.launch(viewModel.exportFileName()) }
+                    scope.launch {
+                        val fileName = try {
+                            viewModel.exportFileName()
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            showMessage(failureMessage(e))
+                            return@launch
+                        }
+                        exportLauncher.launch(fileName)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Export to CSV") }

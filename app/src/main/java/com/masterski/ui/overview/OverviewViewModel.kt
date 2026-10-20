@@ -26,6 +26,8 @@ data class OverviewUiState(
     val months: List<MonthRow> = emptyList(),
     val rateSet: Boolean = false,
     val revealed: Boolean = false,
+    /** True until the first data arrives; the screen shows nothing meanwhile. */
+    val loading: Boolean = true,
 )
 
 class OverviewViewModel(lessons: LessonRepository, settings: SettingsRepository) : ViewModel() {
@@ -44,8 +46,13 @@ class OverviewViewModel(lessons: LessonRepository, settings: SettingsRepository)
             months = summaries.map { MonthRow(it, rate?.let { r -> earningsCents(it.totalMinutes, r) }) },
             rateSet = rate != null,
             revealed = isRevealed,
+            loading = false,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), OverviewUiState())
+
+    fun hide() {
+        revealed.value = false
+    }
 
     fun toggleReveal() {
         revealed.update { !it }

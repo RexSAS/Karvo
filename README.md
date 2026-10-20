@@ -2,11 +2,11 @@
 
 Offline Android app for a ski instructor to log lessons and track hours.
 
-- Log lessons (date, time, duration, hourly rate) with edit and swipe-to-delete with undo
+- Log lessons (date, duration, student name, optional notes) with edit and swipe-to-delete with undo
 - Monthly and lifetime hour totals
-- Earnings are hidden by default and revealed on demand
-- Time zone aware dates and times
-- Backup and restore via CSV (Settings -> Export to CSV)
+- One global hourly rate (Settings); earnings are hidden by default, revealed on demand, and hidden again each time the app is opened
+- Time zone setting (default Europe/Rome) only decides what "today" is: the default date of a new lesson and the date in the export file name
+- Export to CSV (Settings -> Export to CSV); export only, there is no import
 
 The app has no network access (no INTERNET permission); all data stays on the phone.
 
@@ -52,6 +52,9 @@ keyPassword=...
 
 A debug build has a different signature; uninstall it before installing the release build.
 
+> **Warning: uninstalling the app deletes all lessons. Export a CSV first — it cannot be imported back.**
+
 ## Backup
 
 Settings -> Export to CSV, then save the file somewhere safe (it opens in Sheets or Excel).
+The CSV is a read-only copy for your records: the app cannot import it, so it cannot restore lessons after an uninstall.

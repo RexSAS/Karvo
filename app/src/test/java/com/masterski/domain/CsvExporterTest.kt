@@ -27,4 +27,9 @@ class CsvExporterTest {
     }
 
     @Test fun fileName() = assertEquals("masterski-lessons-2026-10-20.csv", csvFileName(LocalDate.of(2026, 10, 20)))
+    @Test fun fileBytesStartWithUtf8Bom() {
+        val bytes = csvFileBytes("a,b\r\n")
+        assertEquals(listOf(0xEF, 0xBB, 0xBF), bytes.take(3).map { it.toInt() and 0xFF })
+        assertEquals("a,b\r\n", String(bytes.copyOfRange(3, bytes.size), Charsets.UTF_8))
+    }
 }

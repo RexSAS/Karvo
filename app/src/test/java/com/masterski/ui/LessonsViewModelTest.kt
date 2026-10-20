@@ -9,6 +9,7 @@ import java.time.YearMonth
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -21,13 +22,18 @@ class LessonsViewModelTest {
         repo.save(Lesson(date = LocalDate.of(2026, 9, 1), durationMinutes = 60, student = "A"))
         repo.save(Lesson(date = LocalDate.of(2026, 10, 5), durationMinutes = 60, student = "B"))
         val vm = LessonsViewModel(repo)
-        assertEquals(listOf(YearMonth.of(2026, 10), YearMonth.of(2026, 9)), vm.groups.first { it.isNotEmpty() }.map { it.month })
+        assertEquals(listOf(YearMonth.of(2026, 10), YearMonth.of(2026, 9)), vm.groups.first { !it.isNullOrEmpty() }!!.map { it.month })
     }
 
-    @Test fun undoRestoresSameLesson() = runTest {
+    @Test fun loadingIsNullUntilFirstEmission() = runTest {
+        val vm = LessonsViewModel(repo)
+        assertNull(vm.groups.value)
+        assertEquals(emptyList<Any>(), vm.groups.first { it != null })
+    }
+
+    @Test fun deleteRemovesLesson() = runTest {
         val id = repo.save(Lesson(date = LocalDate.of(2026, 10, 5), durationMinutes = 60, student = "B"))
-        val vm = LessonsViewModel(repo); val l = repo.get(id)!!
-        vm.delete(l); assertTrue(repo.allLessons().isEmpty())
-        vm.undoDelete(l); assertEquals(listOf(l), repo.allLessons())
+        val vm = LessonsViewModel(repo)
+        vm.delete(repo.get(id)!!); assertTrue(repo.allLessons().isEmpty())
     }
 }

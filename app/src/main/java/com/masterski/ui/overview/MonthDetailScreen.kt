@@ -23,11 +23,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masterski.domain.earningsLabel
@@ -44,8 +46,9 @@ fun MonthDetailScreen(
     viewModel: MonthDetailViewModel = viewModel(key = "month-$month", factory = MonthDetailViewModel.factory(month)),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    // Screen-local; hidden by default each time the screen is opened.
-    var revealed by rememberSaveable { mutableStateOf(false) }
+    // Screen-local and not saved; hidden each time the screen opens and whenever it stops.
+    var revealed by remember { mutableStateOf(false) }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { revealed = false }
 
     Scaffold(
         topBar = {

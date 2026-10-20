@@ -59,6 +59,9 @@ class EditLessonViewModel(
     private var dateChosen = false
     private var studentNames: List<String> = emptyList()
 
+    /** Set once a save or delete starts; further taps are ignored so onDone fires once. */
+    private var busy = false
+
     init {
         viewModelScope.launch {
             repo.observeStudentNames().collect { names ->
@@ -131,7 +134,8 @@ class EditLessonViewModel(
 
     fun save(onDone: () -> Unit) {
         val s = _uiState.value
-        if (!s.isValid) return
+        if (!s.isValid || busy) return
+        busy = true
         val minutes = (s.hoursText.toIntOrNull() ?: 0) * 60 + (s.minutesText.toIntOrNull() ?: 0)
         viewModelScope.launch {
             repo.save(
@@ -149,6 +153,8 @@ class EditLessonViewModel(
 
     fun delete(onDone: () -> Unit) {
         val lesson = original ?: return
+        if (busy) return
+        busy = true
         viewModelScope.launch {
             repo.delete(lesson)
             onDone()

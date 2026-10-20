@@ -14,7 +14,14 @@ class FakeSettingsRepository(
     private val zoneId = MutableStateFlow(zone)
 
     override val hourlyRateCents: Flow<Long?> = rate
-    override suspend fun setHourlyRateCents(cents: Long?) { rate.value = cents }
+    /** Number of setHourlyRateCents calls, to assert idempotent saves. */
+    var rateWrites = 0
+        private set
+
+    override suspend fun setHourlyRateCents(cents: Long?) {
+        rateWrites++
+        rate.value = cents
+    }
 
     override val timeZoneId: Flow<String> = zoneId
     override suspend fun setTimeZoneId(id: String) {
