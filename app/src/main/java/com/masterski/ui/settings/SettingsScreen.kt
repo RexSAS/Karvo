@@ -35,7 +35,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -177,8 +178,13 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { showLanguagePicker = true },
             )
 
-            Button(
-                onClick = {
+            // A navigation-style row, not a filled button, so it doesn't read as "Save".
+            ListItem(
+                leadingContent = { Icon(Icons.Filled.FileDownload, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.export_csv)) },
+                supportingContent = { Text(stringResource(R.string.export_csv_hint)) },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                modifier = Modifier.clickable {
                     scope.launch {
                         val fileName = try {
                             viewModel.exportFileName()
@@ -191,8 +197,7 @@ fun SettingsScreen(
                         exportLauncher.launch(fileName)
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text(stringResource(R.string.export_csv)) }
+            )
 
             Text(
                 stringResource(R.string.version, BuildConfig.VERSION_NAME),

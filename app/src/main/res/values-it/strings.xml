@@ -64,6 +64,7 @@
     <string name="rate_hint">Lascia vuoto per nascondere i guadagni</string>
     <string name="time_zone">Fuso orario</string>
     <string name="export_csv">Esporta in CSV</string>
+    <string name="export_csv_hint">Salva tutte le lezioni in un foglio di calcolo</string>
     <string name="export_failed">Esportazione non riuscita: %1$s</string>
     <string name="cannot_open_file">Impossibile aprire il file</string>
     <string name="version">Versione %1$s</string>
