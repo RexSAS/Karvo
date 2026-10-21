@@ -93,4 +93,15 @@ class BackupStoreTest {
         assertEquals(2, service.backup(BackupReason.Manual).lessonCount)
         assertEquals(1, service.list().size)
     }
+
+    @Test fun backupMadeWhileClockIsBehindIsKept() {
+        val ahead = BackupStore(dir, TickingClock(Instant.parse("2026-12-01T10:00:00Z")))
+        repeat(3) { ahead.create(BackupReason.Manual, lessons(1)) }
+        val behind = BackupStore(dir, TickingClock(Instant.parse("2026-10-21T10:00:00Z")))
+        val safety = behind.create(BackupReason.BeforeRestore, lessons(2))
+        val list = behind.list()
+        assertEquals(3, list.size)
+        assertEquals(safety.fileName, list.first().fileName)
+        assertTrue(File(dir, safety.fileName).exists())
+    }
 }

@@ -52,8 +52,10 @@ class BackupStore(private val dir: File, private val clock: Clock) {
     /** Writes a new backup atomically (temp file, then rename), then deletes the oldest beyond [MAX_BACKUPS]. */
     fun create(reason: BackupReason, lessons: List<Lesson>): Backup {
         if (!dir.isDirectory && !dir.mkdirs()) throw IOException("Can't create $dir")
-        var millis = clock.millis()
-        while (dir.listFiles().orEmpty().any { it.name.startsWith("backup-$millis-") }) millis++
+        // Always newer than every existing backup, even if the clock went backwards; otherwise the
+        // rotation below would treat the new backup as the oldest and delete it straight away.
+        val newest = list().maxOfOrNull { it.createdAt.toEpochMilli() } ?: Long.MIN_VALUE
+        val millis = maxOf(clock.millis(), newest + 1)
         val name = "backup-$millis-${reason.slug()}.csv"
         val tmp = File(dir, "$name.tmp")
         tmp.writeBytes(csvFileBytes(lessonsToCsv(lessons)))
