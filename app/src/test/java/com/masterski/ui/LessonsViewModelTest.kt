@@ -36,4 +36,12 @@ class LessonsViewModelTest {
         val vm = LessonsViewModel(repo)
         vm.delete(repo.get(id)!!); assertTrue(repo.allLessons().isEmpty())
     }
+
+    @Test fun eachMonthCarriesItsTotal() = runTest {
+        repo.save(Lesson(date = LocalDate.of(2026, 10, 5), durationMinutes = 60, student = "A"))
+        repo.save(Lesson(date = LocalDate.of(2026, 10, 9), durationMinutes = 90, student = "B"))
+        repo.save(Lesson(date = LocalDate.of(2026, 9, 1), durationMinutes = 120, student = "C"))
+        val groups = LessonsViewModel(repo).groups.first { !it.isNullOrEmpty() }!!
+        assertEquals(listOf(150L, 120L), groups.map { it.totalMinutes })
+    }
 }

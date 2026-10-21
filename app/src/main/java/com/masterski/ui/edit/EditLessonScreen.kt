@@ -3,6 +3,7 @@ package com.masterski.ui.edit
 import androidx.compose.ui.res.stringResource
 import com.masterski.R
 import com.masterski.ui.messageRes
+import com.masterski.ui.theme.alpineFieldColors
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
@@ -74,6 +76,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(if (state.isNew) R.string.new_lesson else R.string.edit_lesson)) },
                 navigationIcon = {
                     IconButton(onClick = onDone) {
@@ -100,6 +103,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
         ) {
             Box {
                 OutlinedTextField(
+                    colors = alpineFieldColors(),
                     value = state.date.format(DateTimeFormatter.ofPattern("EEE d MMM yyyy", Locale.getDefault())),
                     onValueChange = {},
                     readOnly = true,
@@ -113,6 +117,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
+                    colors = alpineFieldColors(),
                     value = state.hoursText,
                     onValueChange = vm::onHoursChange,
                     label = { Text(stringResource(R.string.hours)) },
@@ -122,6 +127,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                     modifier = Modifier.weight(1f),
                 )
                 OutlinedTextField(
+                    colors = alpineFieldColors(),
                     value = state.minutesText,
                     onValueChange = vm::onMinutesChange,
                     label = { Text(stringResource(R.string.minutes)) },
@@ -156,6 +162,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                 onExpandedChange = { studentMenuOpen = it },
             ) {
                 OutlinedTextField(
+                    colors = alpineFieldColors(),
                     value = state.student,
                     onValueChange = {
                         vm.onStudentChange(it)
@@ -190,6 +197,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
             }
 
             OutlinedTextField(
+                colors = alpineFieldColors(),
                 value = state.notes,
                 onValueChange = vm::onNotesChange,
                 label = { Text(stringResource(R.string.notes)) },

@@ -6,7 +6,11 @@ All notable changes to MasterSki are listed here.
 
 ### Added
 - **Animated splash screen**: the mountains rise and a gold sun appears while the app starts (Android 12+; older versions show the logo still).
-- **Alpine backdrop**: faint mountain ridges along the bottom of every screen, with a skier on Lessons, a snowboarder on Overview and snowflakes in Settings. Content stays fully readable.
+- **Premium Alpine Night look**: a starry night sky with a soft aurora and snow-lit ridges behind every screen; the season total on a frosted-glass panel with the headline numbers tucked under it; solid deep-navy tiles everywhere else; a gold skier in the Overview header and a gold add button.
+- **Lessons grouped by month** in tiles, with each month's total hours in its header and the lesson count under the title.
+
+### Changed
+- Screen titles are left-aligned with a subtitle (today's date on Overview). Classic keeps the plain Material look with the same layout.
 
 ## [1.2] — 2026-10-21
 

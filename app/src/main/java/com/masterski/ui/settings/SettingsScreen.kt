@@ -74,6 +74,8 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masterski.BuildConfig
+import com.masterski.ui.theme.ScreenHeader
+import com.masterski.ui.theme.alpineFieldColors
 import com.masterski.domain.csvFileBytes
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -131,7 +133,7 @@ fun SettingsScreen(
 
     Scaffold(
         containerColor = Color.Transparent, // the alpine backdrop shows through
-        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.settings)) }) },
+        topBar = { ScreenHeader(title = stringResource(R.string.settings)) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
@@ -143,6 +145,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             OutlinedTextField(
+                colors = alpineFieldColors(),
                 value = state.rateText,
                 onValueChange = viewModel::onRateChange,
                 label = { Text(stringResource(R.string.hourly_rate)) },

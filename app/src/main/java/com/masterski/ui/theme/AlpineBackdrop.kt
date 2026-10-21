@@ -18,7 +18,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -37,31 +40,78 @@ private val NearRidge = listOf(
     0f to .82f, .15f to .6f, .28f to .76f, .45f to .5f, .6f to .78f, .75f to .62f, .88f to .8f, 1f to .7f,
 )
 
-private fun DrawScope.ridge(points: List<Pair<Float, Float>>, color: Color) {
+private fun DrawScope.ridge(points: List<Pair<Float, Float>>, brush: Brush) {
     val path = Path().apply {
         moveTo(0f, size.height)
         points.forEach { (x, y) -> lineTo(x * size.width, y * size.height) }
         lineTo(size.width, size.height)
         close()
     }
-    drawPath(path, color)
+    drawPath(path, brush)
+}
+
+/** Star positions as (x, y) fractions of the screen, with radius in dp and opacity; fixed so they never jump. */
+private val Stars = listOf(
+    Triple(.08f, .04f, .9f), Triple(.20f, .12f, .7f), Triple(.33f, .07f, .5f), Triple(.41f, .27f, .6f),
+    Triple(.52f, .03f, .8f), Triple(.61f, .18f, .5f), Triple(.70f, .08f, .9f), Triple(.78f, .30f, .6f),
+    Triple(.86f, .14f, 1f), Triple(.93f, .40f, .7f), Triple(.12f, .32f, .5f), Triple(.27f, .22f, .6f),
+    Triple(.47f, .15f, .4f), Triple(.57f, .34f, .5f), Triple(.66f, .42f, .4f), Triple(.83f, .05f, .5f),
+    Triple(.03f, .19f, .6f), Triple(.37f, .38f, .4f), Triple(.74f, .24f, .7f), Triple(.96f, .09f, .5f),
+)
+
+/** Alpine Night's sky: deep gradient, two soft glows, stars and an aurora band (top half of the screen). */
+private fun DrawScope.nightSky() {
+    drawRect(Brush.verticalGradient(listOf(AlpineNight.SkyTop, AlpineNight.SkyMid, AlpineNight.SkyBottom)))
+    drawRect(Brush.radialGradient(listOf(AlpineNight.GlowBlue, Color.Transparent), center = Offset(size.width * .85f, 0f), radius = size.width * 1.1f))
+    drawRect(Brush.radialGradient(listOf(AlpineNight.GlowTeal.copy(alpha = .8f), Color.Transparent), center = Offset(0f, size.height * .08f), radius = size.width * .9f))
+    Stars.forEachIndexed { i, (x, y, alpha) ->
+        val r = if (i % 3 == 0) 1.6f else 1.1f
+        drawCircle(Color.White.copy(alpha = alpha), radius = r * density, center = Offset(x * size.width, y * size.height))
+    }
+    // Aurora: a soft, slanted band of green-to-violet light.
+    val top = size.height * .07f
+    val band = size.height * .13f
+    drawPath(
+        Path().apply {
+            moveTo(-size.width * .1f, top + band * .9f)
+            cubicTo(size.width * .3f, top + band * .2f, size.width * .6f, top + band * .8f, size.width * 1.1f, top)
+            lineTo(size.width * 1.1f, top + band * .55f)
+            cubicTo(size.width * .6f, top + band * 1.35f, size.width * .3f, top + band * .75f, -size.width * .1f, top + band * 1.45f)
+            close()
+        },
+        Brush.horizontalGradient(
+            listOf(Color.Transparent, Color(0x2E50FFC8), Color(0x3378A0FF), Color(0x1F9B7BFF), Color.Transparent),
+        ),
+    )
+}
+
+/** Snow-lit ridges for Alpine Night: a far range fading into the sky and a near range with lit summits. */
+private fun DrawScope.nightRidges() {
+    ridge(FarRidge, Brush.verticalGradient(listOf(Color(0x733D5AA8), Color.Transparent)))
+    ridge(NearRidge, Brush.verticalGradient(0f to Color(0x47E9F0FF), .3f to Color(0x734F69B8), 1f to AlpineNight.SkyBottom))
 }
 
 /**
- * A subtle alpine scene behind a screen: two mountain ridges along the bottom and an optional winter-sports
- * silhouette, tinted with the theme's primary colour at very low opacity. Purely decorative (hidden from
+ * The scene behind a screen. Alpine Night: a starry night sky with aurora and snow-lit ridges. Classic: two
+ * faint ridges in the theme colour. Both can add a faint winter-sports [figure]. Purely decorative (hidden from
  * accessibility); [content] is drawn on top and should use transparent containers to let it show.
  */
 @Composable
 fun AlpineBackdrop(figure: BackdropFigure, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val tint = MaterialTheme.colorScheme.primary
+    val night = isAlpineNight()
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Box(Modifier.fillMaxSize().clearAndSetSemantics {}) {
-            Canvas(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(170.dp)) {
-                ridge(FarRidge, tint.copy(alpha = 0.05f))
-                ridge(NearRidge, tint.copy(alpha = 0.09f))
+            if (night) Canvas(Modifier.fillMaxSize()) { nightSky() }
+            Canvas(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(if (night) 190.dp else 170.dp)) {
+                if (night) {
+                    nightRidges()
+                } else {
+                    ridge(FarRidge, SolidColor(tint.copy(alpha = 0.05f)))
+                    ridge(NearRidge, SolidColor(tint.copy(alpha = 0.09f)))
+                }
             }
-            Figure(figure, tint)
+            Figure(figure, if (night) AlpineNight.Glacier else tint)
         }
         content()
     }

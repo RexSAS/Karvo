@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.masterski.data.Lesson
@@ -19,12 +20,17 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun LessonRow(lesson: Lesson, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun LessonRow(
+    lesson: Lesson,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+) {
     val dateText = DateTimeFormatter.ofPattern("EEE d MMM yyyy", Locale.getDefault()).format(lesson.date)
     Column(
         modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(containerColor)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {

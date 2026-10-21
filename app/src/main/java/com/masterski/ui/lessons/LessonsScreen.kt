@@ -33,6 +33,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.res.pluralStringResource
+import com.masterski.domain.formatDuration
+import com.masterski.ui.theme.AddButton
+import com.masterski.ui.theme.ScreenHeader
+import com.masterski.ui.theme.groupedShape
+import com.masterski.ui.theme.tileColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -60,10 +70,14 @@ fun LessonsScreen(
 
     Scaffold(
         containerColor = Color.Transparent, // the alpine backdrop shows through
-        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.lessons)) }) },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAdd) { Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_lesson)) }
+        topBar = {
+            val total = groupsOrNull.orEmpty().sumOf { it.lessons.size }
+            ScreenHeader(
+                title = stringResource(R.string.lessons),
+                subtitle = if (total > 0) pluralStringResource(R.plurals.lesson_count, total, total) else null,
+            )
         },
+        floatingActionButton = { AddButton(onClick = onAdd, contentDescription = stringResource(R.string.add_lesson)) },
     ) { padding ->
         val groups = groupsOrNull
         if (groups == null) {
@@ -77,22 +91,29 @@ fun LessonsScreen(
                 )
             }
         } else {
-            LazyColumn(Modifier.fillMaxSize().padding(padding)) {
+            LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 96.dp)) {
                 groups.forEach { group ->
-                    stickyHeader(key = "header-${group.month}") {
+                    item(key = "header-${group.month}") {
                         Text(
-                            monthTitle(group.month),
-                            style = MaterialTheme.typography.titleSmall,
+                            monthTitle(group.month).uppercase() + "  ·  " + formatDuration(group.totalMinutes),
+                            style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(start = 20.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
                         )
                     }
-                    items(group.lessons, key = { it.id }) { lesson ->
-                        SwipeToDeleteRow(lesson, onDelete = { delete(lesson) }, onClick = { onEdit(lesson.id) })
-                        HorizontalDivider()
+                    itemsIndexed(group.lessons, key = { _, lesson -> lesson.id }) { index, lesson ->
+                        SwipeToDeleteRow(
+                            lesson,
+                            shape = groupedShape(index, group.lessons.size),
+                            onDelete = { delete(lesson) },
+                            onClick = { onEdit(lesson.id) },
+                        )
+                        if (index < group.lessons.lastIndex) {
+                            HorizontalDivider(
+                                Modifier.padding(horizontal = 32.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            )
+                        }
                     }
                 }
             }
@@ -102,7 +123,7 @@ fun LessonsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SwipeToDeleteRow(lesson: Lesson, onDelete: () -> Unit, onClick: () -> Unit) {
+private fun SwipeToDeleteRow(lesson: Lesson, shape: Shape, onDelete: () -> Unit, onClick: () -> Unit) {
     var confirmDelete by remember { mutableStateOf(false) }
     // Never settle in the dismissed state: the row springs back and the deletion waits for confirmation.
     val state = rememberSwipeToDismissBoxState(
@@ -126,6 +147,7 @@ private fun SwipeToDeleteRow(lesson: Lesson, onDelete: () -> Unit, onClick: () -
     }
     SwipeToDismissBox(
         state = state,
+        modifier = Modifier.padding(horizontal = 16.dp).clip(shape),
         enableDismissFromStartToEnd = false,
         backgroundContent = {
             Box(
@@ -136,6 +158,6 @@ private fun SwipeToDeleteRow(lesson: Lesson, onDelete: () -> Unit, onClick: () -
             }
         },
     ) {
-        LessonRow(lesson, onClick = onClick)
+        LessonRow(lesson, onClick = onClick, containerColor = tileColor())
     }
 }

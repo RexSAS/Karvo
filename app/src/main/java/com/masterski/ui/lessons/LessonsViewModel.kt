@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class LessonGroup(val month: YearMonth, val lessons: List<Lesson>)
+data class LessonGroup(val month: YearMonth, val lessons: List<Lesson>) {
+    val totalMinutes: Long get() = lessons.sumOf { it.durationMinutes.toLong() }
+}
 
 class LessonsViewModel(private val repo: LessonRepository) : ViewModel() {
 
