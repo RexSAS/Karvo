@@ -86,6 +86,7 @@
     <string name="no_backups">Ancora nessun backup.</string>
     <string name="backup_reason_manual">Manuale</string>
     <string name="backup_reason_restore">Prima del ripristino</string>
+    <string name="backup_reason_import">Prima dell\'importazione</string>
     <string name="backup_reason_update">Prima dell\'aggiornamento a %1$s</string>
     <string name="backup_unreadable">Illeggibile</string>
     <string name="restore">Ripristina</string>

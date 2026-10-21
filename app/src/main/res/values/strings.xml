@@ -88,6 +88,7 @@
     <string name="no_backups">No backups yet.</string>
     <string name="backup_reason_manual">Manual</string>
     <string name="backup_reason_restore">Before restore</string>
+    <string name="backup_reason_import">Before import</string>
     <string name="backup_reason_update">Before update to %1$s</string>
     <string name="backup_unreadable">Unreadable</string>
     <string name="restore">Restore</string>

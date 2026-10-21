@@ -18,6 +18,7 @@ fun backupDateText(backup: Backup, zoneId: String, locale: Locale = Locale.getDe
 fun backupReasonText(reason: BackupReason): String = when (reason) {
     BackupReason.Manual -> stringResource(R.string.backup_reason_manual)
     BackupReason.BeforeRestore -> stringResource(R.string.backup_reason_restore)
+    BackupReason.BeforeImport -> stringResource(R.string.backup_reason_import)
     is BackupReason.BeforeUpdate -> stringResource(R.string.backup_reason_update, reason.version)
 }
 

@@ -14,17 +14,19 @@ const val MAX_BACKUPS = 3
 sealed interface BackupReason {
     data object Manual : BackupReason
     data object BeforeRestore : BackupReason
+    data object BeforeImport : BackupReason
     data class BeforeUpdate(val version: String) : BackupReason
 }
 
 /** A stored backup; [lessonCount] is -1 when the file can't be read. */
 data class Backup(val fileName: String, val createdAt: Instant, val reason: BackupReason, val lessonCount: Int)
 
-private val NAME = Regex("""backup-(\d+)-(manual|restore|update_([0-9.]+))\.csv""")
+private val NAME = Regex("""backup-(\d+)-(manual|restore|import|update_([0-9.]+))\.csv""")
 
 private fun BackupReason.slug(): String = when (this) {
     BackupReason.Manual -> "manual"
     BackupReason.BeforeRestore -> "restore"
+    BackupReason.BeforeImport -> "import"
     is BackupReason.BeforeUpdate -> "update_$version"
 }
 
@@ -43,6 +45,7 @@ class BackupStore(private val dir: File, private val clock: Clock) {
             val reason = when (match.groupValues[2]) {
                 "manual" -> BackupReason.Manual
                 "restore" -> BackupReason.BeforeRestore
+                "import" -> BackupReason.BeforeImport
                 else -> BackupReason.BeforeUpdate(match.groupValues[3])
             }
             Backup(file.name, Instant.ofEpochMilli(millis), reason, countLessons(file))
