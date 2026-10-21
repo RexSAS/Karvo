@@ -43,7 +43,7 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 - **Backups and restore** — up to 3 backups are kept inside the app (one before every update, or any time with *Back up now*). Restore one from *Settings → Backups*, behind two confirmation steps.
 - **Export to CSV** — save all your lessons as a spreadsheet to keep a backup or send to the ski school.
 - **Your time zone** — "today" follows the time zone you pick (default *Europe/Rome*).
-- **Private** — no account, no tracking. The internet is used only to check GitHub for updates; your lessons never leave your phone.
+- **Private** — no account, no tracking. The internet is used only to check GitHub for updates; Karvo itself never sends your lessons anywhere. If your phone's Google backup is on, Android includes Karvo's data in it, so your lessons come back when you set up a new phone.
 
 ## Install
 
@@ -52,10 +52,10 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 3. Open **Karvo**, set your hourly rate in *Settings*, and log your first lesson with **+**.
 
 > [!NOTE]
-> **Karvo is the new name of Karvo.** It's installed as a new app, so it starts empty: if you used Karvo, uninstall it after switching. See the [changelog](CHANGELOG.md) for what's new.
+> **Karvo is the new name of MasterSki.** It's installed as a new app, so it starts empty: if you used MasterSki, uninstall it after switching. See the [changelog](CHANGELOG.md) for what's new.
 
 > [!WARNING]
-> Uninstalling the app deletes all lessons. Use **Settings → Export to CSV** regularly as a backup — the CSV is a copy for your records and cannot be imported back.
+> Uninstalling the app deletes all lessons from the phone (unless your phone's Google backup brings them back on reinstall). Use **Settings → Export to CSV** regularly as a backup — the CSV is a copy for your records and cannot be imported back.
 
 ## Build from source
 

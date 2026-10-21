@@ -78,7 +78,7 @@
     <!-- Backups -->
     <string name="backups">Backups</string>
     <string name="backups_hint">Saved inside the app, up to 3</string>
-    <string name="backups_explanation">Karvo keeps up to 3 backups of your lessons inside the app. A backup is made automatically before every update. Uninstalling the app deletes them — use Export to CSV to keep a copy elsewhere.</string>
+    <string name="backups_explanation">Karvo keeps up to 3 backups of your lessons inside the app. A backup is made automatically before every update. Uninstalling the app deletes them, unless your phone\'s Google backup restores them on reinstall — use Export to CSV to keep a copy elsewhere.</string>
     <string name="back_up_now">Back up now</string>
     <plurals name="backup_saved">
         <item quantity="one">Backup saved (%d lesson)</item>
