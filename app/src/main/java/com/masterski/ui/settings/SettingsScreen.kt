@@ -38,6 +38,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -82,6 +83,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun SettingsScreen(
     onOpenBackups: () -> Unit,
+    onCheckForUpdates: () -> Unit,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -178,6 +180,13 @@ fun SettingsScreen(
                 headlineContent = { Text(stringResource(R.string.language)) },
                 supportingContent = { Text(languageLabel(state.language)) },
                 modifier = Modifier.clickable { showLanguagePicker = true },
+            )
+
+            ListItem(
+                leadingContent = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.check_for_updates)) },
+                supportingContent = { Text(stringResource(R.string.version, BuildConfig.VERSION_NAME)) },
+                modifier = Modifier.clickable(onClick = onCheckForUpdates),
             )
 
             ListItem(

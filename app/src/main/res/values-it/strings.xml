@@ -110,6 +110,20 @@
     <string name="restore_read_error">Questo backup non si può leggere (riga %1$d). Non è stato modificato nulla.</string>
     <string name="restore_backup_error">Impossibile creare il backup. Non è stato modificato nulla.</string>
     <!-- Updates -->
+    <string name="check_for_updates">Cerca aggiornamenti</string>
+    <string name="checking_for_updates">Ricerca aggiornamenti…</string>
+    <string name="up_to_date">L\'app è aggiornata.</string>
+    <string name="check_failed">Impossibile cercare aggiornamenti. Controlla la connessione e riprova.</string>
+    <string name="update_available_title">È disponibile MasterSki %1$s</string>
+    <string name="update">Aggiorna</string>
+    <string name="later">Più tardi</string>
+    <string name="update_backing_up">Backup delle lezioni in corso…</string>
+    <string name="update_downloading">Download dell\'aggiornamento</string>
+    <string name="update_progress">%1$s / %2$s MB</string>
+    <string name="update_installing">Apertura del programma di installazione…</string>
+    <string name="update_permission_title">Consenti l\'installazione degli aggiornamenti</string>
+    <string name="update_permission_text">Per installare gli aggiornamenti, consenti a MasterSki di installare app. Serve solo la prima volta.</string>
+    <string name="open_settings">Apri impostazioni</string>
     <string name="update_backup_failed">Backup non riuscito: aggiornamento annullato. Le tue lezioni sono intatte.</string>
     <string name="update_download_incomplete">Download incompleto: riprova.</string>
     <string name="update_download_failed">Download non riuscito: controlla la connessione e riprova.</string>

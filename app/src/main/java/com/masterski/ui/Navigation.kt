@@ -46,6 +46,9 @@ import com.masterski.ui.lessons.LessonsScreen
 import com.masterski.ui.overview.MonthDetailScreen
 import com.masterski.ui.overview.OverviewScreen
 import com.masterski.ui.settings.SettingsScreen
+import com.masterski.ui.update.UpdateDialogs
+import com.masterski.ui.update.UpdateViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.time.YearMonth
 import kotlinx.coroutines.launch
 
@@ -86,6 +89,10 @@ fun MasterSkiNavHost() {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val showBar = currentRoute in tabs.map { it.route }
+
+    // Outside the NavHost, so this ViewModel is scoped to the activity and the update flow survives navigation.
+    val updateViewModel: UpdateViewModel = viewModel(factory = UpdateViewModel.Factory)
+    UpdateDialogs(updateViewModel)
 
     // Hoisted here so the Undo snackbar survives leaving the Lessons screen.
     val snackbarHostState = remember { SnackbarHostState() }
@@ -146,7 +153,10 @@ fun MasterSkiNavHost() {
                 )
             }
             composable(ROUTE_SETTINGS) {
-                SettingsScreen(onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) })
+                SettingsScreen(
+                    onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
+                    onCheckForUpdates = updateViewModel::checkNow,
+                )
             }
             composable(ROUTE_BACKUPS) { entry ->
                 BackupsScreen(
