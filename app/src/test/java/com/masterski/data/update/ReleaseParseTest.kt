@@ -27,4 +27,11 @@ class ReleaseParseTest {
     @Test fun nullForNonVersionTag() = assertNull(parseRelease(json("latest", apk)))
 
     @Test fun nullForBadJson() = assertNull(parseRelease("not json"))
+
+    @Test fun nullUnlessApkIsHttpsOnGitHub() {
+        val http = """{"name":"MasterSki-1.2.apk","size":1,"browser_download_url":"http://github.com/RexSAS/MasterSki/releases/download/v1.2.0/MasterSki-1.2.apk"}"""
+        val elsewhere = """{"name":"MasterSki-1.2.apk","size":1,"browser_download_url":"https://evil.example.com/MasterSki-1.2.apk"}"""
+        assertNull(parseRelease(json("v1.2.0", http)))
+        assertNull(parseRelease(json("v1.2.0", elsewhere)))
+    }
 }

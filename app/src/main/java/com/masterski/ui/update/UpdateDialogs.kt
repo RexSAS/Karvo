@@ -39,8 +39,9 @@ private fun megabytes(bytes: Long): String = String.format(Locale.getDefault(), 
 fun UpdateDialogs(vm: UpdateViewModel) {
     val state by vm.state.collectAsStateWithLifecycle()
     LaunchedEffect(vm) { vm.checkOnStart() }
-    // Back from the "Install unknown apps" page: continue or report (no-op unless we sent the user there).
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.onReturnedFromPermissionSettings() }
+    // Back in the app: show a held-back install confirmation, and finish the "Install unknown apps" detour.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.onResume() }
+    LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) { vm.onPause() }
 
     when (val s = state) {
         UpdateState.Idle -> Unit
@@ -59,7 +60,8 @@ fun UpdateDialogs(vm: UpdateViewModel) {
         )
         UpdateState.Checking -> BusyDialog(stringResource(R.string.checking_for_updates))
         UpdateState.BackingUp -> BusyDialog(stringResource(R.string.update_backing_up))
-        UpdateState.Installing -> BusyDialog(stringResource(R.string.update_installing))
+        // Closable: if Android never shows its install screen, the user must not be stuck here.
+        UpdateState.Installing -> BusyDialog(stringResource(R.string.update_installing), onClose = vm::dismiss)
         is UpdateState.Downloading -> AlertDialog(
             onDismissRequest = {},
             properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
@@ -93,7 +95,7 @@ fun UpdateDialogs(vm: UpdateViewModel) {
 }
 
 @Composable
-private fun BusyDialog(text: String) {
+private fun BusyDialog(text: String, onClose: (() -> Unit)? = null) {
     AlertDialog(
         onDismissRequest = {},
         properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
@@ -103,7 +105,9 @@ private fun BusyDialog(text: String) {
                 Text(text)
             }
         },
-        confirmButton = {},
+        confirmButton = {
+            if (onClose != null) TextButton(onClick = onClose) { Text(stringResource(R.string.close)) }
+        },
     )
 }
 

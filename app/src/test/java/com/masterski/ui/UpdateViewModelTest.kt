@@ -59,10 +59,12 @@ private class FakeInstaller : UpdateInstaller {
     var allowed = true
     val installed = mutableListOf<File>()
     var settingsOpened = 0
+    val foreground = mutableListOf<Boolean>()
     override val results = MutableSharedFlow<InstallResult>(extraBufferCapacity = 4)
     override fun canInstall() = allowed
     override fun openInstallPermissionSettings() { settingsOpened++ }
     override suspend fun install(apk: File) { installed += apk }
+    override fun setAppInForeground(inForeground: Boolean) { foreground += inForeground }
 }
 
 class UpdateViewModelTest {
@@ -195,6 +197,18 @@ class UpdateViewModelTest {
 
     @Test fun laterDismissesTheOffer() = runTest {
         val vm = vm(); vm.checkOnStart(); vm.dismiss()
+        assertEquals(UpdateState.Idle, vm.state.value)
+    }
+
+    @Test fun resumeAndPauseTellTheInstaller() = runTest {
+        val vm = vm()
+        vm.onResume(); vm.onPause()
+        assertEquals(listOf(true, false), installer.foreground)
+    }
+
+    @Test fun installingCanBeClosed() = runTest {
+        val vm = vm(); vm.checkOnStart(); vm.update()
+        vm.dismiss()
         assertEquals(UpdateState.Idle, vm.state.value)
     }
 }

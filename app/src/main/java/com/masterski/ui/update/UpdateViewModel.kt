@@ -166,7 +166,15 @@ class UpdateViewModel(
         installer.openInstallPermissionSettings()
     }
 
-    /** Called on ON_RESUME: continues if the user granted "Install unknown apps", otherwise reports it. */
+    /** Activity ON_RESUME: lets a held-back install confirmation appear, and re-checks the install permission. */
+    fun onResume() {
+        installer.setAppInForeground(true)
+        onReturnedFromPermissionSettings()
+    }
+
+    fun onPause() = installer.setAppInForeground(false)
+
+    /** Continues if the user granted "Install unknown apps", otherwise reports it. */
     fun onReturnedFromPermissionSettings() {
         if (!awaitingPermission || _state.value != UpdateState.NeedsPermission) return
         awaitingPermission = false

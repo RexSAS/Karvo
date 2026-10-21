@@ -2,6 +2,8 @@ package com.masterski.data.update
 
 import com.masterski.domain.AppVersion
 import com.masterski.domain.parseVersion
+import java.net.URI
+import java.net.URISyntaxException
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -20,17 +22,26 @@ fun parseRelease(json: String): ReleaseInfo? = try {
     val assets = release.optJSONArray("assets")
     val apk = (0 until (assets?.length() ?: 0)).map { assets!!.getJSONObject(it) }
         .firstOrNull { it.optString("name").endsWith(".apk") }
-    if (version == null || apk == null) {
+    val apkUrl = apk?.optString("browser_download_url")
+    if (version == null || apk == null || apkUrl == null || !isGitHubHttps(apkUrl)) {
         null
     } else {
         ReleaseInfo(
             version = version,
             title = release.optString("name"),
             notes = release.optString("body"),
-            apkUrl = apk.getString("browser_download_url"),
+            apkUrl = apkUrl,
             apkSize = apk.getLong("size"),
         )
     }
 } catch (_: JSONException) {
     null
+}
+
+/** Only release assets served over HTTPS by github.com are downloaded (GitHub then redirects to its CDN). */
+private fun isGitHubHttps(url: String): Boolean = try {
+    val uri = URI(url)
+    uri.scheme == "https" && uri.host == "github.com"
+} catch (_: URISyntaxException) {
+    false
 }

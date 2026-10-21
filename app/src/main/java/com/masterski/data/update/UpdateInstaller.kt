@@ -25,12 +25,35 @@ interface UpdateInstaller {
     /** Hands [apk] to the system installer; the outcome arrives on [results] (success ends this process). */
     suspend fun install(apk: File)
     val results: SharedFlow<InstallResult>
+    /** Tells the installer whether the app is visible; a held-back confirmation is shown when it becomes true. */
+    fun setAppInForeground(inForeground: Boolean)
 }
 
 /** Installs updates through a [PackageInstaller] session; Android asks the user to confirm. */
 class PackageInstallerUpdater(private val context: Context) : UpdateInstaller {
     private val _results = MutableSharedFlow<InstallResult>(extraBufferCapacity = 4)
     override val results: SharedFlow<InstallResult> = _results
+
+    @Volatile private var inForeground = false
+
+    /** Android's "Update this app?" screen, held back while the app is in the background (it can't be started then). */
+    @Volatile private var pendingConfirmation: Intent? = null
+
+    override fun setAppInForeground(inForeground: Boolean) {
+        this.inForeground = inForeground
+        if (inForeground) showPendingConfirmation()
+    }
+
+    /** Shows the held-back confirmation once; afterwards the outcome arrives through [onResult]. */
+    private fun showPendingConfirmation() {
+        val confirm = pendingConfirmation ?: return
+        pendingConfirmation = null
+        try {
+            context.startActivity(confirm.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (_: Exception) {
+            _results.tryEmit(InstallResult.Failed(PackageInstaller.STATUS_FAILURE, signatureMismatch = false))
+        }
+    }
 
     override fun canInstall(): Boolean = context.packageManager.canRequestPackageInstalls()
 
@@ -65,18 +88,24 @@ class PackageInstallerUpdater(private val context: Context) : UpdateInstaller {
         when (val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)) {
             PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                 @Suppress("DEPRECATION")
-                val confirm = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT) ?: return
-                context.startActivity(confirm.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                pendingConfirmation = intent.getParcelableExtra(Intent.EXTRA_INTENT) ?: return
+                if (inForeground) showPendingConfirmation()
             }
-            PackageInstaller.STATUS_SUCCESS -> Unit
-            PackageInstaller.STATUS_FAILURE_ABORTED -> _results.tryEmit(InstallResult.Aborted)
-            else -> _results.tryEmit(
+            PackageInstaller.STATUS_SUCCESS -> pendingConfirmation = null
+            PackageInstaller.STATUS_FAILURE_ABORTED -> {
+                pendingConfirmation = null
+                _results.tryEmit(InstallResult.Aborted)
+            }
+            else -> {
+                pendingConfirmation = null
+                _results.tryEmit(
                 InstallResult.Failed(
                     status,
                     signatureMismatch = status == PackageInstaller.STATUS_FAILURE_CONFLICT ||
                         status == PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
-                ),
-            )
+                    ),
+                )
+            }
         }
     }
 }
