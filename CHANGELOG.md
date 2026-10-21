@@ -2,6 +2,11 @@
 
 All notable changes to MasterSki are listed here.
 
+## [Unreleased]
+
+### Added
+- **Animated splash screen**: the mountains rise and a gold sun appears while the app starts (Android 12+; older versions show the logo still).
+
 ## [1.2] — 2026-10-21
 
 ### Added
