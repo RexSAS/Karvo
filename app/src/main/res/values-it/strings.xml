@@ -109,6 +109,13 @@
     </plurals>
     <string name="restore_read_error">Questo backup non si può leggere (riga %1$d). Non è stato modificato nulla.</string>
     <string name="restore_backup_error">Impossibile creare il backup. Non è stato modificato nulla.</string>
+    <!-- Updates -->
+    <string name="update_backup_failed">Backup non riuscito: aggiornamento annullato. Le tue lezioni sono intatte.</string>
+    <string name="update_download_incomplete">Download incompleto: riprova.</string>
+    <string name="update_download_failed">Download non riuscito: controlla la connessione e riprova.</string>
+    <string name="update_permission_denied">Aggiornamento annullato: permesso non concesso.</string>
+    <string name="update_signature_mismatch">Questo aggiornamento non è firmato dallo stesso sviluppatore e non può essere installato.</string>
+    <string name="update_failed">Aggiornamento non riuscito (codice %1$d).</string>
     <plurals name="exported_lessons">
         <item quantity="one">Esportata %d lezione</item>
         <item quantity="other">Esportate %d lezioni</item>

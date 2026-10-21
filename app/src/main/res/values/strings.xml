@@ -111,6 +111,13 @@
     </plurals>
     <string name="restore_read_error">This backup can\'t be read (line %1$d). Nothing was changed.</string>
     <string name="restore_backup_error">Couldn\'t make a backup. Nothing was changed.</string>
+    <!-- Updates -->
+    <string name="update_backup_failed">Backup failed — update cancelled. Your lessons are untouched.</string>
+    <string name="update_download_incomplete">Download incomplete — try again.</string>
+    <string name="update_download_failed">Download failed — check your connection and try again.</string>
+    <string name="update_permission_denied">Update cancelled — permission not granted.</string>
+    <string name="update_signature_mismatch">This update isn\'t signed by the same developer and can\'t be installed.</string>
+    <string name="update_failed">Update failed (code %1$d).</string>
     <plurals name="exported_lessons">
         <item quantity="one">Exported %d lesson</item>
         <item quantity="other">Exported %d lessons</item>

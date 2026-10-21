@@ -20,6 +20,7 @@ import com.masterski.data.update.PackageInstallerUpdater
 import com.masterski.data.update.UrlApkDownloader
 import java.io.File
 import java.time.Clock
+import java.util.concurrent.atomic.AtomicBoolean
 
 class AppContainer(context: Context) {
     private val appContext = context.applicationContext
@@ -42,6 +43,11 @@ class AppContainer(context: Context) {
     val apkDownloader by lazy { UrlApkDownloader() }
     val updateInstaller: PackageInstallerUpdater by lazy { PackageInstallerUpdater(appContext) }
     val updatesDir: File get() = File(appContext.cacheDir, "updates")
+
+    private val updateCheckClaimed = AtomicBoolean(false)
+
+    /** True only for the first caller in this process, so the automatic update check runs once per cold start. */
+    fun claimUpdateCheck(): Boolean = updateCheckClaimed.compareAndSet(false, true)
 
     val backupService: BackupService by lazy {
         BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository)
