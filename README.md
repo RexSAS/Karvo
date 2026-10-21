@@ -20,11 +20,13 @@
 Ski instructors are paid by the hour, and at the end of the month the hours have to add up. **MasterSki** is a small, fast app to log each lesson the moment it ends and check your monthly hours against what the ski school pays you.
 
 <p align="center">
-  <img src="docs/assets/screenshots/new-lesson.png" width="240" alt="Add a lesson">
+  <img src="docs/assets/screenshots/new-lesson.png" width="200" alt="Add a lesson">
   &nbsp;
-  <img src="docs/assets/screenshots/overview.png" width="240" alt="Overview of hours">
+  <img src="docs/assets/screenshots/overview.png" width="200" alt="Overview with statistics">
   &nbsp;
-  <img src="docs/assets/screenshots/settings.png" width="240" alt="Settings">
+  <img src="docs/assets/screenshots/podium.png" width="200" alt="Top students podium">
+  &nbsp;
+  <img src="docs/assets/screenshots/settings.png" width="200" alt="Settings">
 </p>
 
 ## Features
@@ -32,7 +34,10 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 - **Log a lesson in seconds** — date, duration (quick buttons for 1h, 1h 30m, 2h, 3h), student name with suggestions from previous lessons, and optional notes. Group lessons? Just write it in the name, e.g. *Group Rossi*.
 - **Monthly and lifetime hours** — the Overview shows your total hours and a row for every month; tap a month to see its lessons.
 - **Private earnings** — set your hourly rate and MasterSki calculates what you earned. Amounts stay hidden as `**** €` until you tap the eye, and hide again when you leave the screen.
-- **Edit or undo** — tap a lesson to fix it, swipe it away to delete, and tap *Undo* if that was a mistake.
+- **Statistics with charts** — under your totals, the Overview shows lessons this month, average lesson length, your number of students, a 6-month hours chart, a podium of your top students and your busiest weekdays. Any money there stays hidden until you tap the eye.
+- **Alpine Night theme** — a dark navy and gold look, on by default. Prefer the old look? Pick *Classic* in Settings.
+- **Italiano / English** — the app follows your phone's language, or pick one in Settings.
+- **Edit or undo** — tap a lesson to fix it, or swipe it away and confirm to delete. Changed your mind? Tap *Undo*.
 - **Export to CSV** — save all your lessons as a spreadsheet to keep a backup or send to the ski school.
 - **Your time zone** — "today" follows the time zone you pick (default *Europe/Rome*).
 - **Fully offline and private** — no account, no internet permission. Everything stays on your phone.
@@ -42,6 +47,8 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 1. On your Android phone, open the [latest release](https://github.com/RexSAS/MasterSki/releases/latest) and download **`MasterSki-x.y.apk`**.
 2. Open the file and allow *Install unknown apps* when Android asks.
 3. Open **MasterSki**, set your hourly rate in *Settings*, and log your first lesson with **+**.
+
+Already on 1.0? Install the new APK over it: your lessons and settings are kept. See the [changelog](CHANGELOG.md) for what's new.
 
 > [!WARNING]
 > Uninstalling the app deletes all lessons. Use **Settings → Export to CSV** regularly as a backup — the CSV is a copy for your records and cannot be imported back.
@@ -86,6 +93,6 @@ A debug build is signed differently from the release build: uninstall it (export
 
 ## Tech
 
-Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation Compose · MVVM · JUnit + Robolectric
+Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation Compose · AppCompat per-app languages · MVVM · JUnit + Robolectric
 
 Design and implementation notes live in [`docs/superpowers/`](docs/superpowers/).

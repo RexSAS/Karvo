@@ -1,0 +1,83 @@
+<resources>
+    <string name="app_name">MasterSki</string>
+
+    <!-- Navigation -->
+    <string name="lessons">Lessons</string>
+    <string name="overview">Overview</string>
+    <string name="settings">Settings</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="close">Close</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="delete">Delete</string>
+    <string name="save">Save</string>
+    <string name="search">Search</string>
+    <string name="undo">Undo</string>
+
+    <!-- Lessons -->
+    <string name="add_lesson">Add lesson</string>
+    <string name="no_lessons_hint">No lessons yet. Tap + to add your first one.</string>
+    <string name="lesson_deleted">Lesson deleted</string>
+    <plurals name="lesson_count">
+        <item quantity="one">%d lesson</item>
+        <item quantity="other">%d lessons</item>
+    </plurals>
+
+    <!-- Edit lesson -->
+    <string name="new_lesson">New lesson</string>
+    <string name="edit_lesson">Edit lesson</string>
+    <string name="delete_lesson">Delete lesson</string>
+    <string name="delete_lesson_question">Delete this lesson?</string>
+    <string name="date">Date</string>
+    <string name="hours">Hours</string>
+    <string name="minutes">Minutes</string>
+    <string name="student">Student</string>
+    <string name="notes">Notes</string>
+    <string name="error_student_blank">Enter a student name</string>
+    <string name="error_duration_zero">Duration must be more than 0</string>
+    <string name="error_duration_too_long">Max 24 hours</string>
+    <string name="error_minutes_over_59">Minutes must be 0–59</string>
+
+    <!-- Overview -->
+    <string name="total_hours">Total hours</string>
+    <string name="earnings">Earnings</string>
+    <string name="show_earnings">Show earnings</string>
+    <string name="hide_earnings">Hide earnings</string>
+    <string name="no_lessons">No lessons yet.</string>
+    <string name="months">Months</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Statistics</string>
+    <string name="stats_lessons_this_month">Lessons this month</string>
+    <string name="stats_avg_lesson">Avg. lesson</string>
+    <string name="stats_students">Students</string>
+    <string name="stats_last_six_months">Last 6 months</string>
+    <string name="stats_six_month_earnings">6-month earnings</string>
+    <string name="stats_top_students">Top students</string>
+    <string name="stats_busiest_days">Busiest days</string>
+    <string name="a11y_last_six_months">Hours in the last 6 months: %1$s</string>
+    <string name="a11y_top_students">Top students: %1$s</string>
+    <string name="a11y_busiest_days">Lessons per weekday: %1$s</string>
+
+    <!-- Settings -->
+    <string name="hourly_rate">Hourly rate</string>
+    <string name="rate_error">Enter an amount like 25.00</string>
+    <string name="rate_hint">Leave empty to hide earnings</string>
+    <string name="time_zone">Time zone</string>
+    <string name="export_csv">Export to CSV</string>
+    <string name="export_csv_hint">Save all lessons as a spreadsheet</string>
+    <string name="export_failed">Export failed: %1$s</string>
+    <string name="cannot_open_file">Cannot open file</string>
+    <string name="version">Version %1$s</string>
+    <string name="theme">Theme</string>
+    <string name="theme_alpine_night">Alpine Night</string>
+    <string name="theme_classic">Classic</string>
+    <string name="language">Language</string>
+    <string name="language_system">Phone default</string>
+    <plurals name="exported_lessons">
+        <item quantity="one">Exported %d lesson</item>
+        <item quantity="other">Exported %d lessons</item>
+    </plurals>
+</resources>

@@ -1,0 +1,94 @@
+package com.masterski.data
+
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import java.time.LocalDate
+
+/** Behavior every [LessonRepository] must share; run against the Room impl and the test fake. */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
+abstract class LessonRepositoryContract {
+    abstract fun repo(): LessonRepository
+
+    protected val d: LocalDate = LocalDate.of(2026, 10, 20)
+    private fun lesson(date: LocalDate = d, student: String = "A", minutes: Int = 60, notes: String? = null) =
+        Lesson(date = date, durationMinutes = minutes, student = student, notes = notes)
+
+    @Test fun editUpdatesNotDuplicates() = runTest {
+        val r = repo()
+        val id = r.save(lesson(student = "Anna"))
+        r.save(r.get(id)!!.copy(durationMinutes = 90))
+        val all = r.allLessons(); assertEquals(1, all.size); assertEquals(90, all[0].durationMinutes)
+    }
+
+    @Test fun idsAssignedIncrementallyFromOne() = runTest {
+        val r = repo()
+        assertEquals(1L, r.save(lesson()))
+        assertEquals(2L, r.save(lesson()))
+    }
+
+    @Test fun restoreKeepsId() = runTest {
+        val r = repo()
+        val id = r.save(lesson(student = "Anna"))
+        val l = r.get(id)!!; r.delete(l); r.restore(l)
+        assertEquals(l, r.get(id))
+    }
+
+    @Test fun normalizes() = runTest {
+        val r = repo()
+        val id = r.save(lesson(student = "  Anna ", notes = "   "))
+        val l = r.get(id)!!; assertEquals("Anna", l.student); assertNull(l.notes)
+    }
+
+    @Test fun trimsNotes() = runTest {
+        val r = repo()
+        assertEquals("hi", r.get(r.save(lesson(notes = "  hi ")))!!.notes)
+    }
+
+    @Test fun acceptsDurationBounds() = runTest {
+        val r = repo()
+        r.save(lesson(minutes = 1)); r.save(lesson(minutes = 1440))
+        assertEquals(2, r.allLessons().size)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsZeroDuration() = runTest { repo().save(lesson(minutes = 0)) }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsOverMaxDuration() = runTest { repo().save(lesson(minutes = 1441)) }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsBlankStudent() = runTest { repo().save(lesson(student = "  ")) }
+
+    @Test fun lessonsOrderedDateDescThenIdDesc() = runTest {
+        val r = repo()
+        r.save(lesson(date = LocalDate.of(2026, 3, 1), student = "first"))
+        r.save(lesson(date = LocalDate.of(2026, 1, 1), student = "old"))
+        r.save(lesson(date = LocalDate.of(2026, 3, 1), student = "second"))
+        assertEquals(listOf("second", "first", "old"), r.observeLessons().first().map { it.student })
+        assertEquals(listOf("second", "first", "old"), r.allLessons().map { it.student })
+    }
+
+    @Test fun studentNamesDistinctMostRecentFirst() = runTest {
+        val r = repo()
+        r.save(lesson(date = LocalDate.of(2026, 1, 1), student = "Anna"))
+        r.save(lesson(date = LocalDate.of(2026, 2, 1), student = "Bob"))
+        r.save(lesson(date = LocalDate.of(2026, 3, 1), student = "Anna"))
+        assertEquals(listOf("Anna", "Bob"), r.observeStudentNames().first())
+    }
+
+    @Test fun studentNamesRankByMaxDateThenMaxIdIndependently() = runTest {
+        val r = repo()
+        r.save(lesson(date = LocalDate.of(2026, 3, 1), student = "Anna")) // id 1
+        r.save(lesson(date = LocalDate.of(2026, 1, 1), student = "Zed"))  // id 2
+        r.save(lesson(date = LocalDate.of(2026, 3, 1), student = "Bob"))  // id 3
+        r.save(lesson(date = LocalDate.of(2026, 1, 1), student = "Anna")) // id 4
+        assertEquals(listOf("Anna", "Bob", "Zed"), r.observeStudentNames().first())
+    }
+}
