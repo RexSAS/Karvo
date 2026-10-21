@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -55,4 +56,17 @@ class SettingsRepositoryTest {
         store.edit { it[stringPreferencesKey("theme")] = "NEON" }
         assertEquals(ThemeChoice.ALPINE_NIGHT, repo.theme.first())
     }
+
+    @Test fun seasonStartDefaultsToNovemberAndRoundTrips() = runTest {
+        assertEquals(11, repo.seasonStartMonth.first())
+        repo.setSeasonStartMonth(12); assertEquals(12, repo.seasonStartMonth.first())
+    }
+
+    @Test fun outOfRangeSeasonStartFallsBack() = runTest {
+        store.edit { it[intPreferencesKey("season_start_month")] = 0 }
+        assertEquals(11, repo.seasonStartMonth.first())
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun invalidSeasonStartRejected() = runTest { repo.setSeasonStartMonth(13) }
 }

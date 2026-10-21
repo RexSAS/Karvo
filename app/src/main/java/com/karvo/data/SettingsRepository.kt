@@ -3,6 +3,7 @@ package com.karvo.data
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +12,9 @@ import java.time.DateTimeException
 import java.time.ZoneId
 
 const val DEFAULT_TIME_ZONE = "Europe/Rome"
+
+/** Ski seasons start in November unless the user picks another month. */
+const val DEFAULT_SEASON_START_MONTH = 11
 
 /** True if [id] is a valid [ZoneId]; shared by all settings implementations. */
 fun isValidZoneId(id: String): Boolean =
@@ -28,12 +32,16 @@ interface SettingsRepository {
     suspend fun setTimeZoneId(id: String)
     val theme: Flow<ThemeChoice>
     suspend fun setTheme(choice: ThemeChoice)
+    /** 1–12; stored values out of range read as [DEFAULT_SEASON_START_MONTH]. */
+    val seasonStartMonth: Flow<Int>
+    suspend fun setSeasonStartMonth(month: Int)
 }
 
 class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : SettingsRepository {
     private val rateKey = longPreferencesKey("hourly_rate_cents")
     private val zoneKey = stringPreferencesKey("time_zone_id")
     private val themeKey = stringPreferencesKey("theme")
+    private val seasonStartKey = intPreferencesKey("season_start_month")
 
     override val hourlyRateCents: Flow<Long?> = store.data.map { it[rateKey] }
 
@@ -54,5 +62,14 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
 
     override suspend fun setTheme(choice: ThemeChoice) {
         store.edit { it[themeKey] = choice.name }
+    }
+
+    override val seasonStartMonth: Flow<Int> = store.data.map { prefs ->
+        prefs[seasonStartKey]?.takeIf { it in 1..12 } ?: DEFAULT_SEASON_START_MONTH
+    }
+
+    override suspend fun setSeasonStartMonth(month: Int) {
+        require(month in 1..12) { "Invalid month: $month" }
+        store.edit { it[seasonStartKey] = month }
     }
 }
