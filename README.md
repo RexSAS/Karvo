@@ -57,6 +57,31 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 > [!WARNING]
 > Uninstalling the app deletes all lessons from the phone (unless your phone's Google backup brings them back on reinstall). Use **Settings → Export to CSV** regularly as a backup — the CSV is a copy for your records and cannot be imported back.
 
+## Roadmap
+
+Planned features, ticked off as they ship.
+
+### 2.1 — Pay and history
+- [ ] **Import from CSV** — load a Karvo or MasterSki export, e.g. to bring old lessons over or move to a new phone.
+- [ ] **Pay check** — enter what the school paid for a month; Karvo compares it with your hours × rate and shows what's missing.
+- [ ] **Season totals** — totals per ski season (Dec–Apr, across the new year), compared with last season.
+- [ ] **Search and filters** — find lessons by student name and filter the list.
+
+### 2.2 — Faster and more fun
+- [ ] **Repeat a lesson** — long-press a lesson to log the same student and duration again in one tap.
+- [ ] **Badges and achievements** — season milestones (50h, 100h, 250h…) with a small celebration.
+- [ ] **Evening reminder** — optional notification on days with nothing logged.
+- [ ] **Fingerprint unlock** — reveal earnings with your fingerprint.
+
+### 2.3 — Home screen
+- [ ] **Widget** — this month's hours, badge and goal progress, with a quick **+** to add a lesson.
+- [ ] More to be decided.
+
+### Ideas for later
+- Season heatmap (one square per day, coloured by hours taught).
+- Student pages (all lessons and total hours per student).
+- Monthly hours goal with a progress ring on Overview.
+
 ## Build from source
 
 Requirements: JDK 17 and the Android SDK (platform 35, build-tools 35.0.0).
