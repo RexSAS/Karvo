@@ -65,13 +65,13 @@ Planned features, ticked off as they ship.
 - [ ] **Import from CSV** — load a Karvo or MasterSki export, e.g. to bring old lessons over or move to a new phone.
 - [ ] **Paid months** — tick a month as paid when the school pays you (the date is saved); Overview shows what's still unpaid, a lesson added later makes the month "partly paid", and the paid status is kept in CSV exports and backups.
 - [ ] **Season totals** — totals per ski season (Dec–Apr, across the new year), compared with last season.
-- [ ] **Search and filters** — find lessons by student name and filter the list.
+- [ ] **Fingerprint unlock** — reveal earnings with your fingerprint.
 
 ### 2.2 — Faster and more fun
 - [ ] **Repeat a lesson** — long-press a lesson to log the same student and duration again in one tap.
 - [ ] **Badges and achievements** — season milestones (50h, 100h, 250h…) with a small celebration.
 - [ ] **Evening reminder** — optional notification on days with nothing logged.
-- [ ] **Fingerprint unlock** — reveal earnings with your fingerprint.
+- [ ] **Search and filters** — find lessons by student name and filter the list.
 
 ### 2.3 — Home screen
 - [ ] **Widget** — this month's hours, badge and goal progress, with a quick **+** to add a lesson.
