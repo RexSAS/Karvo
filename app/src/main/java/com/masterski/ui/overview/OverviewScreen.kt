@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,11 +62,14 @@ import java.time.YearMonth
 fun OverviewScreen(
     onOpenMonth: (YearMonth) -> Unit,
     onOpenSettings: () -> Unit,
+    /** False while another pager page is on screen: earnings hide as soon as the user swipes away. */
+    isCurrentPage: Boolean = true,
     viewModel: OverviewViewModel = viewModel(factory = OverviewViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     // Earnings go back to hidden whenever the screen stops (app sent to background, or navigated away).
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.hide() }
+    LaunchedEffect(isCurrentPage) { if (!isCurrentPage) viewModel.hide() }
     val onEarningsTap: () -> Unit = when {
         state.loading -> ({})
         state.rateSet -> viewModel::toggleReveal

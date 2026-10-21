@@ -47,6 +47,11 @@ import com.masterski.ui.overview.MonthDetailScreen
 import com.masterski.ui.overview.OverviewScreen
 import com.masterski.ui.settings.SettingsScreen
 import com.masterski.ui.theme.AlpineBackdrop
+import com.masterski.ui.theme.BackdropFigureLayer
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import com.masterski.ui.theme.AlpineNight
 import com.masterski.ui.theme.isAlpineNight
 import androidx.compose.material3.MaterialTheme
@@ -59,9 +64,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import java.time.YearMonth
 import kotlinx.coroutines.launch
 
-const val ROUTE_LESSONS = "lessons"
-const val ROUTE_OVERVIEW = "overview"
-const val ROUTE_SETTINGS = "settings"
+/** Lessons, Overview and Settings live side by side in one swipeable pager. */
+const val ROUTE_HOME = "home"
 const val ROUTE_EDIT = "edit?id={id}"
 const val ROUTE_MONTH = "month/{year}/{month}"
 const val ROUTE_BACKUPS = "backups"
@@ -73,29 +77,29 @@ fun monthRoute(m: YearMonth): String = "month/${m.year}/${m.monthValue}"
 
 fun restoreRoute(fileName: String): String = "restore/${Uri.encode(fileName)}"
 
-private data class Tab(val route: String, @StringRes val labelRes: Int, val icon: ImageVector)
+private data class Tab(@StringRes val labelRes: Int, val icon: ImageVector)
 
+/** Pager pages, in order. */
 private val tabs = listOf(
-    Tab(ROUTE_LESSONS, R.string.lessons, Icons.AutoMirrored.Filled.List),
-    Tab(ROUTE_OVERVIEW, R.string.overview, Icons.Filled.BarChart),
-    Tab(ROUTE_SETTINGS, R.string.settings, Icons.Filled.Settings),
+    Tab(R.string.lessons, Icons.AutoMirrored.Filled.List),
+    Tab(R.string.overview, Icons.Filled.BarChart),
+    Tab(R.string.settings, Icons.Filled.Settings),
 )
 
-/** Switches to a top-level tab, keeping each tab's state and never popping the start destination. */
-private fun NavHostController.navigateToTab(route: String) {
-    navigate(route) {
-        popUpTo(ROUTE_LESSONS) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
-    }
-}
+private const val PAGE_LESSONS = 0
+private const val PAGE_OVERVIEW = 1
+private const val PAGE_SETTINGS = 2
 
 @Composable
 fun MasterSkiNavHost() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-    val showBar = currentRoute in tabs.map { it.route }
+    val showBar = currentRoute == ROUTE_HOME
+    // Hoisted so the selected page survives opening a lesson, a month or Backups and coming back.
+    val pagerState = rememberPagerState { tabs.size }
+    val pagerScope = rememberCoroutineScope()
+    val goToPage: (Int) -> Unit = { page -> pagerScope.launch { pagerState.animateScrollToPage(page) } }
 
     // Outside the NavHost, so this ViewModel is scoped to the activity and the update flow survives navigation.
     val updateViewModel: UpdateViewModel = viewModel(factory = UpdateViewModel.Factory)
@@ -131,10 +135,10 @@ fun MasterSkiNavHost() {
         bottomBar = {
             if (showBar) {
                 NavigationBar(containerColor = if (isAlpineNight()) AlpineNight.NavBar else NavigationBarDefaults.containerColor) {
-                    tabs.forEach { tab ->
+                    tabs.forEachIndexed { page, tab ->
                         NavigationBarItem(
-                            selected = currentRoute == tab.route,
-                            onClick = { navController.navigateToTab(tab.route) },
+                            selected = pagerState.targetPage == page,
+                            onClick = { goToPage(page) },
                             icon = { Icon(tab.icon, contentDescription = null) },
                             label = { Text(stringResource(tab.labelRes)) },
                             colors = NavigationBarItemDefaults.colors(
@@ -148,30 +152,35 @@ fun MasterSkiNavHost() {
     ) { padding ->
         // Every navigating callback is wrapped in dropUnlessResumed so double taps and taps during a
         // transition are ignored; back/done use navigateUp, which never pops the start destination.
-        NavHost(navController, startDestination = ROUTE_LESSONS, modifier = Modifier.padding(padding)) {
-            composable(ROUTE_LESSONS) { entry ->
+        NavHost(navController, startDestination = ROUTE_HOME, modifier = Modifier.padding(padding)) {
+            composable(ROUTE_HOME) { entry ->
+                // Back on Overview or Settings returns to Lessons; on Lessons it leaves the app as before.
+                BackHandler(enabled = pagerState.currentPage != PAGE_LESSONS) { goToPage(PAGE_LESSONS) }
+                // The sky stays still while the pages slide over it.
                 AlpineBackdrop(BackdropFigure.None) {
-                    LessonsScreen(
-                        onAdd = dropUnlessResumed { navController.navigate(editRoute()) },
-                        onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
-                        onDeleted = showUndo,
-                    )
-                }
-            }
-            composable(ROUTE_OVERVIEW) { entry ->
-                AlpineBackdrop(BackdropFigure.None) { // the gold skier sits in Overview's header
-                    OverviewScreen(
-                        onOpenMonth = { month -> dropUnlessResumedNow(entry) { navController.navigate(monthRoute(month)) } },
-                        onOpenSettings = dropUnlessResumed { navController.navigateToTab(ROUTE_SETTINGS) },
-                    )
-                }
-            }
-            composable(ROUTE_SETTINGS) {
-                AlpineBackdrop(BackdropFigure.Snowflakes) {
-                    SettingsScreen(
-                        onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
-                        onCheckForUpdates = updateViewModel::checkNow,
-                    )
+                    HorizontalPager(pagerState, beyondViewportPageCount = 1) { page ->
+                        val isCurrent = pagerState.settledPage == page
+                        when (page) {
+                            PAGE_LESSONS -> LessonsScreen(
+                                onAdd = dropUnlessResumed { navController.navigate(editRoute()) },
+                                onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
+                                onDeleted = showUndo,
+                            )
+                            PAGE_OVERVIEW -> OverviewScreen(
+                                onOpenMonth = { month -> dropUnlessResumedNow(entry) { navController.navigate(monthRoute(month)) } },
+                                onOpenSettings = { goToPage(PAGE_SETTINGS) },
+                                isCurrentPage = isCurrent,
+                            )
+                            else -> Box {
+                                BackdropFigureLayer(BackdropFigure.Snowflakes)
+                                SettingsScreen(
+                                    onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
+                                    onCheckForUpdates = updateViewModel::checkNow,
+                                    isCurrentPage = isCurrent,
+                                )
+                            }
+                        }
+                    }
                 }
             }
             composable(ROUTE_BACKUPS) { entry ->
