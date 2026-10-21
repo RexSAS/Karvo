@@ -13,7 +13,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.foundation.clickable
+import com.karvo.domain.PaidStatus
+import com.karvo.domain.pickerMillisToLocalDate
+import com.karvo.domain.toPickerMillis
+import com.karvo.ui.components.PartlyPaidColor
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import com.karvo.ui.theme.AlpineTile
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -54,6 +67,8 @@ fun MonthDetailScreen(
     // Screen-local and not saved; hidden each time the screen opens and whenever it stops.
     var revealed by remember { mutableStateOf(false) }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { revealed = false }
+    var showPaidPicker by remember { mutableStateOf(false) }
+    var showUnpaidConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color.Transparent, // the alpine backdrop shows through
@@ -90,10 +105,81 @@ fun MonthDetailScreen(
                     }
                 }
             }
+            PaidRow(
+                state = state,
+                onToggle = { if (state.paidStatus == PaidStatus.PAID) showUnpaidConfirm = true else showPaidPicker = true },
+            )
             LazyColumn(Modifier.fillMaxSize()) {
                 items(state.lessons, key = { it.id }) { lesson ->
-                    LessonRow(lesson, onClick = { onEdit(lesson.id) })
+                    LessonRow(
+                        lesson,
+                        onClick = { onEdit(lesson.id) },
+                        showNotPaid = state.paidStatus == PaidStatus.PARTLY_PAID && lesson.paidOn == null,
+                    )
                     HorizontalDivider()
+                }
+            }
+        }
+    }
+
+    if (showPaidPicker) {
+        val pickerState = rememberDatePickerState(initialSelectedDateMillis = state.today.toPickerMillis())
+        DatePickerDialog(
+            onDismissRequest = { showPaidPicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    pickerState.selectedDateMillis?.let { viewModel.markPaid(pickerMillisToLocalDate(it)) }
+                    showPaidPicker = false
+                }) { Text(stringResource(R.string.ok)) }
+            },
+            dismissButton = { TextButton(onClick = { showPaidPicker = false }) { Text(stringResource(R.string.cancel)) } },
+        ) {
+            DatePicker(
+                state = pickerState,
+                title = { Text(stringResource(R.string.paid_on_title), Modifier.padding(start = 24.dp, top = 16.dp)) },
+            )
+        }
+    }
+
+    if (showUnpaidConfirm) {
+        AlertDialog(
+            onDismissRequest = { showUnpaidConfirm = false },
+            title = { Text(stringResource(R.string.mark_unpaid_question, monthTitle(month))) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.markUnpaid()
+                    showUnpaidConfirm = false
+                }) { Text(stringResource(R.string.mark_unpaid)) }
+            },
+            dismissButton = { TextButton(onClick = { showUnpaidConfirm = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
+}
+
+/** "Paid by the school" tick: checked only when every lesson is paid; partly paid months say so underneath. */
+@Composable
+private fun PaidRow(state: MonthDetailUiState, onToggle: () -> Unit) {
+    if (state.lessons.isEmpty()) return
+    AlpineTile(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp)) {
+        Row(
+            Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(horizontal = 4.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(checked = state.paidStatus == PaidStatus.PAID, onCheckedChange = { onToggle() })
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.paid_by_school), style = MaterialTheme.typography.titleMedium)
+                val date = state.paidOn?.let { DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault()).format(it) }
+                when {
+                    state.paidStatus == PaidStatus.PARTLY_PAID -> Text(
+                        stringResource(R.string.partly_paid) + (date?.let { " · " + stringResource(R.string.paid_on, it) } ?: ""),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = PartlyPaidColor,
+                    )
+                    date != null -> Text(
+                        stringResource(R.string.paid_on, date),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
                 }
             }
         }

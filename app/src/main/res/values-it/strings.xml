@@ -160,4 +160,13 @@
         <item quantity="one">Importata %d lezione</item>
         <item quantity="other">Importate %d lezioni</item>
     </plurals>
+    <!-- Paid months -->
+    <string name="paid">Pagato</string>
+    <string name="partly_paid">Pagato in parte</string>
+    <string name="not_paid">Non pagata</string>
+    <string name="paid_by_school">Pagato dalla scuola</string>
+    <string name="paid_on">Pagato il %s</string>
+    <string name="paid_on_title">Data del pagamento</string>
+    <string name="mark_unpaid_question">Segnare %s come non pagato?</string>
+    <string name="mark_unpaid">Segna come non pagato</string>
 </resources>

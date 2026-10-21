@@ -162,4 +162,13 @@
         <item quantity="one">Imported %d lesson</item>
         <item quantity="other">Imported %d lessons</item>
     </plurals>
+    <!-- Paid months -->
+    <string name="paid">Paid</string>
+    <string name="partly_paid">Partly paid</string>
+    <string name="not_paid">Not paid</string>
+    <string name="paid_by_school">Paid by the school</string>
+    <string name="paid_on">Paid on %s</string>
+    <string name="paid_on_title">Paid on</string>
+    <string name="mark_unpaid_question">Mark %s as unpaid?</string>
+    <string name="mark_unpaid">Mark as unpaid</string>
 </resources>

@@ -3,6 +3,7 @@ package com.karvo.ui.overview
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
+import com.karvo.ui.components.PaidBadge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -156,7 +157,10 @@ fun OverviewScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                 ) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(monthTitle(row.summary.month), style = MaterialTheme.typography.titleMedium)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(monthTitle(row.summary.month), style = MaterialTheme.typography.titleMedium)
+                            PaidBadge(row.summary.paidStatus)
+                        }
                         Text(formatDuration(row.summary.totalMinutes), style = MaterialTheme.typography.titleMedium)
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
