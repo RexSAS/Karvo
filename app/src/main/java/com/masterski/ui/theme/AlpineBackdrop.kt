@@ -102,6 +102,13 @@ fun AlpineBackdrop(figure: BackdropFigure, modifier: Modifier = Modifier, conten
     }
 }
 
+/** Just the [figure], for content that slides over a shared backdrop (e.g. a pager page). */
+@Composable
+fun BackdropFigureLayer(figure: BackdropFigure) {
+    val tint = if (isAlpineNight()) AlpineNight.Glacier else MaterialTheme.colorScheme.primary
+    Box(Modifier.fillMaxSize().clearAndSetSemantics {}) { Figure(figure, tint) }
+}
+
 @Composable
 private fun BoxScope.Figure(figure: BackdropFigure, tint: Color) {
     when (figure) {

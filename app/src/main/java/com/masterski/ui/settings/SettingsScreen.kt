@@ -55,6 +55,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +88,8 @@ import kotlinx.coroutines.withContext
 fun SettingsScreen(
     onOpenBackups: () -> Unit,
     onCheckForUpdates: () -> Unit,
+    /** False while another pager page is on screen: a typed rate is saved as soon as the user swipes away. */
+    isCurrentPage: Boolean = true,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -103,6 +106,12 @@ fun SettingsScreen(
     // (saveRate is idempotent; the ViewModel outlives this composition, so the write completes).
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.saveRate() }
     DisposableEffect(viewModel) { onDispose { viewModel.saveRate() } }
+    LaunchedEffect(isCurrentPage) {
+        if (!isCurrentPage) {
+            viewModel.saveRate()
+            focusManager.clearFocus()
+        }
+    }
 
     suspend fun showMessage(message: String) {
         snackbarHostState.currentSnackbarData?.dismiss()
