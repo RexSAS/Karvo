@@ -20,3 +20,6 @@ keystore.properties
 .idea/
 *.iml
 .DS_Store
+
+# Internal design notes (local only)
+docs/superpowers/
