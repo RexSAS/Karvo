@@ -2,6 +2,8 @@ package com.karvo.data
 
 import com.karvo.domain.MAX_DURATION_MINUTES
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
+import java.time.YearMonth
 
 interface LessonRepository {
     fun observeLessons(): Flow<List<Lesson>>
@@ -14,6 +16,14 @@ interface LessonRepository {
 
     /** Replaces every lesson with [lessons] (validated first; ids are reassigned). Nothing changes on failure. */
     suspend fun replaceAll(lessons: List<Lesson>)
+
+    /** Adds [lessons] as new rows (validated first; ids are reassigned, paidOn kept). Nothing is added on failure. */
+    suspend fun addAll(lessons: List<Lesson>)
+
+    /** Marks the unpaid lessons of [month] as paid on [paidOn]; lessons already paid keep their date. */
+    suspend fun markMonthPaid(month: YearMonth, paidOn: LocalDate)
+
+    suspend fun markMonthUnpaid(month: YearMonth)
 }
 
 /** Trims student/notes (blank notes become null) and validates; shared by all repository implementations. */
@@ -50,4 +60,14 @@ class RoomLessonRepository(private val dao: LessonDao) : LessonRepository {
     override suspend fun replaceAll(lessons: List<Lesson>) {
         dao.replaceAll(lessons.map { normalizeForSave(it.copy(id = 0)) })
     }
+
+    override suspend fun addAll(lessons: List<Lesson>) {
+        dao.insertAll(lessons.map { normalizeForSave(it.copy(id = 0)) })
+    }
+
+    override suspend fun markMonthPaid(month: YearMonth, paidOn: LocalDate) =
+        dao.markPaid(month.atDay(1), month.atEndOfMonth(), paidOn)
+
+    override suspend fun markMonthUnpaid(month: YearMonth) =
+        dao.markUnpaid(month.atDay(1), month.atEndOfMonth())
 }

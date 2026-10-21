@@ -6,6 +6,8 @@ import com.karvo.data.normalizeForSave
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
+import java.time.YearMonth
 
 class FakeLessonRepository(initial: List<Lesson> = emptyList()) : LessonRepository {
     private val lessons = MutableStateFlow(initial)
@@ -53,5 +55,20 @@ class FakeLessonRepository(initial: List<Lesson> = emptyList()) : LessonReposito
     override suspend fun replaceAll(lessons: List<Lesson>) {
         val clean = lessons.map { normalizeForSave(it.copy(id = 0)) }
         this.lessons.value = clean.map { it.copy(id = nextId++) }
+    }
+
+    override suspend fun addAll(lessons: List<Lesson>) {
+        val clean = lessons.map { normalizeForSave(it.copy(id = 0)) }
+        this.lessons.value = this.lessons.value + clean.map { it.copy(id = nextId++) }
+    }
+
+    override suspend fun markMonthPaid(month: YearMonth, paidOn: LocalDate) {
+        lessons.value = lessons.value.map {
+            if (YearMonth.from(it.date) == month && it.paidOn == null) it.copy(paidOn = paidOn) else it
+        }
+    }
+
+    override suspend fun markMonthUnpaid(month: YearMonth) {
+        lessons.value = lessons.value.map { if (YearMonth.from(it.date) == month) it.copy(paidOn = null) else it }
     }
 }

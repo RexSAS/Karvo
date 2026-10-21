@@ -10,6 +10,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.LocalDate
+import java.time.YearMonth
 
 /** Behavior every [LessonRepository] must share; run against the Room impl and the test fake. */
 @RunWith(RobolectricTestRunner::class)
@@ -119,5 +120,46 @@ abstract class LessonRepositoryContract {
         r.save(lesson())
         r.replaceAll(emptyList())
         assertEquals(emptyList<Lesson>(), r.allLessons())
+    }
+
+    @Test fun markMonthPaidOnlyTouchesUnpaidInMonth() = runTest {
+        val r = repo()
+        val a = r.save(lesson(date = LocalDate.of(2026, 12, 3), student = "A"))
+        val b = r.save(lesson(date = LocalDate.of(2026, 12, 10), student = "B").copy(paidOn = LocalDate.of(2026, 12, 20)))
+        val c = r.save(lesson(date = LocalDate.of(2027, 1, 2), student = "C"))
+        r.markMonthPaid(YearMonth.of(2026, 12), LocalDate.of(2027, 1, 15))
+        assertEquals(LocalDate.of(2027, 1, 15), r.get(a)!!.paidOn)
+        assertEquals(LocalDate.of(2026, 12, 20), r.get(b)!!.paidOn)
+        assertNull(r.get(c)!!.paidOn)
+    }
+
+    @Test fun markMonthUnpaidClearsOnlyThatMonth() = runTest {
+        val r = repo()
+        val paid = LocalDate.of(2027, 2, 1)
+        val dec = r.save(lesson(date = LocalDate.of(2026, 12, 31)).copy(paidOn = paid))
+        val jan = r.save(lesson(date = LocalDate.of(2027, 1, 1)).copy(paidOn = paid))
+        r.markMonthUnpaid(YearMonth.of(2026, 12))
+        assertNull(r.get(dec)!!.paidOn)
+        assertEquals(paid, r.get(jan)!!.paidOn)
+    }
+
+    @Test fun addAllAssignsNewIdsAndKeepsPaidOn() = runTest {
+        val r = repo()
+        r.save(lesson(student = "Existing"))
+        val paid = LocalDate.of(2027, 1, 15)
+        r.addAll(listOf(lesson(student = " Imported ").copy(id = 7, paidOn = paid)))
+        val imported = r.allLessons().single { it.student == "Imported" }
+        assertEquals(paid, imported.paidOn)
+        assertEquals(2, r.allLessons().size)
+        assertEquals(2, r.allLessons().map { it.id }.toSet().size)
+    }
+
+    @Test fun addAllRejectsInvalidAndAddsNothing() = runTest {
+        val r = repo()
+        r.save(lesson(student = "Existing"))
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.runBlocking { r.addAll(listOf(lesson(student = "Ok"), lesson(student = "  "))) }
+        }
+        assertEquals(listOf("Existing"), r.allLessons().map { it.student })
     }
 }
