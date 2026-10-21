@@ -2,6 +2,20 @@
 
 All notable changes to MasterSki are listed here.
 
+## [1.2] — 2026-10-21
+
+### Added
+- **Automatic updates**: when the app starts, it checks GitHub for a newer release and asks whether to update. It backs up your lessons, downloads the new version and opens Android's installer. The first time, Android asks you to allow MasterSki to install apps.
+- **Check for updates** in Settings, showing the installed version.
+- **Backups**: up to 3 backups of your lessons are kept privately inside the app. One is made automatically before every update, and you can make one any time with *Back up now* (*Settings → Backups*).
+- **Restore a backup**: two "accept the risk" steps, then an optional backup of your current lessons so the restore itself can be undone.
+
+### Changed
+- MasterSki now uses the internet **only** to check for and download updates from GitHub. Your lessons never leave the phone.
+
+### Upgrading
+- Install 1.2 by hand once (over 1.1 or 1.0 — lessons are kept). From 1.2 on, new versions are offered inside the app.
+
 ## [1.1] — 2026-10-21
 
 ### Added
@@ -26,5 +40,6 @@ All notable changes to MasterSki are listed here.
 
 First release: log lessons (date, duration, student, notes), monthly and lifetime hours, private earnings from an hourly rate, time zone setting, CSV export, fully offline.
 
+[1.2]: https://github.com/RexSAS/MasterSki/releases/tag/v1.2.0
 [1.1]: https://github.com/RexSAS/MasterSki/releases/tag/v1.1.0
 [1.0]: https://github.com/RexSAS/MasterSki/releases/tag/v1.0.0

@@ -3,6 +3,7 @@ package com.masterski.ui
 import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import com.masterski.R
+import android.net.Uri
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -38,11 +39,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.masterski.MasterSkiApp
 import com.masterski.data.Lesson
+import com.masterski.ui.backup.BackupsScreen
+import com.masterski.ui.backup.RestoreScreen
 import com.masterski.ui.edit.EditLessonScreen
 import com.masterski.ui.lessons.LessonsScreen
 import com.masterski.ui.overview.MonthDetailScreen
 import com.masterski.ui.overview.OverviewScreen
 import com.masterski.ui.settings.SettingsScreen
+import com.masterski.ui.update.UpdateDialogs
+import com.masterski.ui.update.UpdateViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.time.YearMonth
 import kotlinx.coroutines.launch
 
@@ -51,10 +57,14 @@ const val ROUTE_OVERVIEW = "overview"
 const val ROUTE_SETTINGS = "settings"
 const val ROUTE_EDIT = "edit?id={id}"
 const val ROUTE_MONTH = "month/{year}/{month}"
+const val ROUTE_BACKUPS = "backups"
+const val ROUTE_RESTORE = "restore/{fileName}"
 
 fun editRoute(id: Long? = null): String = "edit?id=${id ?: -1L}"
 
 fun monthRoute(m: YearMonth): String = "month/${m.year}/${m.monthValue}"
+
+fun restoreRoute(fileName: String): String = "restore/${Uri.encode(fileName)}"
 
 private data class Tab(val route: String, @StringRes val labelRes: Int, val icon: ImageVector)
 
@@ -80,11 +90,21 @@ fun MasterSkiNavHost() {
     val currentRoute = backStackEntry?.destination?.route
     val showBar = currentRoute in tabs.map { it.route }
 
+    // Outside the NavHost, so this ViewModel is scoped to the activity and the update flow survives navigation.
+    val updateViewModel: UpdateViewModel = viewModel(factory = UpdateViewModel.Factory)
+    UpdateDialogs(updateViewModel)
+
     // Hoisted here so the Undo snackbar survives leaving the Lessons screen.
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
     val context = LocalContext.current
     val lessonRepository = (context.applicationContext as MasterSkiApp).container.lessonRepository
+    val showMessage: (String) -> Unit = { message ->
+        snackbarScope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            snackbarHostState.showSnackbar(message)
+        }
+    }
     val showUndo: (Lesson) -> Unit = { lesson ->
         snackbarScope.launch {
             snackbarHostState.currentSnackbarData?.dismiss()
@@ -132,7 +152,30 @@ fun MasterSkiNavHost() {
                     onOpenSettings = dropUnlessResumed { navController.navigateToTab(ROUTE_SETTINGS) },
                 )
             }
-            composable(ROUTE_SETTINGS) { SettingsScreen() }
+            composable(ROUTE_SETTINGS) {
+                SettingsScreen(
+                    onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
+                    onCheckForUpdates = updateViewModel::checkNow,
+                )
+            }
+            composable(ROUTE_BACKUPS) { entry ->
+                BackupsScreen(
+                    onBack = dropUnlessResumed { navController.navigateUp() },
+                    onRestore = { fileName -> dropUnlessResumedNow(entry) { navController.navigate(restoreRoute(fileName)) } },
+                    showMessage = showMessage,
+                )
+            }
+            composable(ROUTE_RESTORE, arguments = listOf(navArgument("fileName") { type = NavType.StringType })) { entry ->
+                val fileName = entry.arguments?.getString("fileName") ?: return@composable
+                RestoreScreen(
+                    fileName = fileName,
+                    onBack = dropUnlessResumed { navController.navigateUp() },
+                    onRestored = { count ->
+                        navController.popBackStack(ROUTE_BACKUPS, inclusive = false)
+                        showMessage(context.resources.getQuantityString(R.plurals.restored_lessons, count, count))
+                    },
+                )
+            }
             composable(
                 ROUTE_EDIT,
                 arguments = listOf(navArgument("id") { type = NavType.LongType; defaultValue = -1L }),

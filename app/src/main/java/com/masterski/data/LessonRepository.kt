@@ -11,6 +11,9 @@ interface LessonRepository {
     suspend fun delete(lesson: Lesson)
     suspend fun restore(lesson: Lesson)
     suspend fun allLessons(): List<Lesson>
+
+    /** Replaces every lesson with [lessons] (validated first; ids are reassigned). Nothing changes on failure. */
+    suspend fun replaceAll(lessons: List<Lesson>)
 }
 
 /** Trims student/notes (blank notes become null) and validates; shared by all repository implementations. */
@@ -43,4 +46,8 @@ class RoomLessonRepository(private val dao: LessonDao) : LessonRepository {
         dao.insert(lesson)
     }
     override suspend fun allLessons(): List<Lesson> = dao.getAll()
+
+    override suspend fun replaceAll(lessons: List<Lesson>) {
+        dao.replaceAll(lessons.map { normalizeForSave(it.copy(id = 0)) })
+    }
 }
