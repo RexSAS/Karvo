@@ -7,6 +7,7 @@ import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,6 +28,8 @@ interface UpdateInstaller {
     val results: SharedFlow<InstallResult>
     /** Tells the installer whether the app is visible; a held-back confirmation is shown when it becomes true. */
     fun setAppInForeground(inForeground: Boolean)
+    /** Shows Android's install confirmation again (e.g. it was blocked); false if no install is waiting for it. */
+    fun reopenConfirmation(): Boolean
 }
 
 /** Installs updates through a [PackageInstaller] session; Android asks the user to confirm. */
@@ -36,21 +39,31 @@ class PackageInstallerUpdater(private val context: Context) : UpdateInstaller {
 
     @Volatile private var inForeground = false
 
-    /** Android's "Update this app?" screen, held back while the app is in the background (it can't be started then). */
-    @Volatile private var pendingConfirmation: Intent? = null
+    /** Android's "Update this app?" screen for the session in progress; kept until the install ends. */
+    @Volatile private var confirmation: Intent? = null
+
+    /** True when the confirmation arrived while the app was in the background and hasn't been shown yet. */
+    @Volatile private var showWhenForeground = false
 
     override fun setAppInForeground(inForeground: Boolean) {
         this.inForeground = inForeground
-        if (inForeground) showPendingConfirmation()
+        if (inForeground && showWhenForeground) showConfirmation()
     }
 
-    /** Shows the held-back confirmation once; afterwards the outcome arrives through [onResult]. */
-    private fun showPendingConfirmation() {
-        val confirm = pendingConfirmation ?: return
-        pendingConfirmation = null
+    override fun reopenConfirmation(): Boolean {
+        if (confirmation == null) return false
+        showConfirmation()
+        return true
+    }
+
+    private fun showConfirmation() {
+        val confirm = confirmation ?: return
+        showWhenForeground = false
         try {
-            context.startActivity(confirm.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-        } catch (_: Exception) {
+            context.startActivity(Intent(confirm).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (e: Exception) {
+            Log.w(TAG, "Can't show the install confirmation", e)
+            confirmation = null
             _results.tryEmit(InstallResult.Failed(PackageInstaller.STATUS_FAILURE, signatureMismatch = false))
         }
     }
@@ -83,21 +96,27 @@ class PackageInstallerUpdater(private val context: Context) : UpdateInstaller {
         }
     }
 
+    private fun endSession() {
+        confirmation = null
+        showWhenForeground = false
+    }
+
     /** Called by [InstallResultReceiver] with the session's status. */
     fun onResult(intent: Intent) {
         when (val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)) {
             PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                 @Suppress("DEPRECATION")
-                pendingConfirmation = intent.getParcelableExtra(Intent.EXTRA_INTENT) ?: return
-                if (inForeground) showPendingConfirmation()
+                confirmation = intent.getParcelableExtra(Intent.EXTRA_INTENT) ?: return
+                // Activities can't be started from the background; show it when the app is visible again.
+                if (inForeground) showConfirmation() else showWhenForeground = true
             }
-            PackageInstaller.STATUS_SUCCESS -> pendingConfirmation = null
+            PackageInstaller.STATUS_SUCCESS -> endSession()
             PackageInstaller.STATUS_FAILURE_ABORTED -> {
-                pendingConfirmation = null
+                endSession()
                 _results.tryEmit(InstallResult.Aborted)
             }
             else -> {
-                pendingConfirmation = null
+                endSession()
                 _results.tryEmit(
                 InstallResult.Failed(
                     status,
@@ -109,3 +128,5 @@ class PackageInstallerUpdater(private val context: Context) : UpdateInstaller {
         }
     }
 }
+
+private const val TAG = "MasterSkiUpdate"

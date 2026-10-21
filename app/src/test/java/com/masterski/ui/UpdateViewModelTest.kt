@@ -65,6 +65,8 @@ private class FakeInstaller : UpdateInstaller {
     override fun openInstallPermissionSettings() { settingsOpened++ }
     override suspend fun install(apk: File) { installed += apk }
     override fun setAppInForeground(inForeground: Boolean) { foreground += inForeground }
+    var reopened = 0
+    override fun reopenConfirmation(): Boolean { reopened++; return true }
 }
 
 class UpdateViewModelTest {
@@ -210,5 +212,12 @@ class UpdateViewModelTest {
         val vm = vm(); vm.checkOnStart(); vm.update()
         vm.dismiss()
         assertEquals(UpdateState.Idle, vm.state.value)
+    }
+
+    @Test fun openInstallerReopensTheSystemConfirmation() = runTest {
+        val vm = vm(); vm.checkOnStart(); vm.update()
+        vm.reopenInstaller()
+        assertEquals(1, installer.reopened)
+        assertEquals(UpdateState.Installing, vm.state.value)
     }
 }

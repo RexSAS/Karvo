@@ -126,6 +126,7 @@
     <string name="update_permission_title">Allow installing updates</string>
     <string name="update_permission_text">To install updates, allow MasterSki to install apps. You only need to do this once.</string>
     <string name="open_settings">Open settings</string>
+    <string name="open_installer">Open installer</string>
     <string name="update_backup_failed">Backup failed — update cancelled. Your lessons are untouched.</string>
     <string name="update_download_incomplete">Download incomplete — try again.</string>
     <string name="update_download_failed">Download failed — check your connection and try again.</string>

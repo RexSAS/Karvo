@@ -124,6 +124,7 @@
     <string name="update_permission_title">Consenti l\'installazione degli aggiornamenti</string>
     <string name="update_permission_text">Per installare gli aggiornamenti, consenti a MasterSki di installare app. Serve solo la prima volta.</string>
     <string name="open_settings">Apri impostazioni</string>
+    <string name="open_installer">Apri installazione</string>
     <string name="update_backup_failed">Backup non riuscito: aggiornamento annullato. Le tue lezioni sono intatte.</string>
     <string name="update_download_incomplete">Download incompleto: riprova.</string>
     <string name="update_download_failed">Download non riuscito: controlla la connessione e riprova.</string>

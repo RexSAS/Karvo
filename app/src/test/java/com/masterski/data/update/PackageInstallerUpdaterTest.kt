@@ -55,4 +55,15 @@ class PackageInstallerUpdaterTest {
         assertEquals(listOf<InstallResult>(InstallResult.Aborted), results)
         job.cancel()
     }
+
+    @Test fun confirmationCanBeReopenedUntilTheInstallEnds() {
+        updater.setAppInForeground(true)
+        updater.onResult(pendingUserAction())
+        assertNotNull(nextStarted())
+        assertEquals(true, updater.reopenConfirmation())
+        assertEquals(confirm.action, nextStarted()?.action)
+        updater.onResult(status(PackageInstaller.STATUS_FAILURE_ABORTED))
+        assertEquals(false, updater.reopenConfirmation())
+        assertNull(nextStarted())
+    }
 }

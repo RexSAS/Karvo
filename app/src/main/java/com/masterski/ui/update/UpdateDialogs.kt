@@ -60,8 +60,20 @@ fun UpdateDialogs(vm: UpdateViewModel) {
         )
         UpdateState.Checking -> BusyDialog(stringResource(R.string.checking_for_updates))
         UpdateState.BackingUp -> BusyDialog(stringResource(R.string.update_backing_up))
-        // Closable: if Android never shows its install screen, the user must not be stuck here.
-        UpdateState.Installing -> BusyDialog(stringResource(R.string.update_installing), onClose = vm::dismiss)
+        // Never a dead end: if Android's install screen didn't appear (e.g. the app was leaving the screen),
+        // "Open installer" shows it again and "Close" leaves.
+        UpdateState.Installing -> AlertDialog(
+            onDismissRequest = {},
+            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
+            text = {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 3.dp)
+                    Text(stringResource(R.string.update_installing))
+                }
+            },
+            confirmButton = { TextButton(onClick = vm::reopenInstaller) { Text(stringResource(R.string.open_installer)) } },
+            dismissButton = { TextButton(onClick = vm::dismiss) { Text(stringResource(R.string.close)) } },
+        )
         is UpdateState.Downloading -> AlertDialog(
             onDismissRequest = {},
             properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
@@ -95,7 +107,7 @@ fun UpdateDialogs(vm: UpdateViewModel) {
 }
 
 @Composable
-private fun BusyDialog(text: String, onClose: (() -> Unit)? = null) {
+private fun BusyDialog(text: String) {
     AlertDialog(
         onDismissRequest = {},
         properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
@@ -105,9 +117,7 @@ private fun BusyDialog(text: String, onClose: (() -> Unit)? = null) {
                 Text(text)
             }
         },
-        confirmButton = {
-            if (onClose != null) TextButton(onClick = onClose) { Text(stringResource(R.string.close)) }
-        },
+        confirmButton = {},
     )
 }
 

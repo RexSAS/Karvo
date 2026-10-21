@@ -174,6 +174,11 @@ class UpdateViewModel(
 
     fun onPause() = installer.setAppInForeground(false)
 
+    /** "Open installer" on the installing dialog, for when Android's screen didn't appear. */
+    fun reopenInstaller() {
+        if (_state.value == UpdateState.Installing) installer.reopenConfirmation()
+    }
+
     /** Continues if the user granted "Install unknown apps", otherwise reports it. */
     fun onReturnedFromPermissionSettings() {
         if (!awaitingPermission || _state.value != UpdateState.NeedsPermission) return
