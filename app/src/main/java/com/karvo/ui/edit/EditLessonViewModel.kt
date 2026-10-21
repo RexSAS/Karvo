@@ -138,15 +138,10 @@ class EditLessonViewModel(
         busy = true
         val minutes = (s.hoursText.toIntOrNull() ?: 0) * 60 + (s.minutesText.toIntOrNull() ?: 0)
         viewModelScope.launch {
-            repo.save(
-                Lesson(
-                    id = original?.id ?: 0L,
-                    date = s.date,
-                    durationMinutes = minutes,
-                    student = s.student,
-                    notes = s.notes,
-                ),
-            )
+            // Copying the original keeps fields the form doesn't edit, such as paidOn.
+            val lesson = original?.copy(date = s.date, durationMinutes = minutes, student = s.student, notes = s.notes)
+                ?: Lesson(date = s.date, durationMinutes = minutes, student = s.student, notes = s.notes)
+            repo.save(lesson)
             onDone()
         }
     }

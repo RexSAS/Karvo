@@ -11,4 +11,6 @@ data class Lesson(
     val durationMinutes: Int,
     val student: String,
     val notes: String? = null,
+    /** Day the school paid this lesson; null = unpaid. */
+    val paidOn: LocalDate? = null,
 )

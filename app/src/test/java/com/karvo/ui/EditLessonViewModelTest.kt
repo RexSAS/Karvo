@@ -91,4 +91,24 @@ class EditLessonViewModelTest {
         gated.gate.complete(Unit)
         assertTrue(repo.allLessons().isEmpty()); assertEquals(1, doneCount)
     }
+
+    @Test fun editKeepsPaidOn() = runTest {
+        val paid = LocalDate.of(2027, 1, 15)
+        val id = repo.save(Lesson(date = LocalDate.of(2026, 12, 3), durationMinutes = 60, student = "Rossi", paidOn = paid))
+        val vm = EditLessonViewModel(repo, FakeSettingsRepository(), id)
+        vm.onStudentChange("Rossi Anna"); vm.save {}
+        assertEquals(paid, repo.get(id)!!.paidOn)
+    }
+    @Test fun editMovingDateKeepsPaidOn() = runTest {
+        val paid = LocalDate.of(2027, 1, 15)
+        val id = repo.save(Lesson(date = LocalDate.of(2026, 12, 3), durationMinutes = 60, student = "Rossi", paidOn = paid))
+        val vm = EditLessonViewModel(repo, FakeSettingsRepository(), id)
+        vm.onDateChange(LocalDate.of(2027, 2, 1)); vm.save {}
+        assertEquals(LocalDate.of(2027, 2, 1), repo.get(id)!!.date)
+        assertEquals(paid, repo.get(id)!!.paidOn)
+    }
+    @Test fun newLessonIsUnpaid() = runTest {
+        val vm = newVm(); vm.onStudentChange("Anna"); vm.onQuickPick(60); vm.save {}
+        assertEquals(null, repo.allLessons().single().paidOn)
+    }
 }

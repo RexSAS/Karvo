@@ -10,6 +10,7 @@ import com.karvo.data.AppCompatLanguageController
 import com.karvo.data.DataStoreSettingsRepository
 import com.karvo.data.LanguageController
 import com.karvo.data.LessonRepository
+import com.karvo.data.MIGRATION_1_2
 import com.karvo.data.KarvoDatabase
 import com.karvo.data.RoomLessonRepository
 import com.karvo.data.SettingsRepository
@@ -26,7 +27,9 @@ class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
     private val database: KarvoDatabase by lazy {
-        Room.databaseBuilder(appContext, KarvoDatabase::class.java, "karvo.db").build()
+        Room.databaseBuilder(appContext, KarvoDatabase::class.java, "karvo.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
     }
 
     private val dataStore by lazy {

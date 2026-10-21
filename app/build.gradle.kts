@@ -66,6 +66,8 @@ android {
         buildConfig = true
     }
     testOptions { unitTests.isIncludeAndroidResources = true }
+    // MigrationTestHelper (Robolectric) reads the exported Room schemas from the debug assets; release builds don't ship them.
+    sourceSets["debug"].assets.srcDir("$projectDir/schemas")
 }
 
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
