@@ -9,8 +9,13 @@ import com.masterski.MasterSkiApp
 import com.masterski.data.LessonRepository
 import com.masterski.data.SettingsRepository
 import com.masterski.domain.MonthSummary
+import com.masterski.domain.OverviewStats
+import com.masterski.domain.computeStats
 import com.masterski.domain.earningsCents
 import com.masterski.domain.summarizeByMonth
+import java.time.Clock
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,16 +33,23 @@ data class OverviewUiState(
     val revealed: Boolean = false,
     /** True until the first data arrives; the screen shows nothing meanwhile. */
     val loading: Boolean = true,
+    /** Null when there are no lessons. */
+    val stats: OverviewStats? = null,
 )
 
-class OverviewViewModel(lessons: LessonRepository, settings: SettingsRepository) : ViewModel() {
+class OverviewViewModel(
+    lessons: LessonRepository,
+    settings: SettingsRepository,
+    private val clock: Clock = Clock.systemUTC(),
+) : ViewModel() {
 
     /** In-memory only; never persisted, so earnings are hidden on every app start. */
     private val revealed = MutableStateFlow(false)
 
     val uiState: StateFlow<OverviewUiState> = combine(
-        lessons.observeLessons(), settings.hourlyRateCents, revealed,
-    ) { all, rate, isRevealed ->
+        lessons.observeLessons(), settings.hourlyRateCents, revealed, settings.timeZoneId,
+    ) { all, rate, isRevealed, zone ->
+        val today = LocalDate.now(clock.withZone(ZoneId.of(zone)))
         val summaries = summarizeByMonth(all)
         val total = summaries.sumOf { it.totalMinutes }
         OverviewUiState(
@@ -47,6 +59,7 @@ class OverviewViewModel(lessons: LessonRepository, settings: SettingsRepository)
             rateSet = rate != null,
             revealed = isRevealed,
             loading = false,
+            stats = if (all.isEmpty()) null else computeStats(all, today, rate),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), OverviewUiState())
 

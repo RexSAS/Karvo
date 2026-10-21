@@ -5,11 +5,16 @@ import com.masterski.testing.FakeLessonRepository
 import com.masterski.testing.FakeSettingsRepository
 import com.masterski.testing.MainDispatcherRule
 import com.masterski.ui.overview.OverviewViewModel
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZoneOffset
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -58,5 +63,36 @@ class OverviewViewModelTest {
         val vm = OverviewViewModel(repo, FakeSettingsRepository(1000))
         assertTrue(vm.uiState.value.loading)
         assertFalse(vm.uiState.first { !it.loading }.loading)
+    }
+
+    private val clock = Clock.fixed(Instant.parse("2027-02-10T12:00:00Z"), ZoneOffset.UTC)
+
+    @Test fun statsNullWithoutLessons() = runTest {
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000), clock)
+        assertNull(vm.uiState.first { !it.loading }.stats)
+    }
+
+    @Test fun statsComputedForToday() = runTest {
+        repo.save(Lesson(date = LocalDate.of(2027, 2, 1), durationMinutes = 60, student = "A"))
+        repo.save(Lesson(date = LocalDate.of(2026, 12, 1), durationMinutes = 30, student = "B"))
+        val stats = OverviewViewModel(repo, FakeSettingsRepository(2000), clock).uiState.first { it.stats != null }.stats!!
+        assertEquals(1, stats.lessonsThisMonth)
+        assertEquals(YearMonth.of(2027, 2), stats.lastSixMonths.last().month)
+        assertEquals(2000L, stats.topStudents.first().earningsCents)
+    }
+
+    @Test fun todayUsesTimeZoneSetting() = runTest {
+        val lateFeb = Clock.fixed(Instant.parse("2027-02-28T23:30:00Z"), ZoneOffset.UTC)
+        repo.save(Lesson(date = LocalDate.of(2027, 3, 1), durationMinutes = 60, student = "A"))
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(null, zone = "Europe/Rome"), lateFeb)
+        val stats = vm.uiState.first { it.stats != null }.stats!!
+        assertEquals(1, stats.lessonsThisMonth)
+        assertEquals(YearMonth.of(2027, 3), stats.lastSixMonths.last().month)
+    }
+
+    @Test fun statsDoNotChangeRevealDefault() = runTest {
+        repo.save(Lesson(date = LocalDate.of(2027, 2, 1), durationMinutes = 60, student = "A"))
+        val s = OverviewViewModel(repo, FakeSettingsRepository(1000), clock).uiState.first { it.stats != null }
+        assertNotNull(s.stats); assertFalse(s.revealed)
     }
 }
