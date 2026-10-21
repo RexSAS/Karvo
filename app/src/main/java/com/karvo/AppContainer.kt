@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.karvo.data.AppCompatLanguageController
+import com.karvo.data.ContentResolverTextFileReader
 import com.karvo.data.DataStoreSettingsRepository
 import com.karvo.data.LanguageController
 import com.karvo.data.LessonRepository
@@ -42,6 +43,7 @@ class AppContainer(context: Context) {
     val lessonRepository: LessonRepository by lazy { RoomLessonRepository(database.lessonDao()) }
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(dataStore) }
     val languageController: LanguageController = AppCompatLanguageController()
+    val textFileReader by lazy { ContentResolverTextFileReader(appContext) }
     val releaseSource by lazy { GitHubReleaseSource(BuildConfig.VERSION_NAME) }
     val apkDownloader by lazy { UrlApkDownloader() }
     val updateInstaller: PackageInstallerUpdater by lazy { PackageInstallerUpdater(appContext) }

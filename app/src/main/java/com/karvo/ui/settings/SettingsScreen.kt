@@ -37,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -91,8 +92,10 @@ fun SettingsScreen(
     /** False while another pager page is on screen: a typed rate is saved as soon as the user swipes away. */
     isCurrentPage: Boolean = true,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
+    importViewModel: ImportViewModel = viewModel(factory = ImportViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val importState by importViewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -137,6 +140,19 @@ fun SettingsScreen(
                 failureMessage(e)
             }
             showMessage(message)
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        if (uri != null) importViewModel.onFilePicked(uri.toString())
+    }
+
+    ImportDialogs(importState, importViewModel::confirm, importViewModel::dismiss)
+    val doneCount = (importState as? ImportState.Done)?.count
+    LaunchedEffect(doneCount) {
+        if (doneCount != null) {
+            importViewModel.dismiss()
+            showMessage(context.resources.getQuantityString(R.plurals.imported_lessons, doneCount, doneCount))
         }
     }
 
@@ -235,6 +251,18 @@ fun SettingsScreen(
                         }
                         exportLauncher.launch(fileName)
                     }
+                },
+            )
+
+            ListItem(
+                colors = transparentRow(),
+                leadingContent = { Icon(Icons.Filled.FileUpload, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.import_csv)) },
+                supportingContent = { Text(stringResource(R.string.import_csv_hint)) },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                modifier = Modifier.clickable {
+                    // Some file managers label CSV files as plain text or as a generic binary type.
+                    importLauncher.launch(arrayOf("text/*", "text/comma-separated-values", "application/octet-stream"))
                 },
             )
 

@@ -135,4 +135,29 @@
         <item quantity="one">Esportata %d lezione</item>
         <item quantity="other">Esportate %d lezioni</item>
     </plurals>
+    <!-- Import -->
+    <string name="import_csv">Importa da CSV</string>
+    <string name="import_csv_hint">Aggiungi lezioni da un file Karvo o MasterSki</string>
+    <string name="import_invalid">Impossibile importare questo file (riga %d). Non è stato modificato nulla.</string>
+    <string name="import_empty">Questo file non contiene lezioni.</string>
+    <plurals name="import_nothing_new">
+        <item quantity="one">Niente da importare: la lezione di questo file è già in Karvo.</item>
+        <item quantity="other">Niente da importare: tutte le %d lezioni sono già in Karvo.</item>
+    </plurals>
+    <string name="import_preview_title">Importare le lezioni?</string>
+    <plurals name="import_preview_add">
+        <item quantity="one">Aggiungi %d lezione</item>
+        <item quantity="other">Aggiungi %d lezioni</item>
+    </plurals>
+    <plurals name="import_preview_skipped">
+        <item quantity="one">%d già in Karvo (saltata)</item>
+        <item quantity="other">%d già in Karvo (saltate)</item>
+    </plurals>
+    <string name="import_preview_backup">Prima viene fatto un backup delle lezioni attuali.</string>
+    <string name="import_button">Importa</string>
+    <string name="import_failed">Importazione non riuscita. Non è stato modificato nulla.</string>
+    <plurals name="imported_lessons">
+        <item quantity="one">Importata %d lezione</item>
+        <item quantity="other">Importate %d lezioni</item>
+    </plurals>
 </resources>

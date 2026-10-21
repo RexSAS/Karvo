@@ -137,4 +137,29 @@
         <item quantity="one">Exported %d lesson</item>
         <item quantity="other">Exported %d lessons</item>
     </plurals>
+    <!-- Import -->
+    <string name="import_csv">Import from CSV</string>
+    <string name="import_csv_hint">Add lessons from a Karvo or MasterSki file</string>
+    <string name="import_invalid">Can\'t import this file (line %d). Nothing was changed.</string>
+    <string name="import_empty">This file has no lessons.</string>
+    <plurals name="import_nothing_new">
+        <item quantity="one">Nothing to import — the lesson in this file is already in Karvo.</item>
+        <item quantity="other">Nothing to import — all %d lessons are already in Karvo.</item>
+    </plurals>
+    <string name="import_preview_title">Import lessons?</string>
+    <plurals name="import_preview_add">
+        <item quantity="one">Add %d lesson</item>
+        <item quantity="other">Add %d lessons</item>
+    </plurals>
+    <plurals name="import_preview_skipped">
+        <item quantity="one">%d already in Karvo (skipped)</item>
+        <item quantity="other">%d already in Karvo (skipped)</item>
+    </plurals>
+    <string name="import_preview_backup">Your current lessons are backed up first.</string>
+    <string name="import_button">Import</string>
+    <string name="import_failed">Import failed. Nothing was changed.</string>
+    <plurals name="imported_lessons">
+        <item quantity="one">Imported %d lesson</item>
+        <item quantity="other">Imported %d lessons</item>
+    </plurals>
 </resources>
