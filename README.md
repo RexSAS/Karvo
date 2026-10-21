@@ -63,7 +63,7 @@ Planned features, ticked off as they ship.
 
 ### 2.1 — Pay and history
 - [ ] **Import from CSV** — load a Karvo or MasterSki export, e.g. to bring old lessons over or move to a new phone.
-- [ ] **Pay check** — enter what the school paid for a month; Karvo compares it with your hours × rate and shows what's missing.
+- [ ] **Paid months** — tick a month as paid when the school pays you (the date is saved); Overview shows what's still unpaid, a lesson added later makes the month "partly paid", and the paid status is kept in CSV exports and backups.
 - [ ] **Season totals** — totals per ski season (Dec–Apr, across the new year), compared with last season.
 - [ ] **Search and filters** — find lessons by student name and filter the list.
 
