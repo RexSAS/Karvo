@@ -33,7 +33,9 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 
 - **Log a lesson in seconds** — date, duration (quick buttons for 1h, 1h 30m, 2h, 3h), student name with suggestions from previous lessons, and optional notes. Group lessons? Just write it in the name, e.g. *Group Rossi*.
 - **Monthly and lifetime hours** — the Overview shows your total hours and a row for every month; tap a month to see its lessons. On *Lessons*, each month is grouped with its total.
-- **Private earnings** — set your hourly rate and Karvo calculates what you earned. Amounts stay hidden as `**** €` until you tap the eye, and hide again when you leave the screen.
+- **Private earnings** — set your hourly rate and Karvo calculates what you earned. Amounts stay hidden as `**** €` until you tap the eye and confirm with your fingerprint (or phone PIN), and hide again when you leave the screen.
+- **Paid months** — tick a month as paid when the school pays you. Badges show which months are paid or only partly paid, and the Overview shows what you're still owed.
+- **Seasons** — this season's hours and earnings compared with last season at the same date, plus a list of every season. The season start month is up to you (November by default).
 - **Statistics with charts** — under your totals, the Overview shows lessons this month, average lesson length, your number of students, a 6-month hours chart, a podium of your top students and your busiest weekdays. Any money there stays hidden until you tap the eye.
 - **Alpine Night theme** — a starry night sky over snow-lit mountains, deep-navy tiles and gold accents, with an animated splash screen. On by default; prefer a plain look? Pick *Classic* in Settings.
 - **Swipe between pages** — swipe left and right to move between Lessons, Overview and Settings.
@@ -41,7 +43,7 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 - **Edit or undo** — tap a lesson to fix it, or swipe it away and confirm to delete. Changed your mind? Tap *Undo*.
 - **Automatic updates** — when a new version is out, Karvo offers it when you open the app, backs up your lessons first and installs it with Android's installer.
 - **Backups and restore** — up to 3 backups are kept inside the app (one before every update, or any time with *Back up now*). Restore one from *Settings → Backups*, behind two confirmation steps.
-- **Export to CSV** — save all your lessons as a spreadsheet to keep a backup or send to the ski school.
+- **Export and import CSV** — save all your lessons as a spreadsheet to keep a backup or send to the ski school, and import a Karvo or MasterSki file to bring lessons over (duplicates are skipped).
 - **Your time zone** — "today" follows the time zone you pick (default *Europe/Rome*).
 - **Private** — no account, no tracking. The internet is used only to check GitHub for updates; Karvo itself never sends your lessons anywhere. If your phone's Google backup is on, Android includes Karvo's data in it, so your lessons come back when you set up a new phone.
 
@@ -55,17 +57,17 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 > **Karvo is the new name of MasterSki.** It's installed as a new app, so it starts empty: if you used MasterSki, uninstall it after switching. See the [changelog](CHANGELOG.md) for what's new.
 
 > [!WARNING]
-> Uninstalling the app deletes all lessons from the phone (unless your phone's Google backup brings them back on reinstall). Use **Settings → Export to CSV** regularly as a backup — the CSV is a copy for your records and cannot be imported back.
+> Uninstalling the app deletes all lessons from the phone (unless your phone's Google backup brings them back on reinstall). Use **Settings → Export to CSV** regularly as a backup; you can bring it back with **Settings → Import from CSV**.
 
 ## Roadmap
 
 Planned features, ticked off as they ship.
 
 ### 2.1 — Pay and history
-- [ ] **Import from CSV** — load a Karvo or MasterSki export, e.g. to bring old lessons over or move to a new phone.
-- [ ] **Paid months** — tick a month as paid when the school pays you (the date is saved); Overview shows what's still unpaid, a lesson added later makes the month "partly paid", and the paid status is kept in CSV exports and backups.
-- [ ] **Season totals** — totals per ski season (Dec–Apr, across the new year), compared with last season.
-- [ ] **Fingerprint unlock** — reveal earnings with your fingerprint.
+- [x] **Import from CSV** — load a Karvo or MasterSki export, e.g. to bring old lessons over or move to a new phone.
+- [x] **Paid months** — tick a month as paid when the school pays you (the date is saved); Overview shows what's still unpaid, a lesson added later makes the month "partly paid", and the paid status is kept in CSV exports and backups.
+- [x] **Season totals** — totals per ski season (starting in the month you choose, November by default), compared with last season at the same date.
+- [x] **Fingerprint unlock** — reveal earnings with your fingerprint.
 
 ### 2.2 — Faster and more fun
 - [ ] **Repeat a lesson** — long-press a lesson to log the same student and duration again in one tap.
@@ -73,8 +75,9 @@ Planned features, ticked off as they ship.
 - [ ] **Evening reminder** — optional notification on days with nothing logged.
 - [ ] **Search and filters** — find lessons by student name and filter the list.
 
-### 2.3 — Home screen
+### 2.3 — Home screen and profiles
 - [ ] **Widget** — this month's hours, badge and goal progress, with a quick **+** to add a lesson.
+- [ ] **Profile manager** — add more profiles on the same phone, each with its own lessons, and switch between them.
 - [ ] More to be decided.
 
 ### Ideas for later

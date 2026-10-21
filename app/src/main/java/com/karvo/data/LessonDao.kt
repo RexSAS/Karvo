@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 @Dao
 interface LessonDao {
@@ -41,6 +42,13 @@ interface LessonDao {
         deleteAll()
         insertAll(lessons)
     }
+
+    /** Gives unpaid lessons dated [from]..[to] the paid date [paidOn]; lessons already paid keep theirs. */
+    @Query("UPDATE lessons SET paidOn = :paidOn WHERE date BETWEEN :from AND :to AND paidOn IS NULL")
+    suspend fun markPaid(from: LocalDate, to: LocalDate, paidOn: LocalDate)
+
+    @Query("UPDATE lessons SET paidOn = NULL WHERE date BETWEEN :from AND :to")
+    suspend fun markUnpaid(from: LocalDate, to: LocalDate)
 
     @Query("SELECT student FROM lessons GROUP BY student ORDER BY MAX(date) DESC, MAX(id) DESC")
     fun observeStudentNames(): Flow<List<String>>

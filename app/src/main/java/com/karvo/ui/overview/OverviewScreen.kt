@@ -3,6 +3,9 @@ package com.karvo.ui.overview
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
+import com.karvo.domain.Season
+import com.karvo.ui.components.PaidBadge
+import com.karvo.ui.components.PartlyPaidColor
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -70,9 +73,10 @@ fun OverviewScreen(
     // Earnings go back to hidden whenever the screen stops (app sent to background, or navigated away).
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.hide() }
     LaunchedEffect(isCurrentPage) { if (!isCurrentPage) viewModel.hide() }
+    val promptTitle = stringResource(R.string.show_earnings)
     val onEarningsTap: () -> Unit = when {
         state.loading -> ({})
-        state.rateSet -> viewModel::toggleReveal
+        state.rateSet -> ({ viewModel.toggleReveal(promptTitle) })
         else -> onOpenSettings
     }
 
@@ -119,6 +123,40 @@ fun OverviewScreen(
                                 )
                             }
                         }
+                        state.seasons?.let { seasons ->
+                            val current = seasons.current
+                            Text(
+                                stringResource(R.string.this_season, current.season.label()) + " · " +
+                                    formatDuration(current.minutes) + " · " + earningsLabel(current.earningsCents, state.revealed),
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                            seasons.previousToDateMinutes?.let { previous ->
+                                Text(
+                                    stringResource(
+                                        R.string.season_vs_last,
+                                        signedDuration(current.minutes - previous),
+                                        Season(current.season.startYear - 1, current.season.startMonth).label(),
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        if (state.unpaid.minutes > 0) {
+                            Text(
+                                pluralStringResource(
+                                    R.plurals.to_be_paid,
+                                    state.unpaid.months,
+                                    state.unpaid.months,
+                                    formatDuration(state.unpaid.minutes),
+                                    earningsLabel(state.unpaid.earningsCents, state.revealed),
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = PartlyPaidColor,
+                                modifier = Modifier.padding(top = 4.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -139,6 +177,9 @@ fun OverviewScreen(
                 SummaryTiles(stats, Modifier.padding(horizontal = 16.dp).offset(y = (-18).dp))
             }
             item(key = "stats") { StatsSection(stats, state.revealed, state.rateSet) }
+            state.seasons?.let { seasons ->
+                item(key = "seasons") { SeasonsSection(seasons, state.revealed, Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
+            }
             item(key = "months-header") {
                 Text(
                     stringResource(R.string.months),
@@ -156,7 +197,10 @@ fun OverviewScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                 ) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(monthTitle(row.summary.month), style = MaterialTheme.typography.titleMedium)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(monthTitle(row.summary.month), style = MaterialTheme.typography.titleMedium)
+                            PaidBadge(row.summary.paidStatus)
+                        }
                         Text(formatDuration(row.summary.totalMinutes), style = MaterialTheme.typography.titleMedium)
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

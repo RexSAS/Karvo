@@ -7,18 +7,21 @@ import java.time.LocalDate
 
 private const val CRLF = "\r\n"
 
+/** Header written by [lessonsToCsv]; files from before 2.1 lack the last column (see [parseLessonsCsv]). */
+const val CSV_HEADER = "date,student,duration_minutes,duration_hours,notes,paid_on"
+
 fun durationHoursText(minutes: Int): String =
     BigDecimal(minutes).divide(BigDecimal(60), 2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString()
 
 fun csvFileName(today: LocalDate): String = "karvo-lessons-$today.csv"
 
 fun lessonsToCsv(lessons: List<Lesson>): String = buildString {
-    append("date,student,duration_minutes,duration_hours,notes").append(CRLF)
+    append(CSV_HEADER).append(CRLF)
     lessons.sortedWith(compareBy<Lesson> { it.date }.thenBy { it.id }).forEach {
         append(
             listOf(
                 it.date.toString(), it.student, it.durationMinutes.toString(),
-                durationHoursText(it.durationMinutes), it.notes.orEmpty(),
+                durationHoursText(it.durationMinutes), it.notes.orEmpty(), it.paidOn?.toString().orEmpty(),
             ).joinToString(",") { f -> csvField(f) },
         ).append(CRLF)
     }

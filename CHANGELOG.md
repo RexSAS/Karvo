@@ -2,6 +2,20 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [2.1] — 2026-10-21
+
+### Added
+- **Paid months**: open a month and tick *Paid by the school* when you get paid (you pick the payment date). Months show a gold ✓ *Paid* or an amber *Partly paid* badge, and the Overview shows what's still **to be paid**. A lesson added to a month that's already paid is flagged, and the month becomes *Partly paid*.
+- **Import from CSV**: *Settings → Import from CSV* adds lessons from a Karvo or MasterSki export — handy to bring your MasterSki lessons over or move to a new phone. Lessons already in Karvo are skipped, you see a preview first, and your current lessons are backed up before anything is added.
+- **Seasons**: the Overview shows this season's hours and earnings, compared with last season at the same date, plus a folded list of every season. Pick the month your season starts in Settings (November by default).
+- **Fingerprint unlock**: showing earnings asks for your fingerprint, face or phone PIN. On by default; turn it off in Settings.
+
+### Changed
+- CSV exports and backups have a new last column, `paid_on` (the date the school paid that lesson, empty if unpaid). Older files still import and restore; their lessons come in as unpaid.
+
+### Upgrading
+- Install over Karvo 2.0 as usual (the in-app update works): your lessons are kept and start as unpaid.
+
 ## [2.0] — 2026-10-21
 
 ### Changed
@@ -62,6 +76,7 @@ All notable changes to Karvo are listed here. Versions 1.0–1.3 were released a
 
 First release: log lessons (date, duration, student, notes), monthly and lifetime hours, private earnings from an hourly rate, time zone setting, CSV export, fully offline.
 
+[2.1]: https://github.com/RexSAS/Karvo/releases/tag/v2.1.0
 [2.0]: https://github.com/RexSAS/Karvo/releases/tag/v2.0.0
 [1.3]: https://github.com/RexSAS/Karvo/releases/tag/v1.3.0
 [1.2]: https://github.com/RexSAS/Karvo/releases/tag/v1.2.0

@@ -13,7 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.karvo.R
 import com.karvo.data.Lesson
 import com.karvo.domain.formatDuration
 import java.time.format.DateTimeFormatter
@@ -25,6 +27,8 @@ fun LessonRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.surface,
+    /** Marks an unpaid lesson inside a partly paid month. */
+    showNotPaid: Boolean = false,
 ) {
     val dateText = DateTimeFormatter.ofPattern("EEE d MMM yyyy", Locale.getDefault()).format(lesson.date)
     Column(
@@ -44,7 +48,17 @@ fun LessonRow(
             )
             Text(formatDuration(lesson.durationMinutes.toLong()), style = MaterialTheme.typography.titleMedium)
         }
-        Text(dateText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                dateText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            if (showNotPaid) {
+                Text(stringResource(R.string.not_paid), style = MaterialTheme.typography.labelMedium, color = PartlyPaidColor)
+            }
+        }
         lesson.notes?.let {
             Text(
                 it,

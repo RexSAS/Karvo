@@ -27,7 +27,9 @@ class MainActivity : AppCompatActivity() {
         val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableAlpineBars()
-        val settings = (application as KarvoApp).container.settingsRepository
+        val container = (application as KarvoApp).container
+        val settings = container.settingsRepository
+        container.authenticator.attach(this)
 
         // Keep the splash until the theme setting is read, so the first frame already has the right theme.
         var startTheme: ThemeChoice? = null
@@ -47,6 +49,11 @@ class MainActivity : AppCompatActivity() {
             }
             KarvoTheme(theme) { KarvoNavHost() }
         }
+    }
+
+    override fun onDestroy() {
+        (application as KarvoApp).container.authenticator.detach(this)
+        super.onDestroy()
     }
 
     /** Alpine Night is always dark, so system bar icons stay light regardless of the system setting. */

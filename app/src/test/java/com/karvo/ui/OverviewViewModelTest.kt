@@ -1,6 +1,7 @@
 package com.karvo.ui
 
 import com.karvo.data.Lesson
+import com.karvo.testing.FakeAuthenticator
 import com.karvo.testing.FakeLessonRepository
 import com.karvo.testing.FakeSettingsRepository
 import com.karvo.testing.MainDispatcherRule
@@ -48,12 +49,12 @@ class OverviewViewModelTest {
     }
 
     @Test fun toggleReveal() = runTest {
-        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000)); vm.toggleReveal()
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000)); vm.toggleReveal("Show earnings")
         assertTrue(vm.uiState.first { it.revealed }.revealed)
     }
 
     @Test fun hideAfterRevealHides() = runTest {
-        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000)); vm.toggleReveal()
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000)); vm.toggleReveal("Show earnings")
         vm.uiState.first { it.revealed }
         vm.hide()
         assertFalse(vm.uiState.first { !it.revealed }.revealed)
@@ -94,5 +95,77 @@ class OverviewViewModelTest {
         repo.save(Lesson(date = LocalDate.of(2027, 2, 1), durationMinutes = 60, student = "A"))
         val s = OverviewViewModel(repo, FakeSettingsRepository(1000), clock).uiState.first { it.stats != null }
         assertNotNull(s.stats); assertFalse(s.revealed)
+    }
+
+    @Test fun seasonsFollowStartMonthSetting() = runTest {
+        repo.save(Lesson(date = LocalDate.of(2026, 12, 1), durationMinutes = 60, student = "A"))
+        val settings = FakeSettingsRepository(2000)
+        val clock = Clock.fixed(Instant.parse("2027-01-10T12:00:00Z"), ZoneOffset.UTC)
+        val vm = OverviewViewModel(repo, settings, clock)
+        assertEquals("2026/27", vm.uiState.first { it.seasons != null }.seasons!!.current.season.label())
+        settings.setSeasonStartMonth(1)
+        assertEquals("2027", vm.uiState.first { it.seasons?.current?.season?.startMonth == 1 }.seasons!!.current.season.label())
+    }
+
+    @Test fun unpaidUsesZoneToday() = runTest {
+        repo.save(Lesson(date = LocalDate.of(2027, 1, 1), durationMinutes = 45, student = "A"))
+        repo.save(Lesson(date = LocalDate.of(2026, 12, 1), durationMinutes = 60, student = "B", paidOn = LocalDate.of(2026, 12, 20)))
+        val clock = Clock.fixed(Instant.parse("2026-12-31T23:30:00Z"), ZoneOffset.UTC) // already 1 Jan in Rome
+        val s = OverviewViewModel(repo, FakeSettingsRepository(2000, zone = "Europe/Rome"), clock).uiState.first { !it.loading }
+        assertEquals(45L, s.unpaid.minutes)
+        assertEquals(1, s.unpaid.months)
+    }
+
+    @Test fun noSeasonsWithoutLessons() = runTest {
+        val s = OverviewViewModel(repo, FakeSettingsRepository(2000)).uiState.first { !it.loading }
+        assertNull(s.seasons)
+        assertEquals(0L, s.unpaid.minutes)
+    }
+
+    private suspend fun gatedVm(auth: FakeAuthenticator, settings: FakeSettingsRepository = FakeSettingsRepository(2000)): OverviewViewModel {
+        repo.save(Lesson(date = LocalDate.of(2026, 10, 1), durationMinutes = 60, student = "A"))
+        return OverviewViewModel(repo, settings, authenticator = auth).also { it.uiState.first { s -> !s.loading } }
+    }
+
+    @Test fun revealAsksWhenOnAndAvailable() = runTest {
+        val auth = FakeAuthenticator()
+        val vm = gatedVm(auth)
+        vm.toggleReveal("Show earnings")
+        assertTrue(vm.uiState.first { it.revealed }.revealed)
+        assertEquals(1, auth.calls)
+    }
+
+    @Test fun failedAuthStaysHidden() = runTest {
+        val auth = FakeAuthenticator(succeeds = false)
+        val vm = gatedVm(auth)
+        vm.toggleReveal("Show earnings")
+        assertFalse(vm.uiState.value.revealed)
+        assertEquals(1, auth.calls)
+    }
+
+    @Test fun hideNeverAsks() = runTest {
+        val auth = FakeAuthenticator()
+        val vm = gatedVm(auth)
+        vm.toggleReveal("Show earnings"); vm.uiState.first { it.revealed }
+        vm.toggleReveal("Show earnings")
+        assertFalse(vm.uiState.first { !it.revealed }.revealed)
+        assertEquals(1, auth.calls)
+    }
+
+    @Test fun unavailableRevealsWithoutPrompt() = runTest {
+        val auth = FakeAuthenticator(available = false)
+        val vm = gatedVm(auth)
+        vm.toggleReveal("Show earnings")
+        assertTrue(vm.uiState.first { it.revealed }.revealed)
+        assertEquals(0, auth.calls)
+    }
+
+    @Test fun settingOffRevealsWithoutPrompt() = runTest {
+        val auth = FakeAuthenticator()
+        val settings = FakeSettingsRepository(2000).apply { setBiometricReveal(false) }
+        val vm = gatedVm(auth, settings)
+        vm.toggleReveal("Show earnings")
+        assertTrue(vm.uiState.first { it.revealed }.revealed)
+        assertEquals(0, auth.calls)
     }
 }

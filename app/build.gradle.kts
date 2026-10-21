@@ -20,9 +20,9 @@ android {
         applicationId = "com.karvo"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
+        versionCode = 6
         // -PversionNameOverride=1.0.9 builds a private test APK that sees the latest release as newer.
-        versionName = (findProperty("versionNameOverride") as String?) ?: "2.0"
+        versionName = (findProperty("versionNameOverride") as String?) ?: "2.1"
     }
 
     signingConfigs {
@@ -66,6 +66,8 @@ android {
         buildConfig = true
     }
     testOptions { unitTests.isIncludeAndroidResources = true }
+    // MigrationTestHelper (Robolectric) reads the exported Room schemas from the debug assets; release builds don't ship them.
+    sourceSets["debug"].assets.srcDir("$projectDir/schemas")
 }
 
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
@@ -80,6 +82,7 @@ dependencies {
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.biometric)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)

@@ -104,4 +104,12 @@ class BackupStoreTest {
         assertEquals(safety.fileName, list.first().fileName)
         assertTrue(File(dir, safety.fileName).exists())
     }
+
+    @Test fun beforeImportRoundTripsThroughFileName() {
+        val created = store.create(BackupReason.BeforeImport, lessons(2))
+        assertTrue(created.fileName.endsWith("-import.csv"))
+        val listed = store.list().single()
+        assertEquals(BackupReason.BeforeImport, listed.reason)
+        assertEquals(2, listed.lessonCount)
+    }
 }

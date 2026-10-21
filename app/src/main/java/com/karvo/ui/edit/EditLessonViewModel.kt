@@ -11,9 +11,12 @@ import com.karvo.data.Lesson
 import com.karvo.data.LessonRepository
 import com.karvo.data.SettingsRepository
 import com.karvo.domain.LessonError
+import com.karvo.domain.PaidStatus
+import com.karvo.domain.paidStatus
 import com.karvo.domain.validateLesson
 import java.time.Clock
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +38,8 @@ data class EditLessonUiState(
     /** Fields the user has edited; inline errors are shown only for these. */
     val studentTouched: Boolean = false,
     val durationTouched: Boolean = false,
+    /** The lesson's month when it's already marked paid; this lesson would make it partly paid. */
+    val paidMonthNote: YearMonth? = null,
 ) {
     val isValid get() = errors.isEmpty()
 }
@@ -58,6 +63,7 @@ class EditLessonViewModel(
     private var original: Lesson? = null
     private var dateChosen = false
     private var studentNames: List<String> = emptyList()
+    private var allLessons: List<Lesson> = emptyList()
 
     /** Set once a save or delete starts; further taps are ignored so onDone fires once. */
     private var busy = false
@@ -66,6 +72,12 @@ class EditLessonViewModel(
         viewModelScope.launch {
             repo.observeStudentNames().collect { names ->
                 studentNames = names
+                update { it }
+            }
+        }
+        viewModelScope.launch {
+            repo.observeLessons().collect { lessons ->
+                allLessons = lessons
                 update { it }
             }
         }
@@ -97,6 +109,7 @@ class EditLessonViewModel(
             s.copy(
                 errors = validateLesson(s.student, s.hoursText.toIntOrNull() ?: 0, s.minutesText.toIntOrNull() ?: 0),
                 suggestions = suggestionsFor(s.student),
+                paidMonthNote = paidMonthNoteFor(s.date),
             )
         }
     }
@@ -107,6 +120,13 @@ class EditLessonViewModel(
         return studentNames
             .filter { it.startsWith(prefix, ignoreCase = true) && !it.equals(prefix, ignoreCase = true) }
             .take(MAX_SUGGESTIONS)
+    }
+
+    private fun paidMonthNoteFor(date: LocalDate): YearMonth? {
+        if (original?.paidOn != null) return null
+        val month = YearMonth.from(date)
+        val others = allLessons.filter { YearMonth.from(it.date) == month && it.id != original?.id }
+        return month.takeIf { others.isNotEmpty() && paidStatus(others) == PaidStatus.PAID }
     }
 
     private fun isTwoDigits(text: String) = text.length <= 2 && text.all { it.isDigit() }
@@ -138,15 +158,10 @@ class EditLessonViewModel(
         busy = true
         val minutes = (s.hoursText.toIntOrNull() ?: 0) * 60 + (s.minutesText.toIntOrNull() ?: 0)
         viewModelScope.launch {
-            repo.save(
-                Lesson(
-                    id = original?.id ?: 0L,
-                    date = s.date,
-                    durationMinutes = minutes,
-                    student = s.student,
-                    notes = s.notes,
-                ),
-            )
+            // Copying the original keeps fields the form doesn't edit, such as paidOn.
+            val lesson = original?.copy(date = s.date, durationMinutes = minutes, student = s.student, notes = s.notes)
+                ?: Lesson(date = s.date, durationMinutes = minutes, student = s.student, notes = s.notes)
+            repo.save(lesson)
             onDone()
         }
     }

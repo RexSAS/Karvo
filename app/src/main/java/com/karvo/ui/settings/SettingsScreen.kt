@@ -37,6 +37,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -45,6 +47,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.Switch
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -91,20 +94,25 @@ fun SettingsScreen(
     /** False while another pager page is on screen: a typed rate is saved as soon as the user swipes away. */
     isCurrentPage: Boolean = true,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
+    importViewModel: ImportViewModel = viewModel(factory = ImportViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val importState by importViewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     var showZonePicker by remember { mutableStateOf(false) }
     var showThemePicker by remember { mutableStateOf(false) }
+    var showSeasonPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
     var rateFocused by remember { mutableStateOf(false) }
 
     // Besides Done and focus loss, save a typed rate when the app stops or the screen leaves
     // (saveRate is idempotent; the ViewModel outlives this composition, so the write completes).
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.saveRate() }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshBiometricAvailability() }
+    val biometricPromptTitle = stringResource(R.string.biometric_turn_off_prompt)
     DisposableEffect(viewModel) { onDispose { viewModel.saveRate() } }
     LaunchedEffect(isCurrentPage) {
         if (!isCurrentPage) {
@@ -137,6 +145,21 @@ fun SettingsScreen(
                 failureMessage(e)
             }
             showMessage(message)
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        if (uri != null) importViewModel.onFilePicked(uri.toString())
+    }
+
+    ImportDialogs(importState, importViewModel::confirm, importViewModel::dismiss)
+    val doneCount = (importState as? ImportState.Done)?.count
+    LaunchedEffect(doneCount) {
+        if (doneCount != null) {
+            // Shown on the screen's scope: dismiss() makes doneCount null, which restarts this effect
+            // and would cancel a snackbar shown from inside it.
+            scope.launch { showMessage(context.resources.getQuantityString(R.plurals.imported_lessons, doneCount, doneCount)) }
+            importViewModel.dismiss()
         }
     }
 
@@ -183,6 +206,29 @@ fun SettingsScreen(
                 headlineContent = { Text(stringResource(R.string.time_zone)) },
                 supportingContent = { Text(state.timeZoneId) },
                 modifier = Modifier.clickable { showZonePicker = true },
+            )
+
+            ListItem(
+                colors = transparentRow(),
+                headlineContent = { Text(stringResource(R.string.season_start)) },
+                supportingContent = { Text(monthName(state.seasonStartMonth)) },
+                modifier = Modifier.clickable { showSeasonPicker = true },
+            )
+
+            ListItem(
+                colors = transparentRow(),
+                leadingContent = { Icon(Icons.Filled.Fingerprint, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.biometric_reveal)) },
+                supportingContent = {
+                    Text(stringResource(if (state.biometricAvailable) R.string.biometric_reveal_hint else R.string.biometric_unavailable))
+                },
+                trailingContent = {
+                    Switch(
+                        checked = state.biometricReveal && state.biometricAvailable,
+                        onCheckedChange = { viewModel.onBiometricRevealChange(it, biometricPromptTitle) },
+                        enabled = state.biometricAvailable,
+                    )
+                },
             )
 
             ListItem(
@@ -238,6 +284,18 @@ fun SettingsScreen(
                 },
             )
 
+            ListItem(
+                colors = transparentRow(),
+                leadingContent = { Icon(Icons.Filled.FileUpload, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.import_csv)) },
+                supportingContent = { Text(stringResource(R.string.import_csv_hint)) },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                modifier = Modifier.clickable {
+                    // Some file managers label CSV files as plain text or as a generic binary type.
+                    importLauncher.launch(arrayOf("text/*", "text/comma-separated-values", "application/octet-stream"))
+                },
+            )
+
             Text(
                 stringResource(R.string.version, BuildConfig.VERSION_NAME),
                 style = MaterialTheme.typography.bodySmall,
@@ -254,6 +312,20 @@ fun SettingsScreen(
                 showZonePicker = false
             },
             onDismiss = { showZonePicker = false },
+        )
+    }
+
+    if (showSeasonPicker) {
+        ChoiceDialog(
+            title = stringResource(R.string.season_start),
+            options = (1..12).toList(),
+            selected = state.seasonStartMonth,
+            label = { monthName(it) },
+            onSelect = {
+                viewModel.onSeasonStartSelected(it)
+                showSeasonPicker = false
+            },
+            onDismiss = { showSeasonPicker = false },
         )
     }
 
@@ -400,3 +472,8 @@ private fun TimeZoneDialog(current: String, onSelect: (String) -> Unit, onDismis
 /** Settings rows let the alpine backdrop show through instead of cutting it into fragments. */
 @Composable
 private fun transparentRow() = ListItemDefaults.colors(containerColor = Color.Transparent)
+
+/** "November" / "Novembre", capitalised for display. */
+private fun monthName(month: Int, locale: java.util.Locale = java.util.Locale.getDefault()): String =
+    java.time.Month.of(month).getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, locale)
+        .replaceFirstChar { it.titlecase(locale) }

@@ -88,6 +88,7 @@
     <string name="no_backups">No backups yet.</string>
     <string name="backup_reason_manual">Manual</string>
     <string name="backup_reason_restore">Before restore</string>
+    <string name="backup_reason_import">Before import</string>
     <string name="backup_reason_update">Before update to %1$s</string>
     <string name="backup_unreadable">Unreadable</string>
     <string name="restore">Restore</string>
@@ -136,4 +137,55 @@
         <item quantity="one">Exported %d lesson</item>
         <item quantity="other">Exported %d lessons</item>
     </plurals>
+    <!-- Import -->
+    <string name="import_csv">Import from CSV</string>
+    <string name="import_csv_hint">Add lessons from a Karvo or MasterSki file</string>
+    <string name="import_invalid">Can\'t import this file (line %d). Nothing was changed.</string>
+    <string name="import_empty">This file has no lessons.</string>
+    <plurals name="import_nothing_new">
+        <item quantity="one">Nothing to import — the lesson in this file is already in Karvo.</item>
+        <item quantity="other">Nothing to import — all %d lessons are already in Karvo.</item>
+    </plurals>
+    <string name="import_preview_title">Import lessons?</string>
+    <plurals name="import_preview_add">
+        <item quantity="one">Add %d lesson</item>
+        <item quantity="other">Add %d lessons</item>
+    </plurals>
+    <plurals name="import_preview_skipped">
+        <item quantity="one">%d already in Karvo (skipped)</item>
+        <item quantity="other">%d already in Karvo (skipped)</item>
+    </plurals>
+    <string name="import_preview_backup">Your current lessons are backed up first.</string>
+    <string name="import_button">Import</string>
+    <string name="import_failed">Import failed. Nothing was changed.</string>
+    <plurals name="imported_lessons">
+        <item quantity="one">Imported %d lesson</item>
+        <item quantity="other">Imported %d lessons</item>
+    </plurals>
+    <!-- Paid months -->
+    <string name="paid">Paid</string>
+    <string name="partly_paid">Partly paid</string>
+    <string name="not_paid">Not paid</string>
+    <string name="paid_by_school">Paid by the school</string>
+    <string name="paid_on">Paid on %s</string>
+    <string name="paid_on_title">Paid on</string>
+    <string name="mark_unpaid_question">Mark %s as unpaid?</string>
+    <string name="mark_unpaid">Mark as unpaid</string>
+    <string name="paid_month_note">%s is marked as paid — this lesson will be unpaid.</string>
+    <!-- Seasons -->
+    <string name="this_season">This season %s</string>
+    <string name="season_vs_last">%1$s vs %2$s at this date</string>
+    <plurals name="to_be_paid">
+        <item quantity="one">To be paid: %1$d month · %2$s · %3$s</item>
+        <item quantity="other">To be paid: %1$d months · %2$s · %3$s</item>
+    </plurals>
+    <string name="seasons_header">Seasons (%d)</string>
+    <string name="season_start">Season starts in</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
+    <!-- Fingerprint -->
+    <string name="biometric_reveal">Unlock earnings with fingerprint</string>
+    <string name="biometric_reveal_hint">Ask for fingerprint or PIN before showing money</string>
+    <string name="biometric_unavailable">Set a screen lock on your phone to use this</string>
+    <string name="biometric_turn_off_prompt">Turn off fingerprint unlock</string>
 </resources>

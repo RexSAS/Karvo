@@ -86,6 +86,7 @@
     <string name="no_backups">Ancora nessun backup.</string>
     <string name="backup_reason_manual">Manuale</string>
     <string name="backup_reason_restore">Prima del ripristino</string>
+    <string name="backup_reason_import">Prima dell\'importazione</string>
     <string name="backup_reason_update">Prima dell\'aggiornamento a %1$s</string>
     <string name="backup_unreadable">Illeggibile</string>
     <string name="restore">Ripristina</string>
@@ -134,4 +135,55 @@
         <item quantity="one">Esportata %d lezione</item>
         <item quantity="other">Esportate %d lezioni</item>
     </plurals>
+    <!-- Import -->
+    <string name="import_csv">Importa da CSV</string>
+    <string name="import_csv_hint">Aggiungi lezioni da un file Karvo o MasterSki</string>
+    <string name="import_invalid">Impossibile importare questo file (riga %d). Non è stato modificato nulla.</string>
+    <string name="import_empty">Questo file non contiene lezioni.</string>
+    <plurals name="import_nothing_new">
+        <item quantity="one">Niente da importare: la lezione di questo file è già in Karvo.</item>
+        <item quantity="other">Niente da importare: tutte le %d lezioni sono già in Karvo.</item>
+    </plurals>
+    <string name="import_preview_title">Importare le lezioni?</string>
+    <plurals name="import_preview_add">
+        <item quantity="one">Aggiungi %d lezione</item>
+        <item quantity="other">Aggiungi %d lezioni</item>
+    </plurals>
+    <plurals name="import_preview_skipped">
+        <item quantity="one">%d già in Karvo (saltata)</item>
+        <item quantity="other">%d già in Karvo (saltate)</item>
+    </plurals>
+    <string name="import_preview_backup">Prima viene fatto un backup delle lezioni attuali.</string>
+    <string name="import_button">Importa</string>
+    <string name="import_failed">Importazione non riuscita. Non è stato modificato nulla.</string>
+    <plurals name="imported_lessons">
+        <item quantity="one">Importata %d lezione</item>
+        <item quantity="other">Importate %d lezioni</item>
+    </plurals>
+    <!-- Paid months -->
+    <string name="paid">Pagato</string>
+    <string name="partly_paid">Pagato in parte</string>
+    <string name="not_paid">Non pagata</string>
+    <string name="paid_by_school">Pagato dalla scuola</string>
+    <string name="paid_on">Pagato il %s</string>
+    <string name="paid_on_title">Data del pagamento</string>
+    <string name="mark_unpaid_question">Segnare %s come non pagato?</string>
+    <string name="mark_unpaid">Segna come non pagato</string>
+    <string name="paid_month_note">%s risulta pagato: questa lezione sarà non pagata.</string>
+    <!-- Seasons -->
+    <string name="this_season">Questa stagione %s</string>
+    <string name="season_vs_last">%1$s rispetto al %2$s a questa data</string>
+    <plurals name="to_be_paid">
+        <item quantity="one">Da pagare: %1$d mese · %2$s · %3$s</item>
+        <item quantity="other">Da pagare: %1$d mesi · %2$s · %3$s</item>
+    </plurals>
+    <string name="seasons_header">Stagioni (%d)</string>
+    <string name="season_start">La stagione inizia a</string>
+    <string name="expand">Espandi</string>
+    <string name="collapse">Comprimi</string>
+    <!-- Fingerprint -->
+    <string name="biometric_reveal">Sblocca i guadagni con l\'impronta</string>
+    <string name="biometric_reveal_hint">Chiedi impronta o PIN prima di mostrare gli importi</string>
+    <string name="biometric_unavailable">Imposta un blocco schermo sul telefono per usarlo</string>
+    <string name="biometric_turn_off_prompt">Disattiva lo sblocco con impronta</string>
 </resources>

@@ -7,9 +7,12 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.karvo.data.AppCompatLanguageController
+import com.karvo.data.BiometricAuthenticator
+import com.karvo.data.ContentResolverTextFileReader
 import com.karvo.data.DataStoreSettingsRepository
 import com.karvo.data.LanguageController
 import com.karvo.data.LessonRepository
+import com.karvo.data.MIGRATION_1_2
 import com.karvo.data.KarvoDatabase
 import com.karvo.data.RoomLessonRepository
 import com.karvo.data.SettingsRepository
@@ -26,7 +29,9 @@ class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
     private val database: KarvoDatabase by lazy {
-        Room.databaseBuilder(appContext, KarvoDatabase::class.java, "karvo.db").build()
+        Room.databaseBuilder(appContext, KarvoDatabase::class.java, "karvo.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
     }
 
     private val dataStore by lazy {
@@ -39,6 +44,8 @@ class AppContainer(context: Context) {
     val lessonRepository: LessonRepository by lazy { RoomLessonRepository(database.lessonDao()) }
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(dataStore) }
     val languageController: LanguageController = AppCompatLanguageController()
+    val textFileReader by lazy { ContentResolverTextFileReader(appContext) }
+    val authenticator = BiometricAuthenticator(appContext)
     val releaseSource by lazy { GitHubReleaseSource(BuildConfig.VERSION_NAME) }
     val apkDownloader by lazy { UrlApkDownloader() }
     val updateInstaller: PackageInstallerUpdater by lazy { PackageInstallerUpdater(appContext) }

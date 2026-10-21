@@ -4,7 +4,8 @@ import com.karvo.data.Lesson
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
-private const val HEADER = "date,student,duration_minutes,duration_hours,notes"
+/** Header of files written before 2.1, without paid_on. */
+private const val HEADER_V1 = "date,student,duration_minutes,duration_hours,notes"
 
 /** A backup/export file that can't be read; [line] is the 1-based line where the bad record starts. */
 class BackupFormatException(val line: Int, message: String) : Exception("Line $line: $message")
@@ -13,19 +14,25 @@ class BackupFormatException(val line: Int, message: String) : Exception("Line $l
 private class Record(val line: Int, val fields: List<String>)
 
 /**
- * Reads lessons from a Karvo CSV (as written by [lessonsToCsv], optionally with a UTF-8 BOM).
+ * Reads lessons from a Karvo CSV (as written by [lessonsToCsv], optionally with a UTF-8 BOM). Files from
+ * before 2.1 have no paid_on column; their lessons come back unpaid.
  * All-or-nothing: any invalid record throws [BackupFormatException]. Returned lessons have id 0.
  */
 fun parseLessonsCsv(text: String): List<Lesson> {
     val records = tokenize(text.removePrefix("﻿"))
     val header = records.firstOrNull()
-    if (header == null || header.fields.joinToString(",") != HEADER) throw BackupFormatException(1, "Not a Karvo file")
-    return records.drop(1).map(::toLesson)
+    val fieldCount = when (header?.fields?.joinToString(",")) {
+        CSV_HEADER -> 6
+        HEADER_V1 -> 5
+        else -> throw BackupFormatException(1, "Not a Karvo file")
+    }
+    return records.drop(1).map { toLesson(it, fieldCount) }
 }
 
-private fun toLesson(r: Record): Lesson {
-    if (r.fields.size != 5) throw BackupFormatException(r.line, "Expected 5 fields, found ${r.fields.size}")
+private fun toLesson(r: Record, fieldCount: Int): Lesson {
+    if (r.fields.size != fieldCount) throw BackupFormatException(r.line, "Expected $fieldCount fields, found ${r.fields.size}")
     val (dateText, studentText, minutesText, _, notesText) = r.fields
+    val paidText = r.fields.getOrNull(5).orEmpty()
     val date = try {
         LocalDate.parse(dateText)
     } catch (_: DateTimeParseException) {
@@ -35,7 +42,16 @@ private fun toLesson(r: Record): Lesson {
     if (student.isEmpty()) throw BackupFormatException(r.line, "Missing student")
     val minutes = minutesText.toIntOrNull()
     if (minutes == null || minutes !in 1..MAX_DURATION_MINUTES) throw BackupFormatException(r.line, "Invalid duration \"$minutesText\"")
-    return Lesson(date = date, durationMinutes = minutes, student = student, notes = notesText.trim().ifEmpty { null })
+    val paidOn = if (paidText.isEmpty()) {
+        null
+    } else {
+        try {
+            LocalDate.parse(paidText)
+        } catch (_: DateTimeParseException) {
+            throw BackupFormatException(r.line, "Invalid paid date \"$paidText\"")
+        }
+    }
+    return Lesson(date = date, durationMinutes = minutes, student = student, notes = notesText.trim().ifEmpty { null }, paidOn = paidOn)
 }
 
 /** RFC 4180 tokenizer: quoted fields may hold commas, doubled quotes and line breaks; CRLF, CR or LF end a record. */

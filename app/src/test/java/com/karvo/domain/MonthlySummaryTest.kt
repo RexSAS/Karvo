@@ -16,4 +16,17 @@ class MonthlySummaryTest {
     }
 
     @Test fun empty() = assertEquals(emptyList<MonthSummary>(), summarizeByMonth(emptyList()))
+
+    @Test fun summaryCarriesStatusAndLatestPaidOn() {
+        val early = LocalDate.of(2027, 1, 10)
+        val late = LocalDate.of(2027, 1, 15)
+        val dec = summarizeByMonth(
+            listOf(l(2026, 12, 1, 60).copy(paidOn = late), l(2026, 12, 2, 60).copy(paidOn = early), l(2026, 12, 3, 60)),
+        ).single()
+        assertEquals(PaidStatus.PARTLY_PAID, dec.paidStatus)
+        assertEquals(late, dec.paidOn)
+        val jan = summarizeByMonth(listOf(l(2027, 1, 1, 60))).single()
+        assertEquals(PaidStatus.UNPAID, jan.paidStatus)
+        assertEquals(null, jan.paidOn)
+    }
 }
