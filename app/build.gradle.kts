@@ -13,16 +13,16 @@ val keystoreProps = Properties().apply {
 }
 
 android {
-    namespace = "com.masterski"
+    namespace = "com.karvo"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.masterski"
+        applicationId = "com.karvo"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
+        versionCode = 5
         // -PversionNameOverride=1.0.9 builds a private test APK that sees the latest release as newer.
-        versionName = (findProperty("versionNameOverride") as String?) ?: "1.3"
+        versionName = (findProperty("versionNameOverride") as String?) ?: "2.0"
     }
 
     signingConfigs {

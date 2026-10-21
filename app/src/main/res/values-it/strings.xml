@@ -76,7 +76,7 @@
     <!-- Backups -->
     <string name="backups">Backup</string>
     <string name="backups_hint">Salvati nell\'app, fino a 3</string>
-    <string name="backups_explanation">MasterSki conserva fino a 3 backup delle tue lezioni dentro l\'app. Prima di ogni aggiornamento ne viene fatto uno in automatico. Disinstallando l\'app vengono eliminati: usa Esporta in CSV per tenerne una copia altrove.</string>
+    <string name="backups_explanation">Karvo conserva fino a 3 backup delle tue lezioni dentro l\'app. Prima di ogni aggiornamento ne viene fatto uno in automatico. Disinstallando l\'app vengono eliminati: usa Esporta in CSV per tenerne una copia altrove.</string>
     <string name="back_up_now">Esegui backup ora</string>
     <plurals name="backup_saved">
         <item quantity="one">Backup salvato (%d lezione)</item>
@@ -113,7 +113,7 @@
     <string name="checking_for_updates">Ricerca aggiornamenti…</string>
     <string name="up_to_date">L\'app è aggiornata.</string>
     <string name="check_failed">Impossibile cercare aggiornamenti. Controlla la connessione e riprova.</string>
-    <string name="update_available_title">È disponibile MasterSki %1$s</string>
+    <string name="update_available_title">È disponibile Karvo %1$s</string>
     <string name="update">Aggiorna</string>
     <string name="later">Più tardi</string>
     <string name="update_backing_up">Backup delle lezioni in corso…</string>
@@ -121,7 +121,7 @@
     <string name="update_progress">%1$s / %2$s MB</string>
     <string name="update_installing">Apertura del programma di installazione…</string>
     <string name="update_permission_title">Consenti l\'installazione degli aggiornamenti</string>
-    <string name="update_permission_text">Per installare gli aggiornamenti, consenti a MasterSki di installare app. Serve solo la prima volta.</string>
+    <string name="update_permission_text">Per installare gli aggiornamenti, consenti a Karvo di installare app. Serve solo la prima volta.</string>
     <string name="open_settings">Apri impostazioni</string>
     <string name="open_installer">Apri installazione</string>
     <string name="update_backup_failed">Backup non riuscito: aggiornamento annullato. Le tue lezioni sono intatte.</string>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MasterSki</string>
+    <string name="app_name">Karvo</string>
 
     <!-- Navigation -->
     <string name="lessons">Lessons</string>
@@ -78,7 +78,7 @@
     <!-- Backups -->
     <string name="backups">Backups</string>
     <string name="backups_hint">Saved inside the app, up to 3</string>
-    <string name="backups_explanation">MasterSki keeps up to 3 backups of your lessons inside the app. A backup is made automatically before every update. Uninstalling the app deletes them — use Export to CSV to keep a copy elsewhere.</string>
+    <string name="backups_explanation">Karvo keeps up to 3 backups of your lessons inside the app. A backup is made automatically before every update. Uninstalling the app deletes them — use Export to CSV to keep a copy elsewhere.</string>
     <string name="back_up_now">Back up now</string>
     <plurals name="backup_saved">
         <item quantity="one">Backup saved (%d lesson)</item>
@@ -115,7 +115,7 @@
     <string name="checking_for_updates">Checking for updates…</string>
     <string name="up_to_date">You\'re up to date.</string>
     <string name="check_failed">Couldn\'t check for updates. Check your connection and try again.</string>
-    <string name="update_available_title">MasterSki %1$s is available</string>
+    <string name="update_available_title">Karvo %1$s is available</string>
     <string name="update">Update</string>
     <string name="later">Later</string>
     <string name="update_backing_up">Backing up your lessons…</string>
@@ -123,7 +123,7 @@
     <string name="update_progress">%1$s / %2$s MB</string>
     <string name="update_installing">Opening the installer…</string>
     <string name="update_permission_title">Allow installing updates</string>
-    <string name="update_permission_text">To install updates, allow MasterSki to install apps. You only need to do this once.</string>
+    <string name="update_permission_text">To install updates, allow Karvo to install apps. You only need to do this once.</string>
     <string name="open_settings">Open settings</string>
     <string name="open_installer">Open installer</string>
     <string name="update_backup_failed">Backup failed — update cancelled. Your lessons are untouched.</string>

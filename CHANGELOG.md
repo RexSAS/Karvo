@@ -1,6 +1,14 @@
 # Changelog
 
-All notable changes to MasterSki are listed here.
+All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
+
+## [2.0] — 2026-10-21
+
+### Changed
+- **MasterSki is now Karvo.** New name everywhere: the app, the launcher icon label, the update dialog, the exported CSV file name (`karvo-lessons-YYYY-MM-DD.csv`) and the GitHub repository (`RexSAS/Karvo`).
+
+### Upgrading
+- Karvo is installed as a **new app** (package `com.karvo`), so MasterSki can't update into it and Karvo starts empty. Install `Karvo-2.0.apk`, then uninstall MasterSki. From now on Karvo offers its own updates inside the app.
 
 ## [1.3] — 2026-10-21
 
@@ -54,7 +62,8 @@ All notable changes to MasterSki are listed here.
 
 First release: log lessons (date, duration, student, notes), monthly and lifetime hours, private earnings from an hourly rate, time zone setting, CSV export, fully offline.
 
-[1.3]: https://github.com/RexSAS/MasterSki/releases/tag/v1.3.0
-[1.2]: https://github.com/RexSAS/MasterSki/releases/tag/v1.2.0
-[1.1]: https://github.com/RexSAS/MasterSki/releases/tag/v1.1.0
-[1.0]: https://github.com/RexSAS/MasterSki/releases/tag/v1.0.0
+[2.0]: https://github.com/RexSAS/Karvo/releases/tag/v2.0.0
+[1.3]: https://github.com/RexSAS/Karvo/releases/tag/v1.3.0
+[1.2]: https://github.com/RexSAS/Karvo/releases/tag/v1.2.0
+[1.1]: https://github.com/RexSAS/Karvo/releases/tag/v1.1.0
+[1.0]: https://github.com/RexSAS/Karvo/releases/tag/v1.0.0
