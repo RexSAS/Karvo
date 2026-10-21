@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -90,5 +91,33 @@ abstract class LessonRepositoryContract {
         r.save(lesson(date = LocalDate.of(2026, 3, 1), student = "Bob"))  // id 3
         r.save(lesson(date = LocalDate.of(2026, 1, 1), student = "Anna")) // id 4
         assertEquals(listOf("Anna", "Bob", "Zed"), r.observeStudentNames().first())
+    }
+
+    private fun key(l: Lesson) = Triple(l.date, l.student, l.durationMinutes)
+
+    @Test fun replaceAllSwapsEverything() = runTest {
+        val r = repo()
+        r.save(lesson(student = "Old1")); r.save(lesson(student = "Old2"))
+        val fresh = listOf(lesson(student = "New1"), lesson(student = "New2", minutes = 90), lesson(student = "New3", notes = "n"))
+        r.replaceAll(fresh)
+        assertEquals(fresh.map(::key).toSet(), r.allLessons().map(::key).toSet())
+        assertEquals(3, r.allLessons().size)
+    }
+
+    @Test fun replaceAllWithInvalidLessonChangesNothing() = runTest {
+        val r = repo()
+        r.save(lesson(student = "Old1")); r.save(lesson(student = "Old2"))
+        val before = r.allLessons()
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.runBlocking { r.replaceAll(listOf(lesson(student = "Ok"), lesson(student = "  "))) }
+        }
+        assertEquals(before, r.allLessons())
+    }
+
+    @Test fun replaceAllWithEmptyListClears() = runTest {
+        val r = repo()
+        r.save(lesson())
+        r.replaceAll(emptyList())
+        assertEquals(emptyList<Lesson>(), r.allLessons())
     }
 }

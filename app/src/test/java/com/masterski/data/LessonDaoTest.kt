@@ -46,4 +46,13 @@ class LessonDaoTest {
         val id = dao.insert(Lesson(date = LocalDate.of(2026, 10, 20), durationMinutes = 45, student = "A"))
         assertEquals(LocalDate.of(2026, 10, 20), dao.getById(id)!!.date)
     }
+
+    @Test fun replaceAllRollsBackWhenInsertFails() = runTest {
+        dao.insert(Lesson(date = LocalDate.of(2026, 1, 1), durationMinutes = 60, student = "Keep1"))
+        dao.insert(Lesson(date = LocalDate.of(2026, 1, 2), durationMinutes = 60, student = "Keep2"))
+        val clash = Lesson(id = 99, date = LocalDate.of(2026, 2, 1), durationMinutes = 60, student = "Dup")
+        val failed = runCatching { dao.replaceAll(listOf(clash, clash.copy(student = "Dup2"))) }.isFailure
+        assertEquals(true, failed)
+        assertEquals(listOf("Keep2", "Keep1"), dao.getAll().map { it.student })
+    }
 }

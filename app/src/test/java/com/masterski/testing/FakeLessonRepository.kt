@@ -49,4 +49,9 @@ class FakeLessonRepository(initial: List<Lesson> = emptyList()) : LessonReposito
     }
 
     override suspend fun allLessons(): List<Lesson> = sorted(lessons.value)
+
+    override suspend fun replaceAll(lessons: List<Lesson>) {
+        val clean = lessons.map { normalizeForSave(it.copy(id = 0)) }
+        this.lessons.value = clean.map { it.copy(id = nextId++) }
+    }
 }
