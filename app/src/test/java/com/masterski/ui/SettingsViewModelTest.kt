@@ -1,6 +1,9 @@
 package com.masterski.ui
 
+import com.masterski.data.LanguageChoice
 import com.masterski.data.Lesson
+import com.masterski.data.ThemeChoice
+import com.masterski.testing.FakeLanguageController
 import com.masterski.testing.FakeLessonRepository
 import com.masterski.testing.FakeSettingsRepository
 import com.masterski.testing.MainDispatcherRule
@@ -24,72 +27,97 @@ class SettingsViewModelTest {
     private val repo = FakeLessonRepository()
 
     @Test fun showsStoredRate() = runTest {
-        val vm = SettingsViewModel(FakeSettingsRepository(2500), repo)
+        val vm = SettingsViewModel(FakeSettingsRepository(2500), repo, FakeLanguageController())
         assertEquals("25.00", vm.uiState.first { it.rateText.isNotEmpty() }.rateText)
     }
 
     @Test fun commaBecomesDotWhileTyping() = runTest {
-        val vm = SettingsViewModel(FakeSettingsRepository(), repo); vm.onRateChange("25,5")
+        val vm = SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController()); vm.onRateChange("25,5")
         assertEquals("25.5", vm.uiState.value.rateText)
     }
 
     @Test fun savesValidRateAndReformats() = runTest {
-        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo)
+        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo, FakeLanguageController())
         vm.onRateChange("25,5"); vm.saveRate()
         assertEquals(2550L, s.hourlyRateCents.first()); assertFalse(vm.uiState.value.rateError)
         assertEquals("25.50", vm.uiState.value.rateText)
     }
 
     @Test fun timeZoneChange() = runTest {
-        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo)
+        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo, FakeLanguageController())
         assertEquals("Europe/Rome", vm.uiState.first().timeZoneId)
         vm.onTimeZoneSelected("Europe/Zurich"); assertEquals("Europe/Zurich", s.timeZoneId.first())
     }
 
     @Test fun unknownTimeZoneIgnored() = runTest {
-        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo)
+        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo, FakeLanguageController())
         vm.onTimeZoneSelected("Nowhere/Land"); assertEquals("Europe/Rome", s.timeZoneId.first())
     }
 
     @Test fun exportFileNameUsesZone() = runTest {
         val clock = Clock.fixed(Instant.parse("2026-10-19T22:30:00Z"), ZoneOffset.UTC)
-        assertEquals("masterski-lessons-2026-10-20.csv", SettingsViewModel(FakeSettingsRepository(), repo, clock).exportFileName())
+        assertEquals("masterski-lessons-2026-10-20.csv", SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController(), clock).exportFileName())
     }
 
     @Test fun zoneListHasRome() = assertTrue("Europe/Rome" in availableTimeZones)
 
     @Test fun invalidRateShowsErrorAndKeepsOld() = runTest {
-        val s = FakeSettingsRepository(1000); val vm = SettingsViewModel(s, repo)
+        val s = FakeSettingsRepository(1000); val vm = SettingsViewModel(s, repo, FakeLanguageController())
         vm.onRateChange("abc"); vm.saveRate()
         assertTrue(vm.uiState.value.rateError); assertEquals(1000L, s.hourlyRateCents.first())
     }
 
     @Test fun blankClearsRate() = runTest {
-        val s = FakeSettingsRepository(1000); val vm = SettingsViewModel(s, repo)
+        val s = FakeSettingsRepository(1000); val vm = SettingsViewModel(s, repo, FakeLanguageController())
         vm.onRateChange(""); vm.saveRate(); assertNull(s.hourlyRateCents.first())
     }
 
     @Test fun csvContainsLessons() = runTest {
         repo.save(Lesson(date = LocalDate.of(2026, 10, 20), durationMinutes = 90, student = "Anna"))
-        assertTrue(SettingsViewModel(FakeSettingsRepository(), repo).buildCsv().contains("2026-10-20,Anna,90,1.5,"))
+        assertTrue(SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController()).buildCsv().contains("2026-10-20,Anna,90,1.5,"))
     }
 
     @Test fun saveRateTwiceIsIdempotent() = runTest {
-        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo)
+        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo, FakeLanguageController())
         vm.onRateChange("30"); vm.saveRate(); vm.saveRate()
         assertEquals(3000L, s.hourlyRateCents.first()); assertEquals(1, s.rateWrites)
     }
 
     @Test fun saveRateWithoutEditDoesNotWrite() = runTest {
-        val s = FakeSettingsRepository(2500); val vm = SettingsViewModel(s, repo)
+        val s = FakeSettingsRepository(2500); val vm = SettingsViewModel(s, repo, FakeLanguageController())
         vm.saveRate()
         assertEquals(2500L, s.hourlyRateCents.first()); assertEquals(0, s.rateWrites)
     }
 
     @Test fun typedRateSavedWithoutDone() = runTest {
-        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo)
+        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo, FakeLanguageController())
         vm.onRateChange("30")
         vm.saveRate() // what the screen's onDispose / ON_STOP path calls
         assertEquals(3000L, s.hourlyRateCents.first())
+    }
+
+    @Test fun themeSelectionPersistsAndShows() = runTest {
+        val settings = FakeSettingsRepository()
+        val vm = SettingsViewModel(settings, repo, FakeLanguageController())
+        vm.onThemeSelected(ThemeChoice.CLASSIC)
+        assertEquals(ThemeChoice.CLASSIC, settings.theme.first())
+        assertEquals(ThemeChoice.CLASSIC, vm.uiState.first { it.theme == ThemeChoice.CLASSIC }.theme)
+    }
+
+    @Test fun languageShowsCurrentAndSetsController() = runTest {
+        val lang = FakeLanguageController(LanguageChoice.ITALIAN)
+        val vm = SettingsViewModel(FakeSettingsRepository(), repo, lang)
+        assertEquals(LanguageChoice.ITALIAN, vm.uiState.value.language)
+        vm.onLanguageSelected(LanguageChoice.ENGLISH)
+        assertEquals(LanguageChoice.ENGLISH, lang.current())
+        assertEquals(LanguageChoice.ENGLISH, vm.uiState.value.language)
+    }
+
+    @Test fun languageChangeSavesTypedRateFirst() = runTest {
+        val settings = FakeSettingsRepository()
+        val vm = SettingsViewModel(settings, repo, FakeLanguageController())
+        vm.onRateChange("30")
+        vm.onLanguageSelected(LanguageChoice.ITALIAN)
+        assertEquals(3000L, settings.hourlyRateCents.first { it != null })
     }
 }

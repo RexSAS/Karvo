@@ -5,7 +5,23 @@ import com.masterski.R
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import com.masterski.data.LanguageChoice
+import com.masterski.data.ThemeChoice
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,6 +87,8 @@ fun SettingsScreen(
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     var showZonePicker by remember { mutableStateOf(false) }
+    var showThemePicker by remember { mutableStateOf(false) }
+    var showLanguagePicker by remember { mutableStateOf(false) }
     var rateFocused by remember { mutableStateOf(false) }
 
     // Besides Done and focus loss, save a typed rate when the app stops or the screen leaves
@@ -147,6 +165,18 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { showZonePicker = true },
             )
 
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.theme)) },
+                supportingContent = { Text(themeLabel(state.theme)) },
+                modifier = Modifier.clickable { showThemePicker = true },
+            )
+
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.language)) },
+                supportingContent = { Text(languageLabel(state.language)) },
+                modifier = Modifier.clickable { showLanguagePicker = true },
+            )
+
             Button(
                 onClick = {
                     scope.launch {
@@ -182,6 +212,96 @@ fun SettingsScreen(
             onDismiss = { showZonePicker = false },
         )
     }
+
+    if (showThemePicker) {
+        ChoiceDialog(
+            title = stringResource(R.string.theme),
+            options = ThemeChoice.entries,
+            selected = state.theme,
+            label = { themeLabel(it) },
+            leading = { ThemeSwatch(it) },
+            onSelect = {
+                viewModel.onThemeSelected(it)
+                showThemePicker = false
+            },
+            onDismiss = { showThemePicker = false },
+        )
+    }
+
+    if (showLanguagePicker) {
+        ChoiceDialog(
+            title = stringResource(R.string.language),
+            options = LanguageChoice.entries,
+            selected = state.language,
+            label = { languageLabel(it) },
+            onSelect = {
+                showLanguagePicker = false
+                viewModel.onLanguageSelected(it)
+            },
+            onDismiss = { showLanguagePicker = false },
+        )
+    }
+}
+
+@Composable
+private fun themeLabel(choice: ThemeChoice): String = stringResource(
+    when (choice) {
+        ThemeChoice.ALPINE_NIGHT -> R.string.theme_alpine_night
+        ThemeChoice.CLASSIC -> R.string.theme_classic
+    },
+)
+
+/** Language names are shown in their own language, whatever the current UI language. */
+@Composable
+private fun languageLabel(choice: LanguageChoice): String = when (choice) {
+    LanguageChoice.SYSTEM -> stringResource(R.string.language_system)
+    LanguageChoice.ITALIAN -> "Italiano"
+    LanguageChoice.ENGLISH -> "English"
+}
+
+@Composable
+private fun ThemeSwatch(choice: ThemeChoice) {
+    val (fill, border) = when (choice) {
+        ThemeChoice.ALPINE_NIGHT -> Color(0xFF0B1220) to Color(0xFF7CC4FA)
+        ThemeChoice.CLASSIC -> Color(0xFF1565C0) to Color(0xFF1565C0)
+    }
+    Box(Modifier.size(20.dp).clip(CircleShape).background(fill).border(2.dp, border, CircleShape))
+}
+
+@Composable
+private fun <T> ChoiceDialog(
+    title: String,
+    options: List<T>,
+    selected: T,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    onDismiss: () -> Unit,
+    leading: (@Composable (T) -> Unit)? = null,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            Column {
+                options.forEach { option ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(selected = option == selected, onClick = { onSelect(option) }, role = Role.RadioButton)
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        RadioButton(selected = option == selected, onClick = null)
+                        leading?.invoke(option)
+                        Text(label(option))
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -54,6 +54,11 @@
     <string name="export_failed">Esportazione non riuscita: %1$s</string>
     <string name="cannot_open_file">Impossibile aprire il file</string>
     <string name="version">Versione %1$s</string>
+    <string name="theme">Tema</string>
+    <string name="theme_alpine_night">Alpine Night</string>
+    <string name="theme_classic">Classico</string>
+    <string name="language">Lingua</string>
+    <string name="language_system">Lingua del telefono</string>
     <plurals name="exported_lessons">
         <item quantity="one">Esportata %d lezione</item>
         <item quantity="other">Esportate %d lezioni</item>

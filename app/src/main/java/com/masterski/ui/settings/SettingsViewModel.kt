@@ -7,8 +7,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.masterski.MasterSkiApp
 import com.masterski.data.DEFAULT_TIME_ZONE
+import com.masterski.data.LanguageChoice
+import com.masterski.data.LanguageController
 import com.masterski.data.LessonRepository
 import com.masterski.data.SettingsRepository
+import com.masterski.data.ThemeChoice
 import com.masterski.domain.RateParseResult
 import com.masterski.domain.csvFileName
 import com.masterski.domain.formatRateText
@@ -29,6 +32,8 @@ data class SettingsUiState(
     val rateText: String = "",
     val rateError: Boolean = false,
     val timeZoneId: String = DEFAULT_TIME_ZONE,
+    val theme: ThemeChoice = ThemeChoice.ALPINE_NIGHT,
+    val language: LanguageChoice = LanguageChoice.SYSTEM,
 )
 
 /** Region zone ids (containing '/'), excluding Etc/ and SystemV/, sorted; computed once. */
@@ -42,10 +47,11 @@ data class CsvExport(val csv: String, val lessonCount: Int)
 class SettingsViewModel(
     private val settings: SettingsRepository,
     private val lessons: LessonRepository,
+    private val language: LanguageController,
     private val clock: Clock = Clock.systemUTC(),
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SettingsUiState())
+    private val _uiState = MutableStateFlow(SettingsUiState(language = language.current()))
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     /** True when the rate text was edited since it was loaded or last saved. */
@@ -69,6 +75,9 @@ class SettingsViewModel(
         }
         viewModelScope.launch {
             settings.timeZoneId.collect { id -> _uiState.update { it.copy(timeZoneId = id) } }
+        }
+        viewModelScope.launch {
+            settings.theme.collect { choice -> _uiState.update { it.copy(theme = choice) } }
         }
     }
 
@@ -104,6 +113,17 @@ class SettingsViewModel(
         viewModelScope.launch { settings.setTimeZoneId(id) }
     }
 
+    fun onThemeSelected(choice: ThemeChoice) {
+        viewModelScope.launch { settings.setTheme(choice) }
+    }
+
+    /** Saves a typed rate first: applying a language recreates the activity. */
+    fun onLanguageSelected(choice: LanguageChoice) {
+        saveRate()
+        language.set(choice)
+        _uiState.update { it.copy(language = choice) }
+    }
+
     suspend fun exportData(): CsvExport {
         val all = lessons.allLessons()
         return CsvExport(lessonsToCsv(all), all.size)
@@ -120,7 +140,7 @@ class SettingsViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MasterSkiApp).container
-                SettingsViewModel(container.settingsRepository, container.lessonRepository)
+                SettingsViewModel(container.settingsRepository, container.lessonRepository, container.languageController)
             }
         }
     }
