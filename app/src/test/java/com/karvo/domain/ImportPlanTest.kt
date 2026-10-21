@@ -30,9 +30,16 @@ class ImportPlanTest {
         assertEquals(1, plan.skipped)
     }
 
-    @Test fun duplicateRowsInsideFileCountOnce() {
+    @Test fun identicalLessonsInFileAreAllKeptInEmptyApp() {
+        // Two 1h lessons with the same student on the same day (morning and afternoon) are both real.
         val plan = planImport(emptyList(), listOf(lesson(), lesson("ROSSI")))
-        assertEquals(listOf(lesson()), plan.toAdd)
+        assertEquals(2, plan.toAdd.size)
+        assertEquals(0, plan.skipped)
+    }
+
+    @Test fun skipsOnlyAsManyAsTheAppAlreadyHas() {
+        val plan = planImport(listOf(lesson()), listOf(lesson(), lesson(), lesson()))
+        assertEquals(2, plan.toAdd.size)
         assertEquals(1, plan.skipped)
     }
 
