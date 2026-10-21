@@ -76,6 +76,41 @@
     <string name="theme_classic">Classic</string>
     <string name="language">Language</string>
     <string name="language_system">Phone default</string>
+    <!-- Backups -->
+    <string name="backups">Backups</string>
+    <string name="backups_hint">Saved inside the app, up to 3</string>
+    <string name="backups_explanation">MasterSki keeps up to 3 backups of your lessons inside the app. A backup is made automatically before every update. Uninstalling the app deletes them — use Export to CSV to keep a copy elsewhere.</string>
+    <string name="back_up_now">Back up now</string>
+    <plurals name="backup_saved">
+        <item quantity="one">Backup saved (%d lesson)</item>
+        <item quantity="other">Backup saved (%d lessons)</item>
+    </plurals>
+    <string name="backup_failed">Couldn\'t make a backup</string>
+    <string name="no_backups">No backups yet.</string>
+    <string name="backup_reason_manual">Manual</string>
+    <string name="backup_reason_restore">Before restore</string>
+    <string name="backup_reason_update">Before update to %1$s</string>
+    <string name="backup_unreadable">Unreadable</string>
+    <string name="restore">Restore</string>
+    <string name="restore_title">Restore this backup?</string>
+    <string name="restore_from">Backup from %1$s (%2$s).</string>
+    <string name="restore_replace_warning">All your current lessons (%1$d) will be deleted and replaced by the lessons in this backup (%2$d).</string>
+    <string name="restore_understood">I understand my current lessons will be replaced</string>
+    <string name="continue_">Continue</string>
+    <string name="restore_last_check_title">Last check</string>
+    <string name="restore_last_check_text">This can\'t be undone unless you have a backup of your current lessons. Make sure this is the backup you want.</string>
+    <string name="restore_accept_risk">I accept the risk</string>
+    <string name="restore_ask_title">Back up your current lessons first?</string>
+    <string name="restore_ask_text">A backup of your current lessons (%1$d) lets you undo this restore.</string>
+    <string name="restore_ask_oldest">The oldest backup (%1$s) will be removed.</string>
+    <string name="restore_backup_and_restore">Back up and restore</string>
+    <string name="restore_without_backup">Restore without backup</string>
+    <plurals name="restored_lessons">
+        <item quantity="one">Restored %d lesson</item>
+        <item quantity="other">Restored %d lessons</item>
+    </plurals>
+    <string name="restore_read_error">This backup can\'t be read (line %1$d). Nothing was changed.</string>
+    <string name="restore_backup_error">Couldn\'t make a backup. Nothing was changed.</string>
     <plurals name="exported_lessons">
         <item quantity="one">Exported %d lesson</item>
         <item quantity="other">Exported %d lessons</item>

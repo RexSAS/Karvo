@@ -37,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -80,6 +81,7 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    onOpenBackups: () -> Unit,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -176,6 +178,14 @@ fun SettingsScreen(
                 headlineContent = { Text(stringResource(R.string.language)) },
                 supportingContent = { Text(languageLabel(state.language)) },
                 modifier = Modifier.clickable { showLanguagePicker = true },
+            )
+
+            ListItem(
+                leadingContent = { Icon(Icons.Filled.Restore, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.backups)) },
+                supportingContent = { Text(stringResource(R.string.backups_hint)) },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                modifier = Modifier.clickable(onClick = onOpenBackups),
             )
 
             // A navigation-style row, not a filled button, so it doesn't read as "Save".

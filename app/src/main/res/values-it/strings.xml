@@ -74,6 +74,41 @@
     <string name="theme_classic">Classico</string>
     <string name="language">Lingua</string>
     <string name="language_system">Lingua del telefono</string>
+    <!-- Backups -->
+    <string name="backups">Backup</string>
+    <string name="backups_hint">Salvati nell\'app, fino a 3</string>
+    <string name="backups_explanation">MasterSki conserva fino a 3 backup delle tue lezioni dentro l\'app. Prima di ogni aggiornamento ne viene fatto uno in automatico. Disinstallando l\'app vengono eliminati: usa Esporta in CSV per tenerne una copia altrove.</string>
+    <string name="back_up_now">Esegui backup ora</string>
+    <plurals name="backup_saved">
+        <item quantity="one">Backup salvato (%d lezione)</item>
+        <item quantity="other">Backup salvato (%d lezioni)</item>
+    </plurals>
+    <string name="backup_failed">Impossibile creare il backup</string>
+    <string name="no_backups">Ancora nessun backup.</string>
+    <string name="backup_reason_manual">Manuale</string>
+    <string name="backup_reason_restore">Prima del ripristino</string>
+    <string name="backup_reason_update">Prima dell\'aggiornamento a %1$s</string>
+    <string name="backup_unreadable">Illeggibile</string>
+    <string name="restore">Ripristina</string>
+    <string name="restore_title">Ripristinare questo backup?</string>
+    <string name="restore_from">Backup del %1$s (%2$s).</string>
+    <string name="restore_replace_warning">Tutte le lezioni attuali (%1$d) saranno eliminate e sostituite da quelle di questo backup (%2$d).</string>
+    <string name="restore_understood">Ho capito che le lezioni attuali saranno sostituite</string>
+    <string name="continue_">Continua</string>
+    <string name="restore_last_check_title">Ultimo controllo</string>
+    <string name="restore_last_check_text">L\'operazione non si può annullare, a meno di avere un backup delle lezioni attuali. Assicurati che sia il backup giusto.</string>
+    <string name="restore_accept_risk">Accetto il rischio</string>
+    <string name="restore_ask_title">Fare prima un backup delle lezioni attuali?</string>
+    <string name="restore_ask_text">Un backup delle lezioni attuali (%1$d) ti permette di annullare questo ripristino.</string>
+    <string name="restore_ask_oldest">Il backup più vecchio (%1$s) verrà eliminato.</string>
+    <string name="restore_backup_and_restore">Backup e ripristina</string>
+    <string name="restore_without_backup">Ripristina senza backup</string>
+    <plurals name="restored_lessons">
+        <item quantity="one">Ripristinata %d lezione</item>
+        <item quantity="other">Ripristinate %d lezioni</item>
+    </plurals>
+    <string name="restore_read_error">Questo backup non si può leggere (riga %1$d). Non è stato modificato nulla.</string>
+    <string name="restore_backup_error">Impossibile creare il backup. Non è stato modificato nulla.</string>
     <plurals name="exported_lessons">
         <item quantity="one">Esportata %d lezione</item>
         <item quantity="other">Esportate %d lezioni</item>
