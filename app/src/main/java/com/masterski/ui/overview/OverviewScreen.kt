@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -56,6 +57,7 @@ fun OverviewScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.overview)) }) },
     ) { padding ->
         // Still loading: show nothing rather than flashing 0m / — €.

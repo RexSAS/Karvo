@@ -33,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -57,6 +58,7 @@ fun RestoreScreen(
     val goBack = if (state.step == 2) viewModel::back else onBack
 
     Scaffold(
+        containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(if (state.step == 1) R.string.restore_title else R.string.restore_last_check_title)) },

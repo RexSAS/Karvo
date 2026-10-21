@@ -41,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,6 +71,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
     val studentError = LessonError.StudentBlank in state.errors && state.studentTouched
 
     Scaffold(
+        containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(if (state.isNew) R.string.new_lesson else R.string.edit_lesson)) },
