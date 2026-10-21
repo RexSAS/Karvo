@@ -27,7 +27,19 @@ data class SeasonStats(
     val previousToDateMinutes: Long?,
     /** Seasons with at least one lesson, newest first. */
     val all: List<SeasonTotal>,
-)
+) {
+    /**
+     * [season]'s minutes minus the full season just before it (0 if that one had no lessons);
+     * null for the oldest season, which has nothing to compare with.
+     */
+    fun changeFromPrevious(season: Season): Long? {
+        val oldest = all.minByOrNull { it.season.startYear } ?: return null
+        if (season.startYear <= oldest.season.startYear) return null
+        val minutes = all.firstOrNull { it.season == season }?.minutes ?: 0
+        val previous = all.firstOrNull { it.season.startYear == season.startYear - 1 }?.minutes ?: 0
+        return minutes - previous
+    }
+}
 
 fun computeSeasons(lessons: List<Lesson>, today: LocalDate, startMonth: Int, rateCents: Long?): SeasonStats {
     fun total(season: Season, items: List<Lesson>): SeasonTotal {

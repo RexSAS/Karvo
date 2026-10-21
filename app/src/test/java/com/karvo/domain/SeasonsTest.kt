@@ -69,4 +69,20 @@ class SeasonsTest {
 
     @Test fun earningsNullWithoutRate() =
         assertNull(computeSeasons(listOf(l(2026, 12, 1)), LocalDate.of(2027, 1, 10), 11, null).current.earningsCents)
+
+    @Test fun changeComparesWithTheSeasonJustBeforeEvenAfterAGap() {
+        // 2024/25 had no lessons: 2025/26 compares with an empty season (+2h), not with 2023/24.
+        val s = computeSeasons(listOf(l(2023, 12, 1, 300), l(2025, 12, 1, 120)), LocalDate.of(2026, 1, 10), 11, null)
+        assertEquals(120L, s.changeFromPrevious(Season(2025, 11)))
+    }
+
+    @Test fun changeFromPreviousSeason() {
+        val s = computeSeasons(listOf(l(2024, 12, 1, 60), l(2025, 12, 1, 180)), LocalDate.of(2026, 1, 10), 11, null)
+        assertEquals(120L, s.changeFromPrevious(Season(2025, 11)))
+    }
+
+    @Test fun oldestSeasonHasNoChange() {
+        val s = computeSeasons(listOf(l(2024, 12, 1, 60), l(2025, 12, 1, 180)), LocalDate.of(2026, 1, 10), 11, null)
+        assertNull(s.changeFromPrevious(Season(2024, 11)))
+    }
 }

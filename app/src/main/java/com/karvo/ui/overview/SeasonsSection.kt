@@ -53,7 +53,7 @@ fun SeasonsSection(seasons: SeasonStats, revealed: Boolean, modifier: Modifier =
                 )
             }
             if (open) {
-                seasons.all.forEachIndexed { index, total ->
+                seasons.all.forEach { total ->
                     HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     Column(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -66,10 +66,9 @@ fun SeasonsSection(seasons: SeasonStats, revealed: Boolean, modifier: Modifier =
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            // Seasons are newest first: the one before this is the next in the list.
-                            seasons.all.getOrNull(index + 1)?.let { previous ->
+                            seasons.changeFromPrevious(total.season)?.let { change ->
                                 Text(
-                                    signedDuration(total.minutes - previous.minutes),
+                                    signedDuration(change),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
