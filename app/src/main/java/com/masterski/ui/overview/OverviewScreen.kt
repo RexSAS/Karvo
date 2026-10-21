@@ -89,6 +89,18 @@ fun OverviewScreen(
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(stringResource(R.string.no_lessons)) }
             } else {
                 LazyColumn(Modifier.fillMaxSize()) {
+                    state.stats?.let { stats ->
+                        item(key = "stats") {
+                            StatsSection(stats, state.revealed, state.rateSet, Modifier.padding(vertical = 16.dp))
+                        }
+                    }
+                    item(key = "months-header") {
+                        Text(
+                            stringResource(R.string.months),
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp),
+                        )
+                    }
                     items(state.months, key = { it.summary.month.toString() }) { row ->
                         Column(Modifier.fillMaxWidth().clickable { onOpenMonth(row.summary.month) }.padding(horizontal = 16.dp, vertical = 12.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -110,11 +122,6 @@ fun OverviewScreen(
                             }
                         }
                         HorizontalDivider()
-                    }
-                    state.stats?.let { stats ->
-                        item(key = "stats") {
-                            StatsSection(stats, state.revealed, state.rateSet, Modifier.padding(vertical = 16.dp))
-                        }
                     }
                 }
             }

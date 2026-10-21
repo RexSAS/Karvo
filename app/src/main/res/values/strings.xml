@@ -46,6 +46,7 @@
     <string name="show_earnings">Show earnings</string>
     <string name="hide_earnings">Hide earnings</string>
     <string name="no_lessons">No lessons yet.</string>
+    <string name="months">Months</string>
 
     <!-- Statistics -->
     <string name="statistics">Statistics</string>

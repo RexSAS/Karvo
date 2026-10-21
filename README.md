@@ -32,7 +32,7 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 - **Log a lesson in seconds** — date, duration (quick buttons for 1h, 1h 30m, 2h, 3h), student name with suggestions from previous lessons, and optional notes. Group lessons? Just write it in the name, e.g. *Group Rossi*.
 - **Monthly and lifetime hours** — the Overview shows your total hours and a row for every month; tap a month to see its lessons.
 - **Private earnings** — set your hourly rate and MasterSki calculates what you earned. Amounts stay hidden as `**** €` until you tap the eye, and hide again when you leave the screen.
-- **Statistics with charts** — below the months, the Overview shows lessons this month, average lesson length, your number of students, a 6-month hours chart, your top students and your busiest weekdays. Any money there stays hidden until you tap the eye.
+- **Statistics with charts** — under your totals, the Overview shows lessons this month, average lesson length, your number of students, a 6-month hours chart, a podium of your top students and your busiest weekdays. Any money there stays hidden until you tap the eye.
 - **Alpine Night theme** — a dark navy and gold look, on by default. Prefer the old look? Pick *Classic* in Settings.
 - **Italiano / English** — the app follows your phone's language, or pick one in Settings.
 - **Edit or undo** — tap a lesson to fix it, swipe it away to delete, and tap *Undo* if that was a mistake.
