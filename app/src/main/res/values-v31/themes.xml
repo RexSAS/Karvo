@@ -1,0 +1,10 @@
+<resources>
+    <!-- Android 12+ can animate the splash icon. -->
+    <style name="Theme.MasterSki.Starting" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/alpine_night_background</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/ic_launcher_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo_animated</item>
+        <item name="windowSplashScreenAnimationDuration">800</item>
+        <item name="postSplashScreenTheme">@style/Theme.MasterSki</item>
+    </style>
+</resources>
