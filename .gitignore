@@ -23,3 +23,6 @@ keystore.properties
 
 # Internal design notes (local only)
 docs/superpowers/
+
+# Local brainstorming mockups and build notes
+.superpowers/
