@@ -156,8 +156,10 @@ fun SettingsScreen(
     val doneCount = (importState as? ImportState.Done)?.count
     LaunchedEffect(doneCount) {
         if (doneCount != null) {
+            // Shown on the screen's scope: dismiss() makes doneCount null, which restarts this effect
+            // and would cancel a snackbar shown from inside it.
+            scope.launch { showMessage(context.resources.getQuantityString(R.plurals.imported_lessons, doneCount, doneCount)) }
             importViewModel.dismiss()
-            showMessage(context.resources.getQuantityString(R.plurals.imported_lessons, doneCount, doneCount))
         }
     }
 
