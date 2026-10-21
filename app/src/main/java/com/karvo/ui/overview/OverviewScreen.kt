@@ -73,9 +73,10 @@ fun OverviewScreen(
     // Earnings go back to hidden whenever the screen stops (app sent to background, or navigated away).
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.hide() }
     LaunchedEffect(isCurrentPage) { if (!isCurrentPage) viewModel.hide() }
+    val promptTitle = stringResource(R.string.show_earnings)
     val onEarningsTap: () -> Unit = when {
         state.loading -> ({})
-        state.rateSet -> viewModel::toggleReveal
+        state.rateSet -> ({ viewModel.toggleReveal(promptTitle) })
         else -> onOpenSettings
     }
 

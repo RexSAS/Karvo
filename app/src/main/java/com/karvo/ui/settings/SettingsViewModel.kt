@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.karvo.KarvoApp
+import com.karvo.data.Authenticator
 import com.karvo.data.DEFAULT_SEASON_START_MONTH
 import com.karvo.data.DEFAULT_TIME_ZONE
 import com.karvo.data.LanguageChoice
@@ -36,6 +37,9 @@ data class SettingsUiState(
     val theme: ThemeChoice = ThemeChoice.ALPINE_NIGHT,
     val language: LanguageChoice = LanguageChoice.SYSTEM,
     val seasonStartMonth: Int = DEFAULT_SEASON_START_MONTH,
+    val biometricReveal: Boolean = true,
+    /** False when the phone has no screen lock; the switch is then disabled. */
+    val biometricAvailable: Boolean = false,
 )
 
 /** Region zone ids (containing '/'), excluding Etc/ and SystemV/, sorted; computed once. */
@@ -51,6 +55,7 @@ class SettingsViewModel(
     private val lessons: LessonRepository,
     private val language: LanguageController,
     private val clock: Clock = Clock.systemUTC(),
+    private val authenticator: Authenticator = Authenticator.None,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState(language = language.current()))
@@ -84,6 +89,10 @@ class SettingsViewModel(
         viewModelScope.launch {
             settings.seasonStartMonth.collect { month -> _uiState.update { it.copy(seasonStartMonth = month) } }
         }
+        viewModelScope.launch {
+            settings.biometricReveal.collect { on -> _uiState.update { it.copy(biometricReveal = on) } }
+        }
+        refreshBiometricAvailability()
     }
 
     fun onRateChange(input: String) {
@@ -118,6 +127,18 @@ class SettingsViewModel(
         viewModelScope.launch { settings.setTimeZoneId(id) }
     }
 
+    /** Turning protection off needs a successful prompt first, so nobody else can just switch it off. */
+    fun onBiometricRevealChange(on: Boolean, promptTitle: String) {
+        viewModelScope.launch {
+            if (on || !authenticator.isAvailable() || authenticator.authenticate(promptTitle)) settings.setBiometricReveal(on)
+        }
+    }
+
+    /** Re-read on resume: the user may have just set or removed the phone's screen lock. */
+    fun refreshBiometricAvailability() {
+        _uiState.update { it.copy(biometricAvailable = authenticator.isAvailable()) }
+    }
+
     fun onSeasonStartSelected(month: Int) {
         if (month !in 1..12) return
         viewModelScope.launch { settings.setSeasonStartMonth(month) }
@@ -150,7 +171,10 @@ class SettingsViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KarvoApp).container
-                SettingsViewModel(container.settingsRepository, container.lessonRepository, container.languageController)
+                SettingsViewModel(
+                    container.settingsRepository, container.lessonRepository, container.languageController,
+                    authenticator = container.authenticator,
+                )
             }
         }
     }

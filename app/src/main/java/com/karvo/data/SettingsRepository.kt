@@ -2,6 +2,7 @@ package com.karvo.data
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -35,6 +36,9 @@ interface SettingsRepository {
     /** 1–12; stored values out of range read as [DEFAULT_SEASON_START_MONTH]. */
     val seasonStartMonth: Flow<Int>
     suspend fun setSeasonStartMonth(month: Int)
+    /** Ask for fingerprint/PIN before showing earnings; on by default. */
+    val biometricReveal: Flow<Boolean>
+    suspend fun setBiometricReveal(on: Boolean)
 }
 
 class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : SettingsRepository {
@@ -42,6 +46,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
     private val zoneKey = stringPreferencesKey("time_zone_id")
     private val themeKey = stringPreferencesKey("theme")
     private val seasonStartKey = intPreferencesKey("season_start_month")
+    private val biometricKey = booleanPreferencesKey("biometric_reveal")
 
     override val hourlyRateCents: Flow<Long?> = store.data.map { it[rateKey] }
 
@@ -71,5 +76,11 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
     override suspend fun setSeasonStartMonth(month: Int) {
         require(month in 1..12) { "Invalid month: $month" }
         store.edit { it[seasonStartKey] = month }
+    }
+
+    override val biometricReveal: Flow<Boolean> = store.data.map { it[biometricKey] ?: true }
+
+    override suspend fun setBiometricReveal(on: Boolean) {
+        store.edit { it[biometricKey] = on }
     }
 }

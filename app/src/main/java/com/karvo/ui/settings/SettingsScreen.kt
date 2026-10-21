@@ -38,6 +38,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -46,6 +47,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.Switch
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -109,6 +111,8 @@ fun SettingsScreen(
     // Besides Done and focus loss, save a typed rate when the app stops or the screen leaves
     // (saveRate is idempotent; the ViewModel outlives this composition, so the write completes).
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.saveRate() }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshBiometricAvailability() }
+    val biometricPromptTitle = stringResource(R.string.biometric_turn_off_prompt)
     DisposableEffect(viewModel) { onDispose { viewModel.saveRate() } }
     LaunchedEffect(isCurrentPage) {
         if (!isCurrentPage) {
@@ -207,6 +211,22 @@ fun SettingsScreen(
                 headlineContent = { Text(stringResource(R.string.season_start)) },
                 supportingContent = { Text(monthName(state.seasonStartMonth)) },
                 modifier = Modifier.clickable { showSeasonPicker = true },
+            )
+
+            ListItem(
+                colors = transparentRow(),
+                leadingContent = { Icon(Icons.Filled.Fingerprint, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.biometric_reveal)) },
+                supportingContent = {
+                    Text(stringResource(if (state.biometricAvailable) R.string.biometric_reveal_hint else R.string.biometric_unavailable))
+                },
+                trailingContent = {
+                    Switch(
+                        checked = state.biometricReveal && state.biometricAvailable,
+                        onCheckedChange = { viewModel.onBiometricRevealChange(it, biometricPromptTitle) },
+                        enabled = state.biometricAvailable,
+                    )
+                },
             )
 
             ListItem(

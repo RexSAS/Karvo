@@ -64,9 +64,9 @@ fun MonthDetailScreen(
     viewModel: MonthDetailViewModel = viewModel(key = "month-$month", factory = MonthDetailViewModel.factory(month)),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    // Screen-local and not saved; hidden each time the screen opens and whenever it stops.
-    var revealed by remember { mutableStateOf(false) }
-    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { revealed = false }
+    // Hidden each time the screen opens and whenever it stops; showing may ask for fingerprint/PIN.
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.hide() }
+    val promptTitle = stringResource(R.string.show_earnings)
     var showPaidPicker by remember { mutableStateOf(false) }
     var showUnpaidConfirm by remember { mutableStateOf(false) }
 
@@ -92,14 +92,14 @@ fun MonthDetailScreen(
                     Text(stringResource(R.string.earnings), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            earningsLabel(state.earningsCents, revealed),
+                            earningsLabel(state.earningsCents, state.revealed),
                             style = MaterialTheme.typography.headlineMedium,
                             modifier = Modifier.weight(1f),
                         )
-                        IconButton(onClick = { revealed = !revealed }) {
+                        IconButton(onClick = { viewModel.toggleReveal(promptTitle) }) {
                             Icon(
-                                if (revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = stringResource(if (revealed) R.string.hide_earnings else R.string.show_earnings),
+                                if (state.revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = stringResource(if (state.revealed) R.string.hide_earnings else R.string.show_earnings),
                             )
                         }
                     }

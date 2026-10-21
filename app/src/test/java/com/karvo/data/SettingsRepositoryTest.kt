@@ -69,4 +69,9 @@ class SettingsRepositoryTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun invalidSeasonStartRejected() = runTest { repo.setSeasonStartMonth(13) }
+
+    @Test fun biometricRevealDefaultsTrue() = runTest {
+        assertEquals(true, repo.biometricReveal.first())
+        repo.setBiometricReveal(false); assertEquals(false, repo.biometricReveal.first())
+    }
 }

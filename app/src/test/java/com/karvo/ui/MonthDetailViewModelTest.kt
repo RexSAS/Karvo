@@ -1,6 +1,7 @@
 package com.karvo.ui
 
 import com.karvo.data.Lesson
+import com.karvo.testing.FakeAuthenticator
 import com.karvo.testing.FakeLessonRepository
 import com.karvo.testing.FakeSettingsRepository
 import com.karvo.testing.MainDispatcherRule
@@ -64,5 +65,20 @@ class MonthDetailViewModelTest {
         val clock = Clock.fixed(Instant.parse("2026-12-31T23:30:00Z"), ZoneOffset.UTC)
         val s = vm(clock).uiState.first { it.lessons.isNotEmpty() }
         assertEquals(LocalDate.of(2027, 1, 1), s.today)
+    }
+
+    @Test fun monthRevealAlsoAsks() = runTest {
+        repo.save(Lesson(date = LocalDate.of(2026, 12, 1), durationMinutes = 60, student = "A"))
+        val auth = FakeAuthenticator(succeeds = false)
+        val vm = MonthDetailViewModel(repo, FakeSettingsRepository(1000), dec, authenticator = auth)
+        vm.uiState.first { it.lessons.isNotEmpty() }
+        vm.toggleReveal("Show earnings")
+        assertEquals(false, vm.uiState.value.revealed)
+        auth.succeeds = true
+        vm.toggleReveal("Show earnings")
+        assertEquals(true, vm.uiState.first { it.revealed }.revealed)
+        vm.hide()
+        assertEquals(false, vm.uiState.first { !it.revealed }.revealed)
+        assertEquals(2, auth.calls)
     }
 }

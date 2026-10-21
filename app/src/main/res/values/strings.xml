@@ -183,4 +183,9 @@
     <string name="season_start">Season starts in</string>
     <string name="expand">Expand</string>
     <string name="collapse">Collapse</string>
+    <!-- Fingerprint -->
+    <string name="biometric_reveal">Unlock earnings with fingerprint</string>
+    <string name="biometric_reveal_hint">Ask for fingerprint or PIN before showing money</string>
+    <string name="biometric_unavailable">Set a screen lock on your phone to use this</string>
+    <string name="biometric_turn_off_prompt">Turn off fingerprint unlock</string>
 </resources>

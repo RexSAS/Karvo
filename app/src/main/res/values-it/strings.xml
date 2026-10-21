@@ -181,4 +181,9 @@
     <string name="season_start">La stagione inizia a</string>
     <string name="expand">Espandi</string>
     <string name="collapse">Comprimi</string>
+    <!-- Fingerprint -->
+    <string name="biometric_reveal">Sblocca i guadagni con l\'impronta</string>
+    <string name="biometric_reveal_hint">Chiedi impronta o PIN prima di mostrare gli importi</string>
+    <string name="biometric_unavailable">Imposta un blocco schermo sul telefono per usarlo</string>
+    <string name="biometric_turn_off_prompt">Disattiva lo sblocco con impronta</string>
 </resources>

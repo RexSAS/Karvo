@@ -1,6 +1,7 @@
 package com.karvo.ui
 
 import com.karvo.data.Lesson
+import com.karvo.testing.FakeAuthenticator
 import com.karvo.testing.FakeLessonRepository
 import com.karvo.testing.FakeSettingsRepository
 import com.karvo.testing.MainDispatcherRule
@@ -48,12 +49,12 @@ class OverviewViewModelTest {
     }
 
     @Test fun toggleReveal() = runTest {
-        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000)); vm.toggleReveal()
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000)); vm.toggleReveal("Show earnings")
         assertTrue(vm.uiState.first { it.revealed }.revealed)
     }
 
     @Test fun hideAfterRevealHides() = runTest {
-        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000)); vm.toggleReveal()
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(1000)); vm.toggleReveal("Show earnings")
         vm.uiState.first { it.revealed }
         vm.hide()
         assertFalse(vm.uiState.first { !it.revealed }.revealed)
@@ -119,5 +120,52 @@ class OverviewViewModelTest {
         val s = OverviewViewModel(repo, FakeSettingsRepository(2000)).uiState.first { !it.loading }
         assertNull(s.seasons)
         assertEquals(0L, s.unpaid.minutes)
+    }
+
+    private suspend fun gatedVm(auth: FakeAuthenticator, settings: FakeSettingsRepository = FakeSettingsRepository(2000)): OverviewViewModel {
+        repo.save(Lesson(date = LocalDate.of(2026, 10, 1), durationMinutes = 60, student = "A"))
+        return OverviewViewModel(repo, settings, authenticator = auth).also { it.uiState.first { s -> !s.loading } }
+    }
+
+    @Test fun revealAsksWhenOnAndAvailable() = runTest {
+        val auth = FakeAuthenticator()
+        val vm = gatedVm(auth)
+        vm.toggleReveal("Show earnings")
+        assertTrue(vm.uiState.first { it.revealed }.revealed)
+        assertEquals(1, auth.calls)
+    }
+
+    @Test fun failedAuthStaysHidden() = runTest {
+        val auth = FakeAuthenticator(succeeds = false)
+        val vm = gatedVm(auth)
+        vm.toggleReveal("Show earnings")
+        assertFalse(vm.uiState.value.revealed)
+        assertEquals(1, auth.calls)
+    }
+
+    @Test fun hideNeverAsks() = runTest {
+        val auth = FakeAuthenticator()
+        val vm = gatedVm(auth)
+        vm.toggleReveal("Show earnings"); vm.uiState.first { it.revealed }
+        vm.toggleReveal("Show earnings")
+        assertFalse(vm.uiState.first { !it.revealed }.revealed)
+        assertEquals(1, auth.calls)
+    }
+
+    @Test fun unavailableRevealsWithoutPrompt() = runTest {
+        val auth = FakeAuthenticator(available = false)
+        val vm = gatedVm(auth)
+        vm.toggleReveal("Show earnings")
+        assertTrue(vm.uiState.first { it.revealed }.revealed)
+        assertEquals(0, auth.calls)
+    }
+
+    @Test fun settingOffRevealsWithoutPrompt() = runTest {
+        val auth = FakeAuthenticator()
+        val settings = FakeSettingsRepository(2000).apply { setBiometricReveal(false) }
+        val vm = gatedVm(auth, settings)
+        vm.toggleReveal("Show earnings")
+        assertTrue(vm.uiState.first { it.revealed }.revealed)
+        assertEquals(0, auth.calls)
     }
 }

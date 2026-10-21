@@ -45,4 +45,10 @@ class FakeSettingsRepository(
         require(month in 1..12) { "Invalid month: $month" }
         seasonStartValue.value = month
     }
+
+    private val biometricValue = MutableStateFlow(true)
+    override val biometricReveal: Flow<Boolean> = biometricValue
+    override suspend fun setBiometricReveal(on: Boolean) {
+        biometricValue.value = on
+    }
 }
