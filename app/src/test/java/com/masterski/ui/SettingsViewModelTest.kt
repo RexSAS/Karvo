@@ -6,7 +6,6 @@ import com.masterski.testing.FakeSettingsRepository
 import com.masterski.testing.MainDispatcherRule
 import com.masterski.ui.settings.SettingsViewModel
 import com.masterski.ui.settings.availableTimeZones
-import com.masterski.ui.settings.exportedMessage
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -92,11 +91,5 @@ class SettingsViewModelTest {
         vm.onRateChange("30")
         vm.saveRate() // what the screen's onDispose / ON_STOP path calls
         assertEquals(3000L, s.hourlyRateCents.first())
-    }
-
-    @Test fun exportMessagePluralizes() {
-        assertEquals("Exported 1 lesson", exportedMessage(1))
-        assertEquals("Exported 0 lessons", exportedMessage(0))
-        assertEquals("Exported 3 lessons", exportedMessage(3))
     }
 }

@@ -1,5 +1,7 @@
 package com.masterski.ui.settings
 
+import androidx.compose.ui.res.stringResource
+import com.masterski.R
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -81,7 +83,7 @@ fun SettingsScreen(
         snackbarHostState.showSnackbar(message)
     }
 
-    fun failureMessage(e: Exception) = "Export failed: ${e.message ?: e.javaClass.simpleName}"
+    fun failureMessage(e: Exception) = context.getString(R.string.export_failed, e.message ?: e.javaClass.simpleName)
 
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
@@ -90,10 +92,10 @@ fun SettingsScreen(
                 val export = viewModel.exportData()
                 withContext(Dispatchers.IO) {
                     val out = context.contentResolver.openOutputStream(uri)
-                        ?: throw java.io.IOException("Cannot open file")
+                        ?: throw java.io.IOException(context.getString(R.string.cannot_open_file))
                     out.use { it.write(csvFileBytes(export.csv)) }
                 }
-                exportedMessage(export.lessonCount)
+                context.resources.getQuantityString(R.plurals.exported_lessons, export.lessonCount, export.lessonCount)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -104,7 +106,7 @@ fun SettingsScreen(
     }
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Settings") }) },
+        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.settings)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
@@ -118,13 +120,13 @@ fun SettingsScreen(
             OutlinedTextField(
                 value = state.rateText,
                 onValueChange = viewModel::onRateChange,
-                label = { Text("Hourly rate") },
+                label = { Text(stringResource(R.string.hourly_rate)) },
                 placeholder = { Text("00.00") },
                 suffix = { Text("€") },
                 singleLine = true,
                 isError = state.rateError,
                 supportingText = {
-                    Text(if (state.rateError) "Enter an amount like 25.00" else "Leave empty to hide earnings")
+                    Text(stringResource(if (state.rateError) R.string.rate_error else R.string.rate_hint))
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = {
@@ -140,7 +142,7 @@ fun SettingsScreen(
             )
 
             ListItem(
-                headlineContent = { Text("Time zone") },
+                headlineContent = { Text(stringResource(R.string.time_zone)) },
                 supportingContent = { Text(state.timeZoneId) },
                 modifier = Modifier.clickable { showZonePicker = true },
             )
@@ -160,10 +162,10 @@ fun SettingsScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Export to CSV") }
+            ) { Text(stringResource(R.string.export_csv)) }
 
             Text(
-                "Version ${BuildConfig.VERSION_NAME}",
+                stringResource(R.string.version, BuildConfig.VERSION_NAME),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -194,10 +196,10 @@ private fun TimeZoneDialog(current: String, onSelect: (String) -> Unit, onDismis
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Time zone") },
+                    title = { Text(stringResource(R.string.time_zone)) },
                     navigationIcon = {
                         IconButton(onClick = onDismiss) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.close))
                         }
                     },
                 )
@@ -207,7 +209,7 @@ private fun TimeZoneDialog(current: String, onSelect: (String) -> Unit, onDismis
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    label = { Text("Search") },
+                    label = { Text(stringResource(R.string.search)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 )

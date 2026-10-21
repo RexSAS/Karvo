@@ -1,5 +1,7 @@
 package com.masterski.ui.overview
 
+import androidx.compose.ui.res.stringResource
+import com.masterski.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,7 +58,7 @@ fun MonthDetailScreen(
                 title = { Text(monthTitle(month)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
             )
@@ -65,9 +67,9 @@ fun MonthDetailScreen(
         Column(Modifier.padding(padding).fillMaxSize()) {
             ElevatedCard(Modifier.fillMaxWidth().padding(16.dp)) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("Total hours", style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.total_hours), style = MaterialTheme.typography.labelLarge)
                     Text(formatDuration(state.totalMinutes), style = MaterialTheme.typography.headlineMedium)
-                    Text("Earnings", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 12.dp))
+                    Text(stringResource(R.string.earnings), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             earningsLabel(state.earningsCents, revealed),
@@ -77,7 +79,7 @@ fun MonthDetailScreen(
                         IconButton(onClick = { revealed = !revealed }) {
                             Icon(
                                 if (revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = if (revealed) "Hide earnings" else "Show earnings",
+                                contentDescription = stringResource(if (revealed) R.string.hide_earnings else R.string.show_earnings),
                             )
                         }
                     }

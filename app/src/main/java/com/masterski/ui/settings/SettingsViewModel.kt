@@ -39,8 +39,6 @@ val availableTimeZones: List<String> = ZoneId.getAvailableZoneIds()
 /** CSV text plus the number of lesson rows it contains. */
 data class CsvExport(val csv: String, val lessonCount: Int)
 
-fun exportedMessage(count: Int): String = if (count == 1) "Exported 1 lesson" else "Exported $count lessons"
-
 class SettingsViewModel(
     private val settings: SettingsRepository,
     private val lessons: LessonRepository,

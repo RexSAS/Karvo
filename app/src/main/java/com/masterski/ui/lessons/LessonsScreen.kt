@@ -1,5 +1,7 @@
 package com.masterski.ui.lessons
 
+import androidx.compose.ui.res.stringResource
+import com.masterski.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,9 +55,9 @@ fun LessonsScreen(
     }
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Lessons") }) },
+        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.lessons)) }) },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAdd) { Icon(Icons.Default.Add, contentDescription = "Add lesson") }
+            FloatingActionButton(onClick = onAdd) { Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_lesson)) }
         },
     ) { padding ->
         val groups = groupsOrNull
@@ -63,7 +65,7 @@ fun LessonsScreen(
             // Still loading: show nothing rather than flashing the empty state.
         } else if (groups.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(padding).padding(32.dp), contentAlignment = Alignment.Center) {
-                Text("No lessons yet. Tap + to add your first one.", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.no_lessons_hint), style = MaterialTheme.typography.bodyLarge)
             }
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(padding)) {
@@ -110,7 +112,7 @@ private fun SwipeToDeleteRow(lesson: Lesson, onDelete: () -> Unit, onClick: () -
                 Modifier.fillMaxSize().background(MaterialTheme.colorScheme.error).padding(horizontal = 20.dp),
                 contentAlignment = Alignment.CenterEnd,
             ) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onError)
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = MaterialTheme.colorScheme.onError)
             }
         },
     ) {

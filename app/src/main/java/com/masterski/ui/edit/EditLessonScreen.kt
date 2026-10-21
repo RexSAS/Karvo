@@ -1,5 +1,8 @@
 package com.masterski.ui.edit
 
+import androidx.compose.ui.res.stringResource
+import com.masterski.R
+import com.masterski.ui.messageRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,13 +53,6 @@ import java.util.Locale
 
 private val QUICK_PICKS = listOf(60 to "1h", 90 to "1h 30m", 120 to "2h", 180 to "3h")
 
-private fun LessonError.message() = when (this) {
-    LessonError.StudentBlank -> "Enter a student name"
-    LessonError.DurationZero -> "Duration must be more than 0"
-    LessonError.DurationTooLong -> "Max 24 hours"
-    LessonError.MinutesOver59 -> "Minutes must be 0–59"
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
@@ -76,16 +72,16 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (state.isNew) "New lesson" else "Edit lesson") },
+                title = { Text(stringResource(if (state.isNew) R.string.new_lesson else R.string.edit_lesson)) },
                 navigationIcon = {
                     IconButton(onClick = onDone) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     if (!state.isNew) {
                         IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Delete lesson")
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete_lesson))
                         }
                     }
                 },
@@ -105,7 +101,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                     value = state.date.format(DateTimeFormatter.ofPattern("EEE d MMM yyyy", Locale.getDefault())),
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Date") },
+                    label = { Text(stringResource(R.string.date)) },
                     trailingIcon = { Icon(Icons.Filled.DateRange, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -117,7 +113,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                 OutlinedTextField(
                     value = state.hoursText,
                     onValueChange = vm::onHoursChange,
-                    label = { Text("Hours") },
+                    label = { Text(stringResource(R.string.hours)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     isError = durationErrors.isNotEmpty(),
@@ -126,7 +122,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                 OutlinedTextField(
                     value = state.minutesText,
                     onValueChange = vm::onMinutesChange,
-                    label = { Text("Minutes") },
+                    label = { Text(stringResource(R.string.minutes)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     isError = durationErrors.isNotEmpty(),
@@ -134,8 +130,9 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                 )
             }
             if (durationErrors.isNotEmpty()) {
+                val messages = durationErrors.map { stringResource(it.messageRes()) }
                 Text(
-                    durationErrors.joinToString("\n") { it.message() },
+                    messages.joinToString("\n"),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.error,
                     style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                 )
@@ -162,11 +159,11 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                         vm.onStudentChange(it)
                         studentMenuOpen = true
                     },
-                    label = { Text("Student") },
+                    label = { Text(stringResource(R.string.student)) },
                     singleLine = true,
                     isError = studentError,
                     supportingText = if (studentError) {
-                        { Text(LessonError.StudentBlank.message()) }
+                        { Text(stringResource(LessonError.StudentBlank.messageRes())) }
                     } else {
                         null
                     },
@@ -193,7 +190,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
             OutlinedTextField(
                 value = state.notes,
                 onValueChange = vm::onNotesChange,
-                label = { Text("Notes") },
+                label = { Text(stringResource(R.string.notes)) },
                 minLines = 3,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -202,7 +199,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                 onClick = { vm.save(onDone) },
                 enabled = state.isValid,
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Save") }
+            ) { Text(stringResource(R.string.save)) }
         }
     }
 
@@ -214,23 +211,23 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                 TextButton(onClick = {
                     pickerState.selectedDateMillis?.let { vm.onDateChange(pickerMillisToLocalDate(it)) }
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.ok)) }
             },
-            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.cancel)) } },
         ) { DatePicker(state = pickerState) }
     }
 
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete this lesson?") },
+            title = { Text(stringResource(R.string.delete_lesson_question)) },
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteDialog = false
                     vm.delete(onDone)
-                }) { Text("Delete") }
+                }) { Text(stringResource(R.string.delete)) }
             },
-            dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }

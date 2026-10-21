@@ -1,5 +1,8 @@
 package com.masterski.ui
 
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
+import com.masterski.R
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -53,12 +56,12 @@ fun editRoute(id: Long? = null): String = "edit?id=${id ?: -1L}"
 
 fun monthRoute(m: YearMonth): String = "month/${m.year}/${m.monthValue}"
 
-private data class Tab(val route: String, val label: String, val icon: ImageVector)
+private data class Tab(val route: String, @StringRes val labelRes: Int, val icon: ImageVector)
 
 private val tabs = listOf(
-    Tab(ROUTE_LESSONS, "Lessons", Icons.AutoMirrored.Filled.List),
-    Tab(ROUTE_OVERVIEW, "Overview", Icons.Filled.BarChart),
-    Tab(ROUTE_SETTINGS, "Settings", Icons.Filled.Settings),
+    Tab(ROUTE_LESSONS, R.string.lessons, Icons.AutoMirrored.Filled.List),
+    Tab(ROUTE_OVERVIEW, R.string.overview, Icons.Filled.BarChart),
+    Tab(ROUTE_SETTINGS, R.string.settings, Icons.Filled.Settings),
 )
 
 /** Switches to a top-level tab, keeping each tab's state and never popping the start destination. */
@@ -80,11 +83,15 @@ fun MasterSkiNavHost() {
     // Hoisted here so the Undo snackbar survives leaving the Lessons screen.
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
-    val lessonRepository = (LocalContext.current.applicationContext as MasterSkiApp).container.lessonRepository
+    val context = LocalContext.current
+    val lessonRepository = (context.applicationContext as MasterSkiApp).container.lessonRepository
     val showUndo: (Lesson) -> Unit = { lesson ->
         snackbarScope.launch {
             snackbarHostState.currentSnackbarData?.dismiss()
-            val result = snackbarHostState.showSnackbar("Lesson deleted", actionLabel = "Undo", duration = SnackbarDuration.Short)
+            val result = snackbarHostState.showSnackbar(
+                context.getString(R.string.lesson_deleted),
+                actionLabel = context.getString(R.string.undo),
+                duration = SnackbarDuration.Short)
             if (result == SnackbarResult.ActionPerformed) lessonRepository.restore(lesson)
         }
     }
@@ -102,7 +109,7 @@ fun MasterSkiNavHost() {
                             selected = currentRoute == tab.route,
                             onClick = { navController.navigateToTab(tab.route) },
                             icon = { Icon(tab.icon, contentDescription = null) },
-                            label = { Text(tab.label) },
+                            label = { Text(stringResource(tab.labelRes)) },
                         )
                     }
                 }

@@ -1,5 +1,8 @@
 package com.masterski.ui.overview
 
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import com.masterski.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,17 +60,17 @@ fun OverviewScreen(
     }
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Overview") }) },
+        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.overview)) }) },
     ) { padding ->
         // Still loading: show nothing rather than flashing 0m / — €.
         if (state.loading) return@Scaffold
         Column(Modifier.padding(padding).fillMaxSize()) {
             ElevatedCard(Modifier.fillMaxWidth().padding(16.dp)) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("Total hours", style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.total_hours), style = MaterialTheme.typography.labelLarge)
                     Text(formatDuration(state.totalMinutes), style = MaterialTheme.typography.headlineMedium)
                     Text(
-                        "Earnings",
+                        stringResource(R.string.earnings),
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(top = 12.dp),
                     )
@@ -80,14 +83,14 @@ fun OverviewScreen(
                         IconButton(onClick = onEarningsTap) {
                             Icon(
                                 if (state.revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = if (state.revealed) "Hide earnings" else "Show earnings",
+                                contentDescription = stringResource(if (state.revealed) R.string.hide_earnings else R.string.show_earnings),
                             )
                         }
                     }
                 }
             }
             if (state.months.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("No lessons yet.") }
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(stringResource(R.string.no_lessons)) }
             } else {
                 LazyColumn(Modifier.fillMaxSize()) {
                     items(state.months, key = { it.summary.month.toString() }) { row ->
@@ -99,7 +102,7 @@ fun OverviewScreen(
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 val n = row.summary.lessonCount
                                 Text(
-                                    if (n == 1) "1 lesson" else "$n lessons",
+                                    pluralStringResource(R.plurals.lesson_count, n, n),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
