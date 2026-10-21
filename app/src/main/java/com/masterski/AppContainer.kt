@@ -15,6 +15,9 @@ import com.masterski.data.RoomLessonRepository
 import com.masterski.data.SettingsRepository
 import com.masterski.data.backup.BackupService
 import com.masterski.data.backup.BackupStore
+import com.masterski.data.update.GitHubReleaseSource
+import com.masterski.data.update.PackageInstallerUpdater
+import com.masterski.data.update.UrlApkDownloader
 import java.io.File
 import java.time.Clock
 
@@ -35,6 +38,11 @@ class AppContainer(context: Context) {
     val lessonRepository: LessonRepository by lazy { RoomLessonRepository(database.lessonDao()) }
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(dataStore) }
     val languageController: LanguageController = AppCompatLanguageController()
+    val releaseSource by lazy { GitHubReleaseSource(BuildConfig.VERSION_NAME) }
+    val apkDownloader by lazy { UrlApkDownloader() }
+    val updateInstaller: PackageInstallerUpdater by lazy { PackageInstallerUpdater(appContext) }
+    val updatesDir: File get() = File(appContext.cacheDir, "updates")
+
     val backupService: BackupService by lazy {
         BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository)
     }
