@@ -10,6 +10,7 @@ import com.karvo.ui.edit.EditLessonViewModel
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneOffset
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -110,5 +111,38 @@ class EditLessonViewModelTest {
     @Test fun newLessonIsUnpaid() = runTest {
         val vm = newVm(); vm.onStudentChange("Anna"); vm.onQuickPick(60); vm.save {}
         assertEquals(null, repo.allLessons().single().paidOn)
+    }
+
+    private val paidDate = LocalDate.of(2027, 1, 15)
+    private suspend fun paidDecember() {
+        repo.save(Lesson(date = LocalDate.of(2026, 12, 3), durationMinutes = 60, student = "A", paidOn = paidDate))
+        repo.save(Lesson(date = LocalDate.of(2026, 12, 4), durationMinutes = 60, student = "B", paidOn = paidDate))
+    }
+
+    @Test fun newLessonInPaidMonthShowsNote() = runTest {
+        paidDecember()
+        val vm = newVm(); vm.onDateChange(LocalDate.of(2026, 12, 10))
+        assertEquals(YearMonth.of(2026, 12), vm.uiState.value.paidMonthNote)
+    }
+    @Test fun noNoteForUnpaidOrPartlyPaidMonth() = runTest {
+        repo.save(Lesson(date = LocalDate.of(2026, 12, 3), durationMinutes = 60, student = "A", paidOn = paidDate))
+        repo.save(Lesson(date = LocalDate.of(2026, 12, 4), durationMinutes = 60, student = "B"))
+        repo.save(Lesson(date = LocalDate.of(2027, 1, 4), durationMinutes = 60, student = "C"))
+        val vm = newVm()
+        vm.onDateChange(LocalDate.of(2026, 12, 10)); assertEquals(null, vm.uiState.value.paidMonthNote)
+        vm.onDateChange(LocalDate.of(2027, 1, 10)); assertEquals(null, vm.uiState.value.paidMonthNote)
+        vm.onDateChange(LocalDate.of(2027, 3, 10)); assertEquals(null, vm.uiState.value.paidMonthNote)
+    }
+    @Test fun noNoteWhenEditingAPaidLesson() = runTest {
+        paidDecember()
+        val id = repo.allLessons().first().id
+        val vm = EditLessonViewModel(repo, FakeSettingsRepository(), id)
+        assertEquals(null, vm.uiState.value.paidMonthNote)
+    }
+    @Test fun noteFollowsDateChange() = runTest {
+        paidDecember()
+        val vm = newVm()
+        vm.onDateChange(LocalDate.of(2027, 1, 10)); assertEquals(null, vm.uiState.value.paidMonthNote)
+        vm.onDateChange(LocalDate.of(2026, 12, 10)); assertEquals(YearMonth.of(2026, 12), vm.uiState.value.paidMonthNote)
     }
 }
