@@ -26,16 +26,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masterski.data.Lesson
+import com.masterski.domain.monthTitle
 import com.masterski.ui.components.LessonRow
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -47,7 +45,6 @@ fun LessonsScreen(
     viewModel: LessonsViewModel = viewModel(factory = LessonsViewModel.Factory),
 ) {
     val groupsOrNull by viewModel.groups.collectAsStateWithLifecycle()
-    val monthFormatter = remember { DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()) }
 
     fun delete(lesson: Lesson) {
         viewModel.delete(lesson)
@@ -72,7 +69,7 @@ fun LessonsScreen(
                 groups.forEach { group ->
                     stickyHeader(key = "header-${group.month}") {
                         Text(
-                            group.month.format(monthFormatter),
+                            monthTitle(group.month),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier

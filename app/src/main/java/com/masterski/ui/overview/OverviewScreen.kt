@@ -36,12 +36,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masterski.domain.earningsLabel
 import com.masterski.domain.formatDuration
+import com.masterski.domain.monthTitle
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.util.Locale
-
-internal fun monthTitle(month: YearMonth): String =
-    DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()).format(month)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

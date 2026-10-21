@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masterski.domain.earningsLabel
 import com.masterski.domain.formatDuration
+import com.masterski.domain.monthTitle
 import com.masterski.ui.components.LessonRow
 import java.time.YearMonth
 
