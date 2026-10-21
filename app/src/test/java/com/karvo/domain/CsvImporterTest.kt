@@ -47,4 +47,30 @@ class CsvImporterTest {
 
     @Test fun lineNumbersCountLineBreaksInsideQuotes() =
         assertEquals(4, lineOf("$header\r\n2026-01-01,A,60,1,\"a\r\nb\"\r\n2026-01-01,,60,1,\r\n"))
+
+    private val headerV2 = "date,student,duration_minutes,duration_hours,notes,paid_on"
+
+    @Test fun readsV1AsUnpaid() =
+        assertEquals(null, parseLessonsCsv("$header\r\n2026-01-01,A,60,1,\r\n").single().paidOn)
+
+    @Test fun readsV2PaidOn() {
+        val lessons = parseLessonsCsv("$headerV2\r\n2026-12-03,A,60,1,,2027-01-15\r\n2026-12-04,B,60,1,,\r\n")
+        assertEquals(LocalDate.of(2027, 1, 15), lessons[0].paidOn)
+        assertEquals(null, lessons[1].paidOn)
+    }
+
+    @Test fun v2RowWithFiveFieldsFails() = assertEquals(2, lineOf("$headerV2\r\n2026-01-01,A,60,1,\r\n"))
+
+    @Test fun v1RowWithSixFieldsFails() = assertEquals(2, lineOf("$header\r\n2026-01-01,A,60,1,,2027-01-15\r\n"))
+
+    @Test fun badPaidOnFails() =
+        assertEquals(3, lineOf("$headerV2\r\n2026-01-01,A,60,1,,\r\n2026-01-02,A,60,1,,2027-13-01\r\n"))
+
+    @Test fun semicolonHeaderRejected() =
+        assertEquals(1, lineOf("date;student;duration_minutes;duration_hours;notes\r\n2026-01-01;A;60;1;\r\n"))
+
+    @Test fun roundTripKeepsPaidOn() {
+        val mixed = tricky.mapIndexed { i, l -> if (i % 2 == 0) l.copy(paidOn = LocalDate.of(2027, 1, 15)) else l }
+        assertEquals(mixed, parseLessonsCsv(lessonsToCsv(mixed)))
+    }
 }
