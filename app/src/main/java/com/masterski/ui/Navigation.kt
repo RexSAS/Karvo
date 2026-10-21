@@ -47,6 +47,11 @@ import com.masterski.ui.overview.MonthDetailScreen
 import com.masterski.ui.overview.OverviewScreen
 import com.masterski.ui.settings.SettingsScreen
 import com.masterski.ui.theme.AlpineBackdrop
+import com.masterski.ui.theme.AlpineNight
+import com.masterski.ui.theme.isAlpineNight
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarItemDefaults
 import com.masterski.ui.theme.BackdropFigure
 import com.masterski.ui.update.UpdateDialogs
 import com.masterski.ui.update.UpdateViewModel
@@ -125,13 +130,16 @@ fun MasterSkiNavHost() {
         },
         bottomBar = {
             if (showBar) {
-                NavigationBar {
+                NavigationBar(containerColor = if (isAlpineNight()) AlpineNight.NavBar else NavigationBarDefaults.containerColor) {
                     tabs.forEach { tab ->
                         NavigationBarItem(
                             selected = currentRoute == tab.route,
                             onClick = { navController.navigateToTab(tab.route) },
                             icon = { Icon(tab.icon, contentDescription = null) },
                             label = { Text(stringResource(tab.labelRes)) },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isAlpineNight()) 0.16f else 0.24f),
+                            ),
                         )
                     }
                 }
@@ -151,7 +159,7 @@ fun MasterSkiNavHost() {
                 }
             }
             composable(ROUTE_OVERVIEW) { entry ->
-                AlpineBackdrop(BackdropFigure.Snowboarder) {
+                AlpineBackdrop(BackdropFigure.None) { // the gold skier sits in Overview's header
                     OverviewScreen(
                         onOpenMonth = { month -> dropUnlessResumedNow(entry) { navController.navigate(monthRoute(month)) } },
                         onOpenSettings = dropUnlessResumed { navController.navigateToTab(ROUTE_SETTINGS) },

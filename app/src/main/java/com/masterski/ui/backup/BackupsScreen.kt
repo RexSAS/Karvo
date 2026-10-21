@@ -16,7 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
+import com.masterski.ui.theme.AlpineTile
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,6 +68,7 @@ fun BackupsScreen(
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.backups)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -109,7 +111,7 @@ fun BackupsScreen(
                 }
             }
             items(state.backups, key = { it.fileName }) { backup ->
-                ElevatedCard(Modifier.fillMaxWidth()) {
+                AlpineTile(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(start = 16.dp, top = 16.dp, end = 8.dp, bottom = 8.dp)) {
                         Text(backupDateText(backup, state.zoneId), style = MaterialTheme.typography.titleMedium)
                         Text(

@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ElevatedCard
+import com.masterski.ui.theme.AlpineTile
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,23 +47,22 @@ import java.util.Locale
 private val BarCorner = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp)
 private val StubHeight = 2.dp
 
-/** Statistics shown below the month list. Money respects [revealed]; chart descriptions never contain money. */
+/** Charts below the headline tiles. Money respects [revealed]; chart descriptions never contain money. */
 @Composable
 fun StatsSection(stats: OverviewStats, revealed: Boolean, rateSet: Boolean, modifier: Modifier = Modifier) {
     val locale = ConfigurationCompat.getLocales(LocalConfiguration.current)[0] ?: Locale.getDefault()
     Column(modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(R.string.statistics), style = MaterialTheme.typography.titleLarge)
-        SummaryCards(stats)
         LastSixMonthsCard(stats, revealed, locale)
         TopStudentsCard(stats, revealed, rateSet)
         BusiestDaysCard(stats, locale)
     }
 }
 
+/** The three headline numbers; Overview places them overlapping the season total. */
 @Composable
-private fun SummaryCards(stats: OverviewStats) {
+fun SummaryTiles(stats: OverviewStats, modifier: Modifier = Modifier) {
     // Equal-height cards even when one label wraps.
-    Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         SummaryCard(stats.lessonsThisMonth.toString(), stringResource(R.string.stats_lessons_this_month), Modifier.weight(1f))
         SummaryCard(formatDuration(stats.averageLessonMinutes), stringResource(R.string.stats_avg_lesson), Modifier.weight(1f))
         SummaryCard(stats.studentCount.toString(), stringResource(R.string.stats_students), Modifier.weight(1f))
@@ -72,7 +71,7 @@ private fun SummaryCards(stats: OverviewStats) {
 
 @Composable
 private fun SummaryCard(value: String, label: String, modifier: Modifier) {
-    ElevatedCard(modifier.fillMaxHeight()) {
+    AlpineTile(modifier.fillMaxHeight()) {
         Column(Modifier.padding(12.dp)) {
             Text(value, style = MaterialTheme.typography.headlineMedium, maxLines = 1)
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -82,7 +81,7 @@ private fun SummaryCard(value: String, label: String, modifier: Modifier) {
 
 @Composable
 private fun StatsCard(title: String, description: String, content: @Composable () -> Unit) {
-    ElevatedCard(Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = description }) {
+    AlpineTile(Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = description }) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             content()

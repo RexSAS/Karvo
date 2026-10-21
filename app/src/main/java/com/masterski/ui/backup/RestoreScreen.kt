@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,6 +62,7 @@ fun RestoreScreen(
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(if (state.step == 1) R.string.restore_title else R.string.restore_last_check_title)) },
                 navigationIcon = {
                     IconButton(onClick = goBack) {

@@ -11,3 +11,7 @@ fun monthTitle(month: YearMonth, locale: Locale = Locale.getDefault()): String =
 /** Three-letter chart label: "Oct" / "Ott". */
 fun shortMonthLabel(month: YearMonth, locale: Locale = Locale.getDefault()): String =
     DateTimeFormatter.ofPattern("MMM", locale).format(month).removeSuffix(".").replaceFirstChar { it.titlecase(locale) }
+
+/** Screen-header date: "Wednesday 21 October" / "Mercoledì 21 ottobre" (first letter capitalised). */
+fun dayTitle(date: java.time.LocalDate, locale: Locale = Locale.getDefault()): String =
+    DateTimeFormatter.ofPattern("EEEE d MMMM", locale).format(date).replaceFirstChar { it.titlecase(locale) }

@@ -47,7 +47,6 @@
     <string name="months">Mesi</string>
 
     <!-- Statistics -->
-    <string name="statistics">Statistiche</string>
     <string name="stats_lessons_this_month">Lezioni questo mese</string>
     <string name="stats_avg_lesson">Lezione media</string>
     <string name="stats_students">Allievi</string>

@@ -49,7 +49,6 @@
     <string name="months">Months</string>
 
     <!-- Statistics -->
-    <string name="statistics">Statistics</string>
     <string name="stats_lessons_this_month">Lessons this month</string>
     <string name="stats_avg_lesson">Avg. lesson</string>
     <string name="stats_students">Students</string>
