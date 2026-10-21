@@ -15,4 +15,15 @@ class FormatTest {
     @Test fun labelHidden() = assertEquals("**** €", earningsLabel(5000, revealed = false))
     @Test fun labelNoRate() { assertEquals("— €", earningsLabel(null, false)); assertEquals("— €", earningsLabel(null, true)) }
     @Test fun labelRevealed() = assertEquals("€50.00", earningsLabel(5000, true, Locale.US))
+
+    @Test fun chartLabelKeepsMinutesBelow100Hours() {
+        assertEquals("99h 30m", chartDurationLabel(99 * 60 + 30))
+        assertEquals("45m", chartDurationLabel(45))
+    }
+
+    @Test fun chartLabelDropsMinutesFrom100Hours() {
+        // "152h 30m" does not fit a sixth of a phone-width chart; whole hours, rounded half-up, do.
+        assertEquals("153h", chartDurationLabel(152 * 60 + 30))
+        assertEquals("100h", chartDurationLabel(100 * 60))
+    }
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedCard
@@ -32,11 +33,11 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat
 import com.masterski.R
 import com.masterski.domain.OverviewStats
+import com.masterski.domain.chartDurationLabel
 import com.masterski.domain.earningsLabel
 import com.masterski.domain.formatDuration
 import com.masterski.domain.shortMonthLabel
@@ -104,9 +105,7 @@ private fun LastSixMonthsCard(stats: OverviewStats, revealed: Boolean, locale: L
                 VerticalBar(
                     fraction = bar.minutes.toFloat() / max,
                     color = if (i == bars.lastIndex) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
-                    // Leaves room for the value above and the month below within the row height.
-                    maxHeight = 100.dp,
-                    topLabel = formatDuration(bar.minutes),
+                    topLabel = chartDurationLabel(bar.minutes),
                     bottomLabel = shortMonthLabel(bar.month, locale),
                     modifier = Modifier.weight(1f),
                 )
@@ -182,7 +181,6 @@ private fun BusiestDaysCard(stats: OverviewStats, locale: Locale) {
                 VerticalBar(
                     fraction = n.toFloat() / max.coerceAtLeast(1),
                     color = if (max > 0 && n == max) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
-                    maxHeight = 60.dp,
                     topLabel = null,
                     bottomLabel = names[i],
                     modifier = Modifier.weight(1f),
@@ -205,7 +203,6 @@ private fun animatedFraction(target: Float): Float {
 private fun VerticalBar(
     fraction: Float,
     color: Color,
-    maxHeight: Dp,
     topLabel: String?,
     bottomLabel: String,
     modifier: Modifier = Modifier,
@@ -216,12 +213,10 @@ private fun VerticalBar(
             Text(topLabel, style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
             Spacer(Modifier.height(4.dp))
         }
-        Box(
-            Modifier
-                .fillMaxWidth(0.7f)
-                .height((maxHeight * f).coerceAtLeast(StubHeight))
-                .background(color, BarCorner),
-        )
+        // The bar scales within whatever height the labels leave, so large fonts shrink bars instead of clipping them.
+        Box(Modifier.weight(1f).fillMaxWidth(0.7f), contentAlignment = Alignment.BottomCenter) {
+            Box(Modifier.fillMaxWidth().fillMaxHeight(f).heightIn(min = StubHeight).background(color, BarCorner))
+        }
         Spacer(Modifier.height(4.dp))
         Text(
             bottomLabel,

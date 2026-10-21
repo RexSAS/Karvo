@@ -47,6 +47,10 @@ private val AlpineNightColors = darkColorScheme(
     outline = Color(0xFF3A4A66),
     outlineVariant = Color(0xFF2A3852),
     error = Color(0xFFFF8A80),
+    // Snackbars (e.g. Undo) use the inverse roles; keep them light-on-navy with a glacier action.
+    inverseSurface = Color(0xFFE6ECF5),
+    inverseOnSurface = Color(0xFF0B1220),
+    inversePrimary = Color(0xFF1B6FB0),
 )
 
 private val BaseTypography = Typography()
