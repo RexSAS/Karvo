@@ -26,11 +26,14 @@ interface SettingsRepository {
     suspend fun setHourlyRateCents(cents: Long?)
     val timeZoneId: Flow<String>
     suspend fun setTimeZoneId(id: String)
+    val theme: Flow<ThemeChoice>
+    suspend fun setTheme(choice: ThemeChoice)
 }
 
 class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : SettingsRepository {
     private val rateKey = longPreferencesKey("hourly_rate_cents")
     private val zoneKey = stringPreferencesKey("time_zone_id")
+    private val themeKey = stringPreferencesKey("theme")
 
     override val hourlyRateCents: Flow<Long?> = store.data.map { it[rateKey] }
 
@@ -45,5 +48,11 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
     override suspend fun setTimeZoneId(id: String) {
         require(isValidZoneId(id)) { "Invalid time zone: $id" }
         store.edit { it[zoneKey] = id }
+    }
+
+    override val theme: Flow<ThemeChoice> = store.data.map { themeChoiceOf(it[themeKey]) }
+
+    override suspend fun setTheme(choice: ThemeChoice) {
+        store.edit { it[themeKey] = choice.name }
     }
 }

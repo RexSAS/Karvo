@@ -44,4 +44,15 @@ class SettingsRepositoryTest {
         store.edit { it[stringPreferencesKey("time_zone_id")] = "Mars/Base" }
         assertEquals("Europe/Rome", repo.timeZoneId.first())
     }
+
+    @Test fun themeDefaultsToAlpineNight() = runTest { assertEquals(ThemeChoice.ALPINE_NIGHT, repo.theme.first()) }
+
+    @Test fun themeRoundTrips() = runTest {
+        repo.setTheme(ThemeChoice.CLASSIC); assertEquals(ThemeChoice.CLASSIC, repo.theme.first())
+    }
+
+    @Test fun unknownThemeFallsBack() = runTest {
+        store.edit { it[stringPreferencesKey("theme")] = "NEON" }
+        assertEquals(ThemeChoice.ALPINE_NIGHT, repo.theme.first())
+    }
 }
