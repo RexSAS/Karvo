@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MasterSki emblem: outlined peaks with a snow line and a filled sun. Single colour; tinted where it's used. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="72dp"
+    android:height="56dp"
+    android:viewportWidth="72"
+    android:viewportHeight="56">
+    <path
+        android:pathData="M6,50 L34,4 L48.8,28.4 L52,22 L66,50 Z"
+        android:strokeWidth="2.4"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M25.5,18 L30,20.5 L34,16 L38.5,20 L41.5,17.5"
+        android:strokeWidth="1.6"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M11,14 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 Z" />
+</vector>

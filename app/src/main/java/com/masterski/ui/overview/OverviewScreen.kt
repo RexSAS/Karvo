@@ -43,7 +43,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.filled.DownhillSkiing
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import com.masterski.domain.dayTitle
@@ -80,10 +80,10 @@ fun OverviewScreen(
                 subtitle = dayTitle(LocalDate.now()),
                 trailing = {
                     Icon(
-                        Icons.Filled.DownhillSkiing,
+                        painterResource(R.drawable.ic_emblem),
                         contentDescription = null,
                         tint = if (isAlpineNight()) AlpineNight.Gold else MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(52.dp),
+                        modifier = Modifier.size(width = 58.dp, height = 45.dp),
                     )
                 },
             )

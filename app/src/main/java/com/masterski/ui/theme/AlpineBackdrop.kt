@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AcUnit
-import androidx.compose.material.icons.filled.DownhillSkiing
 import androidx.compose.material.icons.filled.Snowboarding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,7 +23,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
+import com.masterski.R
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -59,7 +61,7 @@ private val Stars = listOf(
     Triple(.03f, .19f, .6f), Triple(.37f, .38f, .4f), Triple(.74f, .24f, .7f), Triple(.96f, .09f, .5f),
 )
 
-/** Alpine Night's sky: deep gradient, two soft glows, stars and an aurora band (top half of the screen). */
+/** Alpine Night's sky: deep gradient, two soft glows and stars. */
 private fun DrawScope.nightSky() {
     drawRect(Brush.verticalGradient(listOf(AlpineNight.SkyTop, AlpineNight.SkyMid, AlpineNight.SkyBottom)))
     drawRect(Brush.radialGradient(listOf(AlpineNight.GlowBlue, Color.Transparent), center = Offset(size.width * .85f, 0f), radius = size.width * 1.1f))
@@ -68,21 +70,6 @@ private fun DrawScope.nightSky() {
         val r = if (i % 3 == 0) 1.6f else 1.1f
         drawCircle(Color.White.copy(alpha = alpha), radius = r * density, center = Offset(x * size.width, y * size.height))
     }
-    // Aurora: a soft, slanted band of green-to-violet light.
-    val top = size.height * .07f
-    val band = size.height * .13f
-    drawPath(
-        Path().apply {
-            moveTo(-size.width * .1f, top + band * .9f)
-            cubicTo(size.width * .3f, top + band * .2f, size.width * .6f, top + band * .8f, size.width * 1.1f, top)
-            lineTo(size.width * 1.1f, top + band * .55f)
-            cubicTo(size.width * .6f, top + band * 1.35f, size.width * .3f, top + band * .75f, -size.width * .1f, top + band * 1.45f)
-            close()
-        },
-        Brush.horizontalGradient(
-            listOf(Color.Transparent, Color(0x2E50FFC8), Color(0x3378A0FF), Color(0x1F9B7BFF), Color.Transparent),
-        ),
-    )
 }
 
 /** Snow-lit ridges for Alpine Night: a far range fading into the sky and a near range with lit summits. */
@@ -92,7 +79,7 @@ private fun DrawScope.nightRidges() {
 }
 
 /**
- * The scene behind a screen. Alpine Night: a starry night sky with aurora and snow-lit ridges. Classic: two
+ * The scene behind a screen. Alpine Night: a starry night sky and snow-lit ridges. Classic: two
  * faint ridges in the theme colour. Both can add a faint winter-sports [figure]. Purely decorative (hidden from
  * accessibility); [content] is drawn on top and should use transparent containers to let it show.
  */
@@ -120,21 +107,21 @@ fun AlpineBackdrop(figure: BackdropFigure, modifier: Modifier = Modifier, conten
 @Composable
 private fun BoxScope.Figure(figure: BackdropFigure, tint: Color) {
     when (figure) {
-        BackdropFigure.Skier -> Silhouette(Icons.Filled.DownhillSkiing, tint, 120.dp, Alignment.BottomEnd, x = (-28).dp, y = (-118).dp)
-        BackdropFigure.Snowboarder -> Silhouette(Icons.Filled.Snowboarding, tint, 120.dp, Alignment.BottomStart, x = 24.dp, y = (-110).dp)
+        BackdropFigure.Skier -> Silhouette(painterResource(R.drawable.art_carving_skier), tint, 150.dp, Alignment.BottomEnd, x = (-16).dp, y = (-112).dp)
+        BackdropFigure.Snowboarder -> Silhouette(rememberVectorPainter(Icons.Filled.Snowboarding), tint, 120.dp, Alignment.BottomStart, x = 24.dp, y = (-110).dp)
         BackdropFigure.Snowflakes -> {
-            Silhouette(Icons.Filled.AcUnit, tint, 72.dp, Alignment.BottomEnd, x = (-36).dp, y = (-190).dp)
-            Silhouette(Icons.Filled.AcUnit, tint, 40.dp, Alignment.BottomEnd, x = (-130).dp, y = (-280).dp)
-            Silhouette(Icons.Filled.AcUnit, tint, 28.dp, Alignment.BottomStart, x = 48.dp, y = (-230).dp)
+            Silhouette(rememberVectorPainter(Icons.Filled.AcUnit), tint, 72.dp, Alignment.BottomEnd, x = (-36).dp, y = (-190).dp)
+            Silhouette(rememberVectorPainter(Icons.Filled.AcUnit), tint, 40.dp, Alignment.BottomEnd, x = (-130).dp, y = (-280).dp)
+            Silhouette(rememberVectorPainter(Icons.Filled.AcUnit), tint, 28.dp, Alignment.BottomStart, x = 48.dp, y = (-230).dp)
         }
         BackdropFigure.None -> Unit
     }
 }
 
 @Composable
-private fun BoxScope.Silhouette(icon: ImageVector, tint: Color, size: Dp, alignment: Alignment, x: Dp, y: Dp) {
+private fun BoxScope.Silhouette(art: Painter, tint: Color, size: Dp, alignment: Alignment, x: Dp, y: Dp) {
     Icon(
-        icon,
+        art,
         contentDescription = null,
         tint = tint.copy(alpha = 0.10f),
         modifier = Modifier.align(alignment).offset(x, y).size(size),

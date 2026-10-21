@@ -154,7 +154,7 @@ fun alpineFieldColors(): TextFieldColors =
         OutlinedTextFieldDefaults.colors()
     }
 
-/** The add button: a gold gradient in Alpine Night, the standard FAB in Classic. */
+/** The add button: solid gold in Alpine Night, the standard FAB in Classic. */
 @Composable
 fun AddButton(onClick: () -> Unit, contentDescription: String) {
     if (!isAlpineNight()) {
@@ -163,11 +163,8 @@ fun AddButton(onClick: () -> Unit, contentDescription: String) {
     }
     FloatingActionButton(
         onClick = onClick,
-        containerColor = Color.Transparent,
+        containerColor = AlpineNight.Gold,
         contentColor = Color(0xFF2A1D00),
         shape = RoundedCornerShape(18.dp),
-        modifier = Modifier
-            .shadow(14.dp, RoundedCornerShape(18.dp), ambientColor = AlpineNight.GoldDeep, spotColor = AlpineNight.GoldDeep)
-            .background(Brush.linearGradient(listOf(Color(0xFFFFE2A3), AlpineNight.GoldDeep)), RoundedCornerShape(18.dp)),
     ) { Icon(Icons.Filled.Add, contentDescription = contentDescription, modifier = Modifier.size(28.dp)) }
 }
