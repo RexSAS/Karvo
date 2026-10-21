@@ -10,6 +10,10 @@ import com.karvo.data.LessonRepository
 import com.karvo.data.SettingsRepository
 import com.karvo.domain.MonthSummary
 import com.karvo.domain.OverviewStats
+import com.karvo.domain.SeasonStats
+import com.karvo.domain.Unpaid
+import com.karvo.domain.computeSeasons
+import com.karvo.domain.unpaidTotals
 import com.karvo.domain.computeStats
 import com.karvo.domain.earningsCents
 import com.karvo.domain.summarizeByMonth
@@ -35,6 +39,9 @@ data class OverviewUiState(
     val loading: Boolean = true,
     /** Null when there are no lessons. */
     val stats: OverviewStats? = null,
+    /** Null when there are no lessons. */
+    val seasons: SeasonStats? = null,
+    val unpaid: Unpaid = Unpaid(0, 0, null),
 )
 
 class OverviewViewModel(
@@ -47,8 +54,8 @@ class OverviewViewModel(
     private val revealed = MutableStateFlow(false)
 
     val uiState: StateFlow<OverviewUiState> = combine(
-        lessons.observeLessons(), settings.hourlyRateCents, revealed, settings.timeZoneId,
-    ) { all, rate, isRevealed, zone ->
+        lessons.observeLessons(), settings.hourlyRateCents, revealed, settings.timeZoneId, settings.seasonStartMonth,
+    ) { all, rate, isRevealed, zone, seasonStart ->
         val today = LocalDate.now(clock.withZone(ZoneId.of(zone)))
         val summaries = summarizeByMonth(all)
         val total = summaries.sumOf { it.totalMinutes }
@@ -60,6 +67,8 @@ class OverviewViewModel(
             revealed = isRevealed,
             loading = false,
             stats = if (all.isEmpty()) null else computeStats(all, today, rate),
+            seasons = if (all.isEmpty()) null else computeSeasons(all, today, seasonStart, rate),
+            unpaid = unpaidTotals(all, today, rate),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), OverviewUiState())
 

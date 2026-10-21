@@ -95,4 +95,29 @@ class OverviewViewModelTest {
         val s = OverviewViewModel(repo, FakeSettingsRepository(1000), clock).uiState.first { it.stats != null }
         assertNotNull(s.stats); assertFalse(s.revealed)
     }
+
+    @Test fun seasonsFollowStartMonthSetting() = runTest {
+        repo.save(Lesson(date = LocalDate.of(2026, 12, 1), durationMinutes = 60, student = "A"))
+        val settings = FakeSettingsRepository(2000)
+        val clock = Clock.fixed(Instant.parse("2027-01-10T12:00:00Z"), ZoneOffset.UTC)
+        val vm = OverviewViewModel(repo, settings, clock)
+        assertEquals("2026/27", vm.uiState.first { it.seasons != null }.seasons!!.current.season.label())
+        settings.setSeasonStartMonth(1)
+        assertEquals("2027", vm.uiState.first { it.seasons?.current?.season?.startMonth == 1 }.seasons!!.current.season.label())
+    }
+
+    @Test fun unpaidUsesZoneToday() = runTest {
+        repo.save(Lesson(date = LocalDate.of(2027, 1, 1), durationMinutes = 45, student = "A"))
+        repo.save(Lesson(date = LocalDate.of(2026, 12, 1), durationMinutes = 60, student = "B", paidOn = LocalDate.of(2026, 12, 20)))
+        val clock = Clock.fixed(Instant.parse("2026-12-31T23:30:00Z"), ZoneOffset.UTC) // already 1 Jan in Rome
+        val s = OverviewViewModel(repo, FakeSettingsRepository(2000, zone = "Europe/Rome"), clock).uiState.first { !it.loading }
+        assertEquals(45L, s.unpaid.minutes)
+        assertEquals(1, s.unpaid.months)
+    }
+
+    @Test fun noSeasonsWithoutLessons() = runTest {
+        val s = OverviewViewModel(repo, FakeSettingsRepository(2000)).uiState.first { !it.loading }
+        assertNull(s.seasons)
+        assertEquals(0L, s.unpaid.minutes)
+    }
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.karvo.KarvoApp
+import com.karvo.data.DEFAULT_SEASON_START_MONTH
 import com.karvo.data.DEFAULT_TIME_ZONE
 import com.karvo.data.LanguageChoice
 import com.karvo.data.LanguageController
@@ -34,6 +35,7 @@ data class SettingsUiState(
     val timeZoneId: String = DEFAULT_TIME_ZONE,
     val theme: ThemeChoice = ThemeChoice.ALPINE_NIGHT,
     val language: LanguageChoice = LanguageChoice.SYSTEM,
+    val seasonStartMonth: Int = DEFAULT_SEASON_START_MONTH,
 )
 
 /** Region zone ids (containing '/'), excluding Etc/ and SystemV/, sorted; computed once. */
@@ -79,6 +81,9 @@ class SettingsViewModel(
         viewModelScope.launch {
             settings.theme.collect { choice -> _uiState.update { it.copy(theme = choice) } }
         }
+        viewModelScope.launch {
+            settings.seasonStartMonth.collect { month -> _uiState.update { it.copy(seasonStartMonth = month) } }
+        }
     }
 
     fun onRateChange(input: String) {
@@ -111,6 +116,11 @@ class SettingsViewModel(
     fun onTimeZoneSelected(id: String) {
         if (id !in availableTimeZones) return
         viewModelScope.launch { settings.setTimeZoneId(id) }
+    }
+
+    fun onSeasonStartSelected(month: Int) {
+        if (month !in 1..12) return
+        viewModelScope.launch { settings.setSeasonStartMonth(month) }
     }
 
     fun onThemeSelected(choice: ThemeChoice) {

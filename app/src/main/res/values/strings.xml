@@ -172,4 +172,15 @@
     <string name="mark_unpaid_question">Mark %s as unpaid?</string>
     <string name="mark_unpaid">Mark as unpaid</string>
     <string name="paid_month_note">%s is marked as paid — this lesson will be unpaid.</string>
+    <!-- Seasons -->
+    <string name="this_season">This season %s</string>
+    <string name="season_vs_last">%1$s vs %2$s at this date</string>
+    <plurals name="to_be_paid">
+        <item quantity="one">To be paid: %1$d month · %2$s · %3$s</item>
+        <item quantity="other">To be paid: %1$d months · %2$s · %3$s</item>
+    </plurals>
+    <string name="seasons_header">Seasons (%d)</string>
+    <string name="season_start">Season starts in</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
 </resources>

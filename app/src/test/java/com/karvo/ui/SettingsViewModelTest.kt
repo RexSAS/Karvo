@@ -120,4 +120,12 @@ class SettingsViewModelTest {
         vm.onLanguageSelected(LanguageChoice.ITALIAN)
         assertEquals(3000L, settings.hourlyRateCents.first { it != null })
     }
+
+    @Test fun settingSeasonStartPersists() = runTest {
+        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo, FakeLanguageController())
+        assertEquals(11, vm.uiState.value.seasonStartMonth)
+        vm.onSeasonStartSelected(12)
+        assertEquals(12, s.seasonStartMonth.first())
+        assertEquals(12, vm.uiState.value.seasonStartMonth)
+    }
 }

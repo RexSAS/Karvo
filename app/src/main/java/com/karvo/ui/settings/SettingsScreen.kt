@@ -102,6 +102,7 @@ fun SettingsScreen(
     val focusManager = LocalFocusManager.current
     var showZonePicker by remember { mutableStateOf(false) }
     var showThemePicker by remember { mutableStateOf(false) }
+    var showSeasonPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
     var rateFocused by remember { mutableStateOf(false) }
 
@@ -203,6 +204,13 @@ fun SettingsScreen(
 
             ListItem(
                 colors = transparentRow(),
+                headlineContent = { Text(stringResource(R.string.season_start)) },
+                supportingContent = { Text(monthName(state.seasonStartMonth)) },
+                modifier = Modifier.clickable { showSeasonPicker = true },
+            )
+
+            ListItem(
+                colors = transparentRow(),
                 headlineContent = { Text(stringResource(R.string.theme)) },
                 supportingContent = { Text(themeLabel(state.theme)) },
                 modifier = Modifier.clickable { showThemePicker = true },
@@ -282,6 +290,20 @@ fun SettingsScreen(
                 showZonePicker = false
             },
             onDismiss = { showZonePicker = false },
+        )
+    }
+
+    if (showSeasonPicker) {
+        ChoiceDialog(
+            title = stringResource(R.string.season_start),
+            options = (1..12).toList(),
+            selected = state.seasonStartMonth,
+            label = { monthName(it) },
+            onSelect = {
+                viewModel.onSeasonStartSelected(it)
+                showSeasonPicker = false
+            },
+            onDismiss = { showSeasonPicker = false },
         )
     }
 
@@ -428,3 +450,8 @@ private fun TimeZoneDialog(current: String, onSelect: (String) -> Unit, onDismis
 /** Settings rows let the alpine backdrop show through instead of cutting it into fragments. */
 @Composable
 private fun transparentRow() = ListItemDefaults.colors(containerColor = Color.Transparent)
+
+/** "November" / "Novembre", capitalised for display. */
+private fun monthName(month: Int, locale: java.util.Locale = java.util.Locale.getDefault()): String =
+    java.time.Month.of(month).getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, locale)
+        .replaceFirstChar { it.titlecase(locale) }
