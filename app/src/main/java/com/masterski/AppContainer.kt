@@ -13,6 +13,10 @@ import com.masterski.data.LessonRepository
 import com.masterski.data.MasterSkiDatabase
 import com.masterski.data.RoomLessonRepository
 import com.masterski.data.SettingsRepository
+import com.masterski.data.backup.BackupService
+import com.masterski.data.backup.BackupStore
+import java.io.File
+import java.time.Clock
 
 class AppContainer(context: Context) {
     private val appContext = context.applicationContext
@@ -31,4 +35,7 @@ class AppContainer(context: Context) {
     val lessonRepository: LessonRepository by lazy { RoomLessonRepository(database.lessonDao()) }
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(dataStore) }
     val languageController: LanguageController = AppCompatLanguageController()
+    val backupService: BackupService by lazy {
+        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository)
+    }
 }
