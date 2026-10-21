@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,6 +59,7 @@ fun LessonsScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.lessons)) }) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAdd) { Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_lesson)) }

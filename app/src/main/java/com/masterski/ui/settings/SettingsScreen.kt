@@ -45,6 +45,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -129,6 +130,7 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.settings)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
@@ -165,24 +167,28 @@ fun SettingsScreen(
             )
 
             ListItem(
+                colors = transparentRow(),
                 headlineContent = { Text(stringResource(R.string.time_zone)) },
                 supportingContent = { Text(state.timeZoneId) },
                 modifier = Modifier.clickable { showZonePicker = true },
             )
 
             ListItem(
+                colors = transparentRow(),
                 headlineContent = { Text(stringResource(R.string.theme)) },
                 supportingContent = { Text(themeLabel(state.theme)) },
                 modifier = Modifier.clickable { showThemePicker = true },
             )
 
             ListItem(
+                colors = transparentRow(),
                 headlineContent = { Text(stringResource(R.string.language)) },
                 supportingContent = { Text(languageLabel(state.language)) },
                 modifier = Modifier.clickable { showLanguagePicker = true },
             )
 
             ListItem(
+                colors = transparentRow(),
                 leadingContent = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
                 headlineContent = { Text(stringResource(R.string.check_for_updates)) },
                 supportingContent = { Text(stringResource(R.string.version, BuildConfig.VERSION_NAME)) },
@@ -190,6 +196,7 @@ fun SettingsScreen(
             )
 
             ListItem(
+                colors = transparentRow(),
                 leadingContent = { Icon(Icons.Filled.Restore, contentDescription = null) },
                 headlineContent = { Text(stringResource(R.string.backups)) },
                 supportingContent = { Text(stringResource(R.string.backups_hint)) },
@@ -199,6 +206,7 @@ fun SettingsScreen(
 
             // A navigation-style row, not a filled button, so it doesn't read as "Save".
             ListItem(
+                colors = transparentRow(),
                 leadingContent = { Icon(Icons.Filled.FileDownload, contentDescription = null) },
                 headlineContent = { Text(stringResource(R.string.export_csv)) },
                 supportingContent = { Text(stringResource(R.string.export_csv_hint)) },
@@ -376,3 +384,7 @@ private fun TimeZoneDialog(current: String, onSelect: (String) -> Unit, onDismis
         }
     }
 }
+
+/** Settings rows let the alpine backdrop show through instead of cutting it into fragments. */
+@Composable
+private fun transparentRow() = ListItemDefaults.colors(containerColor = Color.Transparent)

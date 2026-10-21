@@ -46,6 +46,8 @@ import com.masterski.ui.lessons.LessonsScreen
 import com.masterski.ui.overview.MonthDetailScreen
 import com.masterski.ui.overview.OverviewScreen
 import com.masterski.ui.settings.SettingsScreen
+import com.masterski.ui.theme.AlpineBackdrop
+import com.masterski.ui.theme.BackdropFigure
 import com.masterski.ui.update.UpdateDialogs
 import com.masterski.ui.update.UpdateViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -140,48 +142,60 @@ fun MasterSkiNavHost() {
         // transition are ignored; back/done use navigateUp, which never pops the start destination.
         NavHost(navController, startDestination = ROUTE_LESSONS, modifier = Modifier.padding(padding)) {
             composable(ROUTE_LESSONS) { entry ->
-                LessonsScreen(
-                    onAdd = dropUnlessResumed { navController.navigate(editRoute()) },
-                    onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
-                    onDeleted = showUndo,
-                )
+                AlpineBackdrop(BackdropFigure.Skier) {
+                    LessonsScreen(
+                        onAdd = dropUnlessResumed { navController.navigate(editRoute()) },
+                        onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
+                        onDeleted = showUndo,
+                    )
+                }
             }
             composable(ROUTE_OVERVIEW) { entry ->
-                OverviewScreen(
-                    onOpenMonth = { month -> dropUnlessResumedNow(entry) { navController.navigate(monthRoute(month)) } },
-                    onOpenSettings = dropUnlessResumed { navController.navigateToTab(ROUTE_SETTINGS) },
-                )
+                AlpineBackdrop(BackdropFigure.Snowboarder) {
+                    OverviewScreen(
+                        onOpenMonth = { month -> dropUnlessResumedNow(entry) { navController.navigate(monthRoute(month)) } },
+                        onOpenSettings = dropUnlessResumed { navController.navigateToTab(ROUTE_SETTINGS) },
+                    )
+                }
             }
             composable(ROUTE_SETTINGS) {
-                SettingsScreen(
-                    onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
-                    onCheckForUpdates = updateViewModel::checkNow,
-                )
+                AlpineBackdrop(BackdropFigure.Snowflakes) {
+                    SettingsScreen(
+                        onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
+                        onCheckForUpdates = updateViewModel::checkNow,
+                    )
+                }
             }
             composable(ROUTE_BACKUPS) { entry ->
-                BackupsScreen(
-                    onBack = dropUnlessResumed { navController.navigateUp() },
-                    onRestore = { fileName -> dropUnlessResumedNow(entry) { navController.navigate(restoreRoute(fileName)) } },
-                    showMessage = showMessage,
-                )
+                AlpineBackdrop(BackdropFigure.None) {
+                    BackupsScreen(
+                        onBack = dropUnlessResumed { navController.navigateUp() },
+                        onRestore = { fileName -> dropUnlessResumedNow(entry) { navController.navigate(restoreRoute(fileName)) } },
+                        showMessage = showMessage,
+                    )
+                }
             }
             composable(ROUTE_RESTORE, arguments = listOf(navArgument("fileName") { type = NavType.StringType })) { entry ->
                 val fileName = entry.arguments?.getString("fileName") ?: return@composable
-                RestoreScreen(
-                    fileName = fileName,
-                    onBack = dropUnlessResumed { navController.navigateUp() },
-                    onRestored = { count ->
-                        navController.popBackStack(ROUTE_BACKUPS, inclusive = false)
-                        showMessage(context.resources.getQuantityString(R.plurals.restored_lessons, count, count))
-                    },
-                )
+                AlpineBackdrop(BackdropFigure.None) {
+                    RestoreScreen(
+                        fileName = fileName,
+                        onBack = dropUnlessResumed { navController.navigateUp() },
+                        onRestored = { count ->
+                            navController.popBackStack(ROUTE_BACKUPS, inclusive = false)
+                            showMessage(context.resources.getQuantityString(R.plurals.restored_lessons, count, count))
+                        },
+                    )
+                }
             }
             composable(
                 ROUTE_EDIT,
                 arguments = listOf(navArgument("id") { type = NavType.LongType; defaultValue = -1L }),
             ) { entry ->
                 val id = entry.arguments?.getLong("id") ?: -1L
-                EditLessonScreen(lessonId = id.takeIf { it != -1L }, onDone = dropUnlessResumed { navController.navigateUp() })
+                AlpineBackdrop(BackdropFigure.None) {
+                    EditLessonScreen(lessonId = id.takeIf { it != -1L }, onDone = dropUnlessResumed { navController.navigateUp() })
+                }
             }
             composable(
                 ROUTE_MONTH,
@@ -192,11 +206,13 @@ fun MasterSkiNavHost() {
             ) { entry ->
                 val year = entry.arguments?.getInt("year") ?: return@composable
                 val month = entry.arguments?.getInt("month") ?: return@composable
-                MonthDetailScreen(
-                    month = YearMonth.of(year, month),
-                    onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
-                    onBack = dropUnlessResumed { navController.navigateUp() },
-                )
+                AlpineBackdrop(BackdropFigure.None) {
+                    MonthDetailScreen(
+                        month = YearMonth.of(year, month),
+                        onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
+                        onBack = dropUnlessResumed { navController.navigateUp() },
+                    )
+                }
             }
         }
     }
