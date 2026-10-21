@@ -150,7 +150,7 @@ fun MasterSkiNavHost() {
         // transition are ignored; back/done use navigateUp, which never pops the start destination.
         NavHost(navController, startDestination = ROUTE_LESSONS, modifier = Modifier.padding(padding)) {
             composable(ROUTE_LESSONS) { entry ->
-                AlpineBackdrop(BackdropFigure.Skier) {
+                AlpineBackdrop(BackdropFigure.None) {
                     LessonsScreen(
                         onAdd = dropUnlessResumed { navController.navigate(editRoute()) },
                         onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },

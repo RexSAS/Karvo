@@ -25,14 +25,12 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.res.painterResource
-import com.masterski.R
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /** The faint figure drawn above the ridges on a screen. */
-enum class BackdropFigure { Skier, Snowboarder, Snowflakes, None }
+enum class BackdropFigure { Snowboarder, Snowflakes, None }
 
 // Ridge outlines as (x, y) fractions of the backdrop band: far range first, near range second.
 private val FarRidge = listOf(
@@ -107,7 +105,6 @@ fun AlpineBackdrop(figure: BackdropFigure, modifier: Modifier = Modifier, conten
 @Composable
 private fun BoxScope.Figure(figure: BackdropFigure, tint: Color) {
     when (figure) {
-        BackdropFigure.Skier -> Silhouette(painterResource(R.drawable.art_carving_skier), tint, 150.dp, Alignment.BottomEnd, x = (-16).dp, y = (-112).dp)
         BackdropFigure.Snowboarder -> Silhouette(rememberVectorPainter(Icons.Filled.Snowboarding), tint, 120.dp, Alignment.BottomStart, x = 24.dp, y = (-110).dp)
         BackdropFigure.Snowflakes -> {
             Silhouette(rememberVectorPainter(Icons.Filled.AcUnit), tint, 72.dp, Alignment.BottomEnd, x = (-36).dp, y = (-190).dp)
