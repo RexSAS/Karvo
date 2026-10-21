@@ -34,6 +34,11 @@ private val AlpineNightColors = darkColorScheme(
     onPrimary = Color(0xFF04223A),
     primaryContainer = Color(0xFF1B3A5C),
     onPrimaryContainer = Color(0xFFCDE6FF),
+    // Nav-bar indicator and chips use secondary; keep them in the glacier family, not Material purple.
+    secondary = Color(0xFF9CC9F0),
+    onSecondary = Color(0xFF04223A),
+    secondaryContainer = Color(0xFF1B3A5C),
+    onSecondaryContainer = Color(0xFFCDE6FF),
     tertiary = Color(0xFFE8B964),
     onTertiary = Color(0xFF3A2800),
     onBackground = Color(0xFFE6ECF5),
