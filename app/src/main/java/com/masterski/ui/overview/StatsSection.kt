@@ -32,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat
 import com.masterski.R
@@ -130,39 +129,12 @@ private fun LastSixMonthsCard(stats: OverviewStats, revealed: Boolean, locale: L
 @Composable
 private fun TopStudentsCard(stats: OverviewStats, revealed: Boolean, rateSet: Boolean) {
     val top = stats.topStudents
-    val max = top.maxOfOrNull { it.minutes }?.coerceAtLeast(1) ?: 1
-    val description = stringResource(R.string.a11y_top_students, top.joinToString { "${it.name} ${formatDuration(it.minutes)}" })
+    val description = stringResource(
+        R.string.a11y_top_students,
+        top.mapIndexed { i, it -> "${i + 1}. ${it.name} ${formatDuration(it.minutes)}" }.joinToString(),
+    )
     StatsCard(stringResource(R.string.stats_top_students), description) {
-        top.forEach { student ->
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        student.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(0.35f),
-                    )
-                    HorizontalBar(student.minutes.toFloat() / max, Modifier.weight(0.4f))
-                    Text(
-                        formatDuration(student.minutes),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.End,
-                        maxLines = 1,
-                        modifier = Modifier.weight(0.25f),
-                    )
-                }
-                if (rateSet) {
-                    Text(
-                        earningsLabel(student.earningsCents, revealed),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
-        }
+        TopStudentsPodium(top, revealed, rateSet)
     }
 }
 
@@ -224,14 +196,5 @@ private fun VerticalBar(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
         )
-    }
-}
-
-@Composable
-private fun HorizontalBar(fraction: Float, modifier: Modifier = Modifier) {
-    val f = animatedFraction(fraction)
-    val shape = RoundedCornerShape(5.dp)
-    Box(modifier.height(10.dp).background(MaterialTheme.colorScheme.surfaceContainerHighest, shape)) {
-        Box(Modifier.fillMaxWidth(f.coerceAtLeast(0.02f)).fillMaxHeight().background(MaterialTheme.colorScheme.primary, shape))
     }
 }
