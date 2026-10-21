@@ -2,16 +2,19 @@
 
 All notable changes to MasterSki are listed here.
 
-## [Unreleased]
+## [1.3] — 2026-10-21
 
 ### Added
 - **Animated splash screen**: the mountains rise and a gold sun appears while the app starts (Android 12+; older versions show the logo still).
-- **Premium Alpine Night look**: a starry night sky with a soft aurora and snow-lit ridges behind every screen; the season total on a frosted-glass panel with the headline numbers tucked under it; solid deep-navy tiles everywhere else; a gold skier in the Overview header and a gold add button.
+- **Premium Alpine Night look**: a starry night sky with snow-lit ridges behind every screen; your total hours on a frosted-glass panel with the headline numbers tucked under it; solid deep-navy tiles everywhere else; the gold MasterSki emblem in the Overview header and a solid gold add button.
 - **Swipe between pages**: swipe left and right to move between Lessons, Overview and Settings (swiping a lesson row still deletes it). Earnings hide and a typed rate is saved as soon as you swipe away.
 - **Lessons grouped by month** in tiles, with each month's total hours in its header and the lesson count under the title.
 
 ### Changed
 - Screen titles are left-aligned with a subtitle (today's date on Overview). Classic keeps the plain Material look with the same layout.
+
+### Upgrading
+- On 1.2 the app offers 1.3 by itself when you open it. On 1.0 or 1.1, install it by hand once — lessons and settings are kept.
 
 ## [1.2] — 2026-10-21
 
@@ -51,6 +54,7 @@ All notable changes to MasterSki are listed here.
 
 First release: log lessons (date, duration, student, notes), monthly and lifetime hours, private earnings from an hourly rate, time zone setting, CSV export, fully offline.
 
+[1.3]: https://github.com/RexSAS/MasterSki/releases/tag/v1.3.0
 [1.2]: https://github.com/RexSAS/MasterSki/releases/tag/v1.2.0
 [1.1]: https://github.com/RexSAS/MasterSki/releases/tag/v1.1.0
 [1.0]: https://github.com/RexSAS/MasterSki/releases/tag/v1.0.0

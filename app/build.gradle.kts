@@ -20,9 +20,9 @@ android {
         applicationId = "com.masterski"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
+        versionCode = 4
         // -PversionNameOverride=1.0.9 builds a private test APK that sees the latest release as newer.
-        versionName = (findProperty("versionNameOverride") as String?) ?: "1.2"
+        versionName = (findProperty("versionNameOverride") as String?) ?: "1.3"
     }
 
     signingConfigs {
