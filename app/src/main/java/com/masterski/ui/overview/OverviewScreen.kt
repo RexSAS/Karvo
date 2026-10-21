@@ -111,6 +111,11 @@ fun OverviewScreen(
                         }
                         HorizontalDivider()
                     }
+                    state.stats?.let { stats ->
+                        item(key = "stats") {
+                            StatsSection(stats, state.revealed, state.rateSet, Modifier.padding(vertical = 16.dp))
+                        }
+                    }
                 }
             }
         }

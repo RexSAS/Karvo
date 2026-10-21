@@ -47,6 +47,19 @@
     <string name="hide_earnings">Hide earnings</string>
     <string name="no_lessons">No lessons yet.</string>
 
+    <!-- Statistics -->
+    <string name="statistics">Statistics</string>
+    <string name="stats_lessons_this_month">Lessons this month</string>
+    <string name="stats_avg_lesson">Avg. lesson</string>
+    <string name="stats_students">Students</string>
+    <string name="stats_last_six_months">Last 6 months</string>
+    <string name="stats_six_month_earnings">6-month earnings</string>
+    <string name="stats_top_students">Top students</string>
+    <string name="stats_busiest_days">Busiest days</string>
+    <string name="a11y_last_six_months">Hours in the last 6 months: %1$s</string>
+    <string name="a11y_top_students">Top students: %1$s</string>
+    <string name="a11y_busiest_days">Lessons per weekday: %1$s</string>
+
     <!-- Settings -->
     <string name="hourly_rate">Hourly rate</string>
     <string name="rate_error">Enter an amount like 25.00</string>

@@ -45,6 +45,19 @@
     <string name="hide_earnings">Nascondi guadagni</string>
     <string name="no_lessons">Ancora nessuna lezione.</string>
 
+    <!-- Statistics -->
+    <string name="statistics">Statistiche</string>
+    <string name="stats_lessons_this_month">Lezioni questo mese</string>
+    <string name="stats_avg_lesson">Lezione media</string>
+    <string name="stats_students">Allievi</string>
+    <string name="stats_last_six_months">Ultimi 6 mesi</string>
+    <string name="stats_six_month_earnings">Guadagni 6 mesi</string>
+    <string name="stats_top_students">Allievi principali</string>
+    <string name="stats_busiest_days">Giorni più intensi</string>
+    <string name="a11y_last_six_months">Ore negli ultimi 6 mesi: %1$s</string>
+    <string name="a11y_top_students">Allievi principali: %1$s</string>
+    <string name="a11y_busiest_days">Lezioni per giorno della settimana: %1$s</string>
+
     <!-- Settings -->
     <string name="hourly_rate">Tariffa oraria</string>
     <string name="rate_error">Inserisci un importo come 25.00</string>
