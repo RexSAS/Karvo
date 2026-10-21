@@ -12,7 +12,7 @@
   <a href="https://github.com/RexSAS/MasterSki/releases/latest"><img src="https://img.shields.io/github/v/release/RexSAS/MasterSki?label=download&color=1565C0" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white" alt="Android 8.0+">
   <img src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin + Jetpack Compose">
-  <img src="https://img.shields.io/badge/works-offline-1565C0" alt="Works offline">
+  <img src="https://img.shields.io/badge/data-stays%20on%20your%20phone-1565C0" alt="Data stays on your phone">
 </p>
 
 ---
@@ -38,17 +38,19 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 - **Alpine Night theme** — a dark navy and gold look, on by default. Prefer the old look? Pick *Classic* in Settings.
 - **Italiano / English** — the app follows your phone's language, or pick one in Settings.
 - **Edit or undo** — tap a lesson to fix it, or swipe it away and confirm to delete. Changed your mind? Tap *Undo*.
+- **Automatic updates** — when a new version is out, MasterSki offers it when you open the app, backs up your lessons first and installs it with Android's installer.
+- **Backups and restore** — up to 3 backups are kept inside the app (one before every update, or any time with *Back up now*). Restore one from *Settings → Backups*, behind two confirmation steps.
 - **Export to CSV** — save all your lessons as a spreadsheet to keep a backup or send to the ski school.
 - **Your time zone** — "today" follows the time zone you pick (default *Europe/Rome*).
-- **Fully offline and private** — no account, no internet permission. Everything stays on your phone.
+- **Private** — no account, no tracking. The internet is used only to check GitHub for updates; your lessons never leave your phone.
 
 ## Install
 
 1. On your Android phone, open the [latest release](https://github.com/RexSAS/MasterSki/releases/latest) and download **`MasterSki-x.y.apk`**.
-2. Open the file and allow *Install unknown apps* when Android asks.
+2. Open the file and allow *Install unknown apps* when Android asks. From 1.2 on, MasterSki updates itself: it asks once to be allowed to install apps.
 3. Open **MasterSki**, set your hourly rate in *Settings*, and log your first lesson with **+**.
 
-Already on 1.0? Install the new APK over it: your lessons and settings are kept. See the [changelog](CHANGELOG.md) for what's new.
+Already on 1.0 or 1.1? Install the new APK over it once: your lessons and settings are kept. See the [changelog](CHANGELOG.md) for what's new.
 
 > [!WARNING]
 > Uninstalling the app deletes all lessons. Use **Settings → Export to CSV** regularly as a backup — the CSV is a copy for your records and cannot be imported back.
@@ -90,6 +92,17 @@ Without this file `assembleRelease` produces an unsigned APK that cannot be inst
 > Back up the keystore and its password. If you lose them, updates can no longer be installed over the existing app. Never commit the keystore or `keystore.properties` (both are git-ignored).
 
 A debug build is signed differently from the release build: uninstall it (export your lessons first!) before installing the release.
+
+### Publishing a release
+
+The in-app updater reads `https://api.github.com/repos/RexSAS/MasterSki/releases/latest`, so every release must:
+
+- use a tag like `v1.3.0` (a higher number than the installed version);
+- have exactly one `.apk` asset;
+- be signed with the same keystore (Android refuses updates signed with another key);
+- bump `versionCode` and `versionName` in `app/build.gradle.kts`.
+
+To test the update flow before publishing, build a private APK that thinks it is older: `./gradlew assembleRelease -PversionNameOverride=1.0.9`.
 
 ## Tech
 
