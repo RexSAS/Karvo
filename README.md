@@ -94,5 +94,3 @@ A debug build is signed differently from the release build: uninstall it (export
 ## Tech
 
 Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation Compose · AppCompat per-app languages · MVVM · JUnit + Robolectric
-
-Design and implementation notes live in [`docs/superpowers/`](docs/superpowers/).
