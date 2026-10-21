@@ -2,8 +2,8 @@ package com.masterski
 
 import android.graphics.Color
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
@@ -13,7 +13,7 @@ import com.masterski.data.ThemeChoice
 import com.masterski.ui.MasterSkiNavHost
 import com.masterski.ui.theme.MasterSkiTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableAlpineBars()

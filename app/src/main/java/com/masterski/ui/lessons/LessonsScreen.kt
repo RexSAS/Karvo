@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -62,7 +63,11 @@ fun LessonsScreen(
             // Still loading: show nothing rather than flashing the empty state.
         } else if (groups.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(padding).padding(32.dp), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.no_lessons_hint), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.no_lessons_hint),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                )
             }
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(padding)) {

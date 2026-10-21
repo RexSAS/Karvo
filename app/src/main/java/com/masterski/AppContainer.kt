@@ -6,7 +6,9 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
+import com.masterski.data.AppCompatLanguageController
 import com.masterski.data.DataStoreSettingsRepository
+import com.masterski.data.LanguageController
 import com.masterski.data.LessonRepository
 import com.masterski.data.MasterSkiDatabase
 import com.masterski.data.RoomLessonRepository
@@ -28,4 +30,5 @@ class AppContainer(context: Context) {
 
     val lessonRepository: LessonRepository by lazy { RoomLessonRepository(database.lessonDao()) }
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(dataStore) }
+    val languageController: LanguageController = AppCompatLanguageController()
 }
