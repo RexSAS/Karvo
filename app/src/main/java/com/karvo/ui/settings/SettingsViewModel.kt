@@ -14,9 +14,11 @@ import com.karvo.data.LanguageController
 import com.karvo.data.LessonRepository
 import com.karvo.data.SettingsRepository
 import com.karvo.data.ThemeChoice
+import com.karvo.data.effectiveTheme
 import com.karvo.domain.RateParseResult
 import com.karvo.domain.csvFileName
 import com.karvo.domain.formatRateText
+import com.karvo.domain.isProCode
 import com.karvo.domain.lessonsToCsv
 import com.karvo.domain.normalizeRateInput
 import com.karvo.domain.parseRateCents
@@ -26,6 +28,7 @@ import java.time.ZoneId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -34,7 +37,9 @@ data class SettingsUiState(
     val rateText: String = "",
     val rateError: Boolean = false,
     val timeZoneId: String = DEFAULT_TIME_ZONE,
-    val theme: ThemeChoice = ThemeChoice.ALPINE_NIGHT,
+    /** The theme being drawn: always Classic without Pro. */
+    val theme: ThemeChoice = ThemeChoice.CLASSIC,
+    val pro: Boolean = false,
     val language: LanguageChoice = LanguageChoice.SYSTEM,
     val seasonStartMonth: Int = DEFAULT_SEASON_START_MONTH,
     val biometricReveal: Boolean = true,
@@ -84,7 +89,9 @@ class SettingsViewModel(
             settings.timeZoneId.collect { id -> _uiState.update { it.copy(timeZoneId = id) } }
         }
         viewModelScope.launch {
-            settings.theme.collect { choice -> _uiState.update { it.copy(theme = choice) } }
+            settings.theme.combine(settings.pro, ::Pair).collect { (choice, pro) ->
+                _uiState.update { it.copy(theme = effectiveTheme(choice, pro), pro = pro) }
+            }
         }
         viewModelScope.launch {
             settings.seasonStartMonth.collect { month -> _uiState.update { it.copy(seasonStartMonth = month) } }
@@ -142,6 +149,17 @@ class SettingsViewModel(
     fun onSeasonStartSelected(month: Int) {
         if (month !in 1..12) return
         viewModelScope.launch { settings.setSeasonStartMonth(month) }
+    }
+
+    /** Unlocks Pro and switches to Alpine Night if [code] is the Pro code; returns whether it was. */
+    fun redeem(code: String): Boolean {
+        if (!isProCode(code)) return false
+        viewModelScope.launch {
+            // Theme first, so unlocking switches straight to Alpine Night without a frame of the old choice.
+            settings.setTheme(ThemeChoice.ALPINE_NIGHT)
+            settings.setPro(true)
+        }
+        return true
     }
 
     fun onThemeSelected(choice: ThemeChoice) {

@@ -14,11 +14,13 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.karvo.data.ThemeChoice
+import com.karvo.data.effectiveTheme
 import com.karvo.ui.KarvoNavHost
 import com.karvo.ui.theme.KarvoTheme
 import com.karvo.ui.theme.SPLASH_ANIMATION_MS
 import com.karvo.ui.theme.animateSplashExit
 import com.karvo.ui.theme.shouldKeepSplash
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -34,7 +36,8 @@ class MainActivity : AppCompatActivity() {
         // Keep the splash until the theme setting is read, so the first frame already has the right theme.
         var startTheme: ThemeChoice? = null
         val startedAt = SystemClock.elapsedRealtime()
-        lifecycleScope.launch { startTheme = settings.theme.first() }
+        val drawnTheme = settings.theme.combine(settings.pro, ::effectiveTheme)
+        lifecycleScope.launch { startTheme = drawnTheme.first() }
         // Android 12+ animates the logo, so let the animation play out; older versions show it still.
         val minShowMs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) SPLASH_ANIMATION_MS else 0L
         splash.setKeepOnScreenCondition {
@@ -43,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         splash.setOnExitAnimationListener(::animateSplashExit)
 
         setContent {
-            val theme by settings.theme.collectAsStateWithLifecycle(initialValue = startTheme ?: ThemeChoice.ALPINE_NIGHT)
+            val theme by drawnTheme.collectAsStateWithLifecycle(initialValue = startTheme ?: ThemeChoice.CLASSIC)
             LaunchedEffect(theme) {
                 if (theme == ThemeChoice.ALPINE_NIGHT) enableAlpineBars() else enableEdgeToEdge()
             }

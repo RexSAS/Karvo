@@ -2,6 +2,18 @@ package com.karvo.ui.settings
 
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
+import com.karvo.domain.formatProCodeInput
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
+import com.karvo.data.backup.MAX_BACKUPS
+import com.karvo.data.backup.FREE_MAX_BACKUPS
+import com.karvo.ui.components.ProCrown
+import com.karvo.ui.components.proGold
+import com.karvo.ui.components.ProUnlockedCelebration
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.res.pluralStringResource
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -90,7 +102,9 @@ import kotlinx.coroutines.withContext
 @Composable
 fun SettingsScreen(
     onOpenBackups: () -> Unit,
-    onCheckForUpdates: () -> Unit,
+    onOpenPro: () -> Unit,
+    /** Null in the Play build, which Play keeps up to date. */
+    onCheckForUpdates: (() -> Unit)?,
     /** False while another pager page is on screen: a typed rate is saved as soon as the user swipes away. */
     isCurrentPage: Boolean = true,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
@@ -107,6 +121,8 @@ fun SettingsScreen(
     var showSeasonPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
     var rateFocused by remember { mutableStateOf(false) }
+    var showRedeem by remember { mutableStateOf(false) }
+    var celebrate by remember { mutableStateOf(false) }
 
     // Besides Done and focus loss, save a typed rate when the app stops or the screen leaves
     // (saveRate is idempotent; the ViewModel outlives this composition, so the write completes).
@@ -124,6 +140,11 @@ fun SettingsScreen(
     suspend fun showMessage(message: String) {
         snackbarHostState.currentSnackbarData?.dismiss()
         snackbarHostState.showSnackbar(message)
+    }
+
+    val proRequired = stringResource(R.string.pro_required)
+    fun showProRequired() {
+        scope.launch { showMessage(proRequired) }
     }
 
     fun failureMessage(e: Exception) = context.getString(R.string.export_failed, e.message ?: e.javaClass.simpleName)
@@ -163,6 +184,16 @@ fun SettingsScreen(
         }
     }
 
+    // Without Pro the theme row moves down into the locked section.
+    val themeRow: @Composable () -> Unit = {
+        ListItem(
+            colors = transparentRow(),
+            headlineContent = { Text(stringResource(R.string.theme), color = proTitleColor(state.pro)) },
+            supportingContent = { Text(themeLabel(state.theme)) },
+            modifier = Modifier.clickable { if (state.pro) showThemePicker = true else showProRequired() },
+        )
+    }
+
     Scaffold(
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = { ScreenHeader(title = stringResource(R.string.settings)) },
@@ -176,7 +207,8 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            OutlinedTextField(
+            // The hourly rate and the earnings lock only matter for money, which is Pro only.
+            if (state.pro) OutlinedTextField(
                 colors = alpineFieldColors(),
                 value = state.rateText,
                 onValueChange = viewModel::onRateChange,
@@ -215,7 +247,7 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { showSeasonPicker = true },
             )
 
-            ListItem(
+            if (state.pro) ListItem(
                 colors = transparentRow(),
                 leadingContent = { Icon(Icons.Filled.Fingerprint, contentDescription = null) },
                 headlineContent = { Text(stringResource(R.string.biometric_reveal)) },
@@ -231,12 +263,7 @@ fun SettingsScreen(
                 },
             )
 
-            ListItem(
-                colors = transparentRow(),
-                headlineContent = { Text(stringResource(R.string.theme)) },
-                supportingContent = { Text(themeLabel(state.theme)) },
-                modifier = Modifier.clickable { showThemePicker = true },
-            )
+            if (state.pro) themeRow()
 
             ListItem(
                 colors = transparentRow(),
@@ -245,31 +272,57 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { showLanguagePicker = true },
             )
 
-            ListItem(
-                colors = transparentRow(),
-                leadingContent = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.check_for_updates)) },
-                supportingContent = { Text(stringResource(R.string.version, BuildConfig.VERSION_NAME)) },
-                modifier = Modifier.clickable(onClick = onCheckForUpdates),
-            )
+            if (onCheckForUpdates != null) {
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.check_for_updates)) },
+                    supportingContent = { Text(stringResource(R.string.version, BuildConfig.VERSION_NAME)) },
+                    modifier = Modifier.clickable(onClick = onCheckForUpdates),
+                )
+            }
 
             ListItem(
                 colors = transparentRow(),
                 leadingContent = { Icon(Icons.Filled.Restore, contentDescription = null) },
                 headlineContent = { Text(stringResource(R.string.backups)) },
-                supportingContent = { Text(stringResource(R.string.backups_hint)) },
+                supportingContent = {
+                    val max = if (state.pro) MAX_BACKUPS else FREE_MAX_BACKUPS
+                    Text(pluralStringResource(R.plurals.backups_hint, max, max))
+                },
                 trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                 modifier = Modifier.clickable(onClick = onOpenBackups),
             )
+
+            if (!state.pro) {
+                ListItem(
+                    colors = transparentRow(),
+                    headlineContent = { Text(stringResource(R.string.redeem_a_code)) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.clickable { showRedeem = true },
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                // One crown for the whole locked section; tapping the heading shows what Pro includes.
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { ProCrown(Modifier.size(20.dp), contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.pro_section), style = MaterialTheme.typography.titleSmall) },
+                    supportingContent = { Text(stringResource(R.string.pro_see_included)) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.semantics { heading() }.clickable(onClick = onOpenPro),
+                )
+                themeRow()
+            }
 
             // A navigation-style row, not a filled button, so it doesn't read as "Save".
             ListItem(
                 colors = transparentRow(),
                 leadingContent = { Icon(Icons.Filled.FileDownload, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.export_csv)) },
+                headlineContent = { Text(stringResource(R.string.export_csv), color = proTitleColor(state.pro)) },
                 supportingContent = { Text(stringResource(R.string.export_csv_hint)) },
-                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                trailingContent = { if (state.pro) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                 modifier = Modifier.clickable {
+                    if (!state.pro) return@clickable showProRequired()
                     scope.launch {
                         val fileName = try {
                             viewModel.exportFileName()
@@ -287,10 +340,11 @@ fun SettingsScreen(
             ListItem(
                 colors = transparentRow(),
                 leadingContent = { Icon(Icons.Filled.FileUpload, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.import_csv)) },
+                headlineContent = { Text(stringResource(R.string.import_csv), color = proTitleColor(state.pro)) },
                 supportingContent = { Text(stringResource(R.string.import_csv_hint)) },
-                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                trailingContent = { if (state.pro) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                 modifier = Modifier.clickable {
+                    if (!state.pro) return@clickable showProRequired()
                     // Some file managers label CSV files as plain text or as a generic binary type.
                     importLauncher.launch(arrayOf("text/*", "text/comma-separated-values", "application/octet-stream"))
                 },
@@ -303,6 +357,22 @@ fun SettingsScreen(
             )
         }
     }
+
+    if (showRedeem) {
+        RedeemDialog(
+            onRedeem = { code ->
+                viewModel.redeem(code).also { ok ->
+                    if (ok) {
+                        showRedeem = false
+                        celebrate = true
+                    }
+                }
+            },
+            onDismiss = { showRedeem = false },
+        )
+    }
+
+    if (celebrate) ProUnlockedCelebration(onDone = { celebrate = false })
 
     if (showZonePicker) {
         TimeZoneDialog(
@@ -357,6 +427,47 @@ fun SettingsScreen(
             onDismiss = { showLanguagePicker = false },
         )
     }
+}
+
+/** Locked Pro rows wear the crown's gold; once unlocked they look like every other row. */
+@Composable
+private fun proTitleColor(pro: Boolean): Color = if (pro) Color.Unspecified else proGold()
+
+/** [onRedeem] returns false for a wrong code, which keeps the dialog open with an error. */
+@Composable
+private fun RedeemDialog(onRedeem: (String) -> Boolean, onDismiss: () -> Unit) {
+    var field by remember { mutableStateOf(TextFieldValue("")) }
+    val code = field.text
+    var invalid by remember { mutableStateOf(false) }
+    val submit = { invalid = !onRedeem(code) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.redeem_a_code)) },
+        text = {
+            OutlinedTextField(
+                value = field,
+                onValueChange = {
+                    // Keep the cursor at the end, after any dash just added.
+                    val text = formatProCodeInput(it.text, previous = code)
+                    field = TextFieldValue(text, selection = TextRange(text.length))
+                    invalid = false
+                },
+                label = { Text(stringResource(R.string.redeem_code_label)) },
+                placeholder = { Text("KARVO-XXXX-XXXX-XXXX") },
+                singleLine = true,
+                isError = invalid,
+                supportingText = { if (invalid) Text(stringResource(R.string.redeem_invalid)) },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Characters,
+                    autoCorrectEnabled = false,
+                    imeAction = ImeAction.Done,
+                ),
+                keyboardActions = KeyboardActions(onDone = { submit() }),
+            )
+        },
+        confirmButton = { TextButton(onClick = submit, enabled = code.isNotBlank()) { Text(stringResource(R.string.redeem)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+    )
 }
 
 @Composable

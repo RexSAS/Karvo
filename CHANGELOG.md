@@ -2,6 +2,23 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.0] — unreleased
+
+### Added
+- **Karvo Pro**: Karvo is now free, with a Pro plan for everything around your pay. Free keeps logging lessons, months and total hours. Pro adds earnings, paid months, statistics, seasons, CSV export and import, the Alpine Night theme, fingerprint lock and 3 backups instead of 1. Unlock it in *Settings → Redeem a code*, with a small celebration when it works.
+- **Moments**: tap the new camera button on *Lessons* to capture your day on the slopes: tap the shutter for a photo, or hold it for a video of up to 10 seconds (Pro). Each day keeps 1 moment (3 with Pro); when the day is full, you pick the one to replace. Moments are saved to a **Karvo** album in your gallery. Every photo gets Karvo's look: lifted shadows, a soft roll-off on bright snow and sky, and richer colours that leave skin natural. On phones that share their own camera processing with apps, a button turns it on: **HDR** (on by default) or, where only that is offered, **Night** (off by default, for dusk and evening).
+- **Moments calendar and daily recap**: the *Moments* page is a calendar where each day shows its moment, and days with lessons get a dot. Tap a day to see its moments, its lessons and its hours. Videos play muted on loop right in the recap. Tap a moment to open it full screen: swipe through the day, pinch or double-tap photos to zoom, and play videos with sound, a mute button and a seek bar.
+- **Karvo Pro page**: see everything Pro includes, from the Overview or from *Settings → With Karvo Pro*.
+- **Google Play build**: a separate build for Google Play that's updated by the Play Store, so it has no in-app updater and no internet access at all.
+
+### Changed
+- Without Pro, the Overview shows your total hours, and the rest is blurred behind a "Pro plan needed" card.
+- **Classic** is now the default theme. Unlocking Pro switches to Alpine Night.
+- Karvo now targets Android 16 (API 36), as Google Play requires.
+
+### Upgrading
+- Install over Karvo 2.1 as usual: your lessons are kept. Your app becomes free until you redeem a code, and the next backup keeps only the newest one, so redeem your code first if you want to keep all 3.
+
 ## [2.1] — 2026-10-21
 
 ### Added

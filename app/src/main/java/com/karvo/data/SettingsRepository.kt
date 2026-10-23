@@ -39,6 +39,9 @@ interface SettingsRepository {
     /** Ask for fingerprint/PIN before showing earnings; on by default. */
     val biometricReveal: Flow<Boolean>
     suspend fun setBiometricReveal(on: Boolean)
+    /** Unlocked by a redeem code; off by default. */
+    val pro: Flow<Boolean>
+    suspend fun setPro(on: Boolean)
 }
 
 class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : SettingsRepository {
@@ -47,6 +50,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
     private val themeKey = stringPreferencesKey("theme")
     private val seasonStartKey = intPreferencesKey("season_start_month")
     private val biometricKey = booleanPreferencesKey("biometric_reveal")
+    private val proKey = booleanPreferencesKey("pro_unlocked")
 
     override val hourlyRateCents: Flow<Long?> = store.data.map { it[rateKey] }
 
@@ -82,5 +86,11 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
 
     override suspend fun setBiometricReveal(on: Boolean) {
         store.edit { it[biometricKey] = on }
+    }
+
+    override val pro: Flow<Boolean> = store.data.map { it[proKey] ?: false }
+
+    override suspend fun setPro(on: Boolean) {
+        store.edit { it[proKey] = on }
     }
 }

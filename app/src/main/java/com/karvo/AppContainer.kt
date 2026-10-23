@@ -17,13 +17,17 @@ import com.karvo.data.KarvoDatabase
 import com.karvo.data.RoomLessonRepository
 import com.karvo.data.SettingsRepository
 import com.karvo.data.backup.BackupService
+import com.karvo.data.moments.MomentStore
 import com.karvo.data.backup.BackupStore
+import com.karvo.data.backup.FREE_MAX_BACKUPS
+import com.karvo.data.backup.MAX_BACKUPS
 import com.karvo.data.update.GitHubReleaseSource
 import com.karvo.data.update.PackageInstallerUpdater
 import com.karvo.data.update.UrlApkDownloader
 import java.io.File
 import java.time.Clock
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.flow.first
 
 class AppContainer(context: Context) {
     private val appContext = context.applicationContext
@@ -56,7 +60,11 @@ class AppContainer(context: Context) {
     /** True only for the first caller in this process, so the automatic update check runs once per cold start. */
     fun claimUpdateCheck(): Boolean = updateCheckClaimed.compareAndSet(false, true)
 
+    val momentStore by lazy { MomentStore(appContext) }
+
     val backupService: BackupService by lazy {
-        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository)
+        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository) {
+            if (settingsRepository.pro.first()) MAX_BACKUPS else FREE_MAX_BACKUPS
+        }
     }
 }

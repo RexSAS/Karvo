@@ -2,6 +2,7 @@ package com.karvo.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
+import com.karvo.BuildConfig
 import com.karvo.R
 import android.net.Uri
 import androidx.compose.foundation.layout.WindowInsets
@@ -58,9 +59,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItemDefaults
 import com.karvo.ui.theme.BackdropFigure
+import com.karvo.ui.moments.CameraScreen
+import com.karvo.ui.moments.DayRecapScreen
+import com.karvo.ui.moments.MomentViewerScreen
+import com.karvo.ui.moments.MomentsScreen
+import com.karvo.ui.pro.ProScreen
 import com.karvo.ui.update.UpdateDialogs
 import com.karvo.ui.update.UpdateViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.time.LocalDate
 import java.time.YearMonth
 import kotlinx.coroutines.launch
 
@@ -70,6 +77,13 @@ const val ROUTE_EDIT = "edit?id={id}"
 const val ROUTE_MONTH = "month/{year}/{month}"
 const val ROUTE_BACKUPS = "backups"
 const val ROUTE_RESTORE = "restore/{fileName}"
+const val ROUTE_PRO = "pro"
+const val ROUTE_CAMERA = "camera"
+const val ROUTE_MOMENTS = "moments"
+const val ROUTE_MOMENT = "moment/{date}/{index}"
+const val ROUTE_DAY = "day/{date}"
+fun dayRoute(date: LocalDate): String = "day/$date"
+fun momentRoute(date: LocalDate, index: Int): String = "moment/$date/$index"
 
 fun editRoute(id: Long? = null): String = "edit?id=${id ?: -1L}"
 
@@ -102,8 +116,8 @@ fun KarvoNavHost() {
     val goToPage: (Int) -> Unit = { page -> pagerScope.launch { pagerState.animateScrollToPage(page) } }
 
     // Outside the NavHost, so this ViewModel is scoped to the activity and the update flow survives navigation.
-    val updateViewModel: UpdateViewModel = viewModel(factory = UpdateViewModel.Factory)
-    UpdateDialogs(updateViewModel)
+    val updateViewModel: UpdateViewModel? =
+        if (BuildConfig.UPDATER) viewModel<UpdateViewModel>(factory = UpdateViewModel.Factory).also { UpdateDialogs(it) } else null
 
     // Hoisted here so the Undo snackbar survives leaving the Lessons screen.
     val snackbarHostState = remember { SnackbarHostState() }
@@ -165,22 +179,69 @@ fun KarvoNavHost() {
                                 onAdd = dropUnlessResumed { navController.navigate(editRoute()) },
                                 onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
                                 onDeleted = showUndo,
+                                onOpenCamera = dropUnlessResumed { navController.navigate(ROUTE_CAMERA) },
+                                onOpenMoments = dropUnlessResumed { navController.navigate(ROUTE_MOMENTS) },
                             )
                             PAGE_OVERVIEW -> OverviewScreen(
                                 onOpenMonth = { month -> dropUnlessResumedNow(entry) { navController.navigate(monthRoute(month)) } },
                                 onOpenSettings = { goToPage(PAGE_SETTINGS) },
+                                onOpenPro = dropUnlessResumed { navController.navigate(ROUTE_PRO) },
                                 isCurrentPage = isCurrent,
                             )
                             else -> Box {
                                 BackdropFigureLayer(BackdropFigure.Snowflakes)
                                 SettingsScreen(
                                     onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
-                                    onCheckForUpdates = updateViewModel::checkNow,
+                                    onOpenPro = dropUnlessResumed { navController.navigate(ROUTE_PRO) },
+                                    onCheckForUpdates = updateViewModel?.let { it::checkNow },
                                     isCurrentPage = isCurrent,
                                 )
                             }
                         }
                     }
+                }
+            }
+            composable(ROUTE_CAMERA) {
+                CameraScreen(
+                    // Not dropUnlessResumed: the camera also closes by itself right after a capture.
+                    onClose = { navController.navigateUp() },
+                    onOpenPro = dropUnlessResumed { navController.navigate(ROUTE_PRO) },
+                )
+            }
+            composable(ROUTE_MOMENTS) { entry ->
+                AlpineBackdrop(BackdropFigure.None) {
+                    MomentsScreen(
+                        onBack = dropUnlessResumed { navController.navigateUp() },
+                        onOpenCamera = dropUnlessResumed { navController.navigate(ROUTE_CAMERA) },
+                        onOpenDay = { date -> dropUnlessResumedNow(entry) { navController.navigate(dayRoute(date)) } },
+                    )
+                }
+            }
+            composable(ROUTE_DAY, arguments = listOf(navArgument("date") { type = NavType.StringType })) { entry ->
+                val date = entry.arguments?.getString("date")?.let(LocalDate::parse) ?: return@composable
+                AlpineBackdrop(BackdropFigure.None) {
+                    DayRecapScreen(
+                        date,
+                        onBack = dropUnlessResumed { navController.navigateUp() },
+                        onOpenMoment = { index -> dropUnlessResumedNow(entry) { navController.navigate(momentRoute(date, index)) } },
+                        onEditLesson = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
+                        onOpenCamera = dropUnlessResumed { navController.navigate(ROUTE_CAMERA) },
+                    )
+                }
+            }
+            composable(
+                ROUTE_MOMENT,
+                arguments = listOf(
+                    navArgument("date") { type = NavType.StringType },
+                    navArgument("index") { type = NavType.IntType },
+                ),
+            ) { entry ->
+                val date = entry.arguments?.getString("date")?.let(LocalDate::parse) ?: return@composable
+                MomentViewerScreen(date, entry.arguments?.getInt("index") ?: 0, onBack = dropUnlessResumed { navController.navigateUp() })
+            }
+            composable(ROUTE_PRO) {
+                AlpineBackdrop(BackdropFigure.None) {
+                    ProScreen(onBack = dropUnlessResumed { navController.navigateUp() })
                 }
             }
             composable(ROUTE_BACKUPS) { entry ->

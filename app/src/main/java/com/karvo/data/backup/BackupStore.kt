@@ -10,6 +10,7 @@ import java.time.Clock
 import java.time.Instant
 
 const val MAX_BACKUPS = 3
+const val FREE_MAX_BACKUPS = 1
 
 sealed interface BackupReason {
     data object Manual : BackupReason
@@ -32,7 +33,7 @@ private fun BackupReason.slug(): String = when (this) {
 
 /**
  * Lesson backups kept as CSV files in [dir] (app-private storage). The file name carries the time and
- * reason, so no other metadata is stored. Only the newest [MAX_BACKUPS] are kept. Blocking I/O.
+ * reason, so no other metadata is stored. Only the newest `keep` (default [MAX_BACKUPS]) are kept. Blocking I/O.
  */
 class BackupStore(private val dir: File, private val clock: Clock) {
 
@@ -52,8 +53,8 @@ class BackupStore(private val dir: File, private val clock: Clock) {
         }.sortedByDescending { it.createdAt }
     }
 
-    /** Writes a new backup atomically (temp file, then rename), then deletes the oldest beyond [MAX_BACKUPS]. */
-    fun create(reason: BackupReason, lessons: List<Lesson>): Backup {
+    /** Writes a new backup atomically (temp file, then rename), then deletes the oldest beyond [keep]. */
+    fun create(reason: BackupReason, lessons: List<Lesson>, keep: Int = MAX_BACKUPS): Backup {
         if (!dir.isDirectory && !dir.mkdirs()) throw IOException("Can't create $dir")
         // Always newer than every existing backup, even if the clock went backwards; otherwise the
         // rotation below would treat the new backup as the oldest and delete it straight away.
@@ -66,15 +67,15 @@ class BackupStore(private val dir: File, private val clock: Clock) {
             tmp.delete()
             throw IOException("Can't save backup $name")
         }
-        list().drop(MAX_BACKUPS).forEach { File(dir, it.fileName).delete() }
+        list().drop(keep).forEach { File(dir, it.fileName).delete() }
         return Backup(name, Instant.ofEpochMilli(millis), reason, lessons.size)
     }
 
     /** Throws [com.karvo.domain.BackupFormatException] for a damaged file, [IOException] for a missing one. */
     fun read(fileName: String): List<Lesson> = parseLessonsCsv(File(dir, fileName).readText(Charsets.UTF_8))
 
-    /** The backup the next [create] would delete, or null while fewer than [MAX_BACKUPS] exist. */
-    fun oldestToBeRemoved(): Backup? = list().takeIf { it.size >= MAX_BACKUPS }?.last()
+    /** The backup the next [create] would delete, or null while fewer than [keep] exist. */
+    fun oldestToBeRemoved(keep: Int = MAX_BACKUPS): Backup? = list().takeIf { it.size >= keep }?.last()
 
     private fun countLessons(file: File): Int = try {
         parseLessonsCsv(file.readText(Charsets.UTF_8)).size

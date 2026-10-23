@@ -5,19 +5,16 @@
 <h1 align="center">Karvo</h1>
 
 <p align="center">
-  <b>Keep track of every ski lesson you teach — hours, students and pay, right on your phone.</b>
+  <b>The lesson log for ski instructors.</b><br>
+  Log every lesson in seconds and always know your hours, your students and what you're owed.
 </p>
 
 <p align="center">
-  <a href="https://github.com/RexSAS/Karvo/releases/latest"><img src="https://img.shields.io/github/v/release/RexSAS/Karvo?label=download&color=1565C0" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/Google%20Play-coming%20soon-414141?logo=googleplay&logoColor=white" alt="Coming soon to Google Play">
   <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white" alt="Android 8.0+">
-  <img src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin + Jetpack Compose">
+  <img src="https://img.shields.io/badge/languages-Italiano%20%C2%B7%20English-1565C0" alt="Italiano and English">
   <img src="https://img.shields.io/badge/data-stays%20on%20your%20phone-1565C0" alt="Data stays on your phone">
 </p>
-
----
-
-Ski instructors are paid by the hour, and at the end of the month the hours have to add up. **Karvo** is a small, fast app to log each lesson the moment it ends and check your monthly hours against what the ski school pays you.
 
 <p align="center">
   <img src="docs/assets/screenshots/new-lesson.png" width="200" alt="Add a lesson">
@@ -29,111 +26,88 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
   <img src="docs/assets/screenshots/settings.png" width="200" alt="Settings">
 </p>
 
-## Features
+---
 
-- **Log a lesson in seconds** — date, duration (quick buttons for 1h, 1h 30m, 2h, 3h), student name with suggestions from previous lessons, and optional notes. Group lessons? Just write it in the name, e.g. *Group Rossi*.
-- **Monthly and lifetime hours** — the Overview shows your total hours and a row for every month; tap a month to see its lessons. On *Lessons*, each month is grouped with its total.
-- **Private earnings** — set your hourly rate and Karvo calculates what you earned. Amounts stay hidden as `**** €` until you tap the eye and confirm with your fingerprint (or phone PIN), and hide again when you leave the screen.
-- **Paid months** — tick a month as paid when the school pays you. Badges show which months are paid or only partly paid, and the Overview shows what you're still owed.
-- **Seasons** — this season's hours and earnings compared with last season at the same date, plus a list of every season. The season start month is up to you (November by default).
-- **Statistics with charts** — under your totals, the Overview shows lessons this month, average lesson length, your number of students, a 6-month hours chart, a podium of your top students and your busiest weekdays. Any money there stays hidden until you tap the eye.
-- **Alpine Night theme** — a starry night sky over snow-lit mountains, deep-navy tiles and gold accents, with an animated splash screen. On by default; prefer a plain look? Pick *Classic* in Settings.
-- **Swipe between pages** — swipe left and right to move between Lessons, Overview and Settings.
-- **Italiano / English** — the app follows your phone's language, or pick one in Settings.
-- **Edit or undo** — tap a lesson to fix it, or swipe it away and confirm to delete. Changed your mind? Tap *Undo*.
-- **Automatic updates** — when a new version is out, Karvo offers it when you open the app, backs up your lessons first and installs it with Android's installer.
-- **Backups and restore** — up to 3 backups are kept inside the app (one before every update, or any time with *Back up now*). Restore one from *Settings → Backups*, behind two confirmation steps.
-- **Export and import CSV** — save all your lessons as a spreadsheet to keep a backup or send to the ski school, and import a Karvo or MasterSki file to bring lessons over (duplicates are skipped).
-- **Your time zone** — "today" follows the time zone you pick (default *Europe/Rome*).
-- **Private** — no account, no tracking. The internet is used only to check GitHub for updates; Karvo itself never sends your lessons anywhere. If your phone's Google backup is on, Android includes Karvo's data in it, so your lessons come back when you set up a new phone.
+Ski instructors are paid by the hour, and at the end of the month the hours have to add up. **Karvo** lets you log each lesson the moment it ends — then check your month, your season and your pay at a glance. No account, no sign-up, nothing to set up.
 
-## Install
+## Why Karvo
 
-1. On your Android phone, open the [latest release](https://github.com/RexSAS/Karvo/releases/latest) and download **`Karvo-x.y.apk`**.
-2. Open the file and allow *Install unknown apps* when Android asks. Karvo updates itself: it asks once to be allowed to install apps.
-3. Open **Karvo**, set your hourly rate in *Settings*, and log your first lesson with **+**.
+- ⛷️ **Made for the slopes** — log a lesson in two taps: quick durations (1h, 1h 30m, 2h, 3h) and student names suggested from your past lessons.
+- 📅 **Every hour accounted for** — lessons grouped by month with their totals, plus your lifetime hours.
+- 📷 **Moments** — capture your day on the slopes and watch your season fill up a photo calendar. Tap any day for its recap: the moment, the lessons and the hours. Everything is also saved to a *Karvo* album in your gallery.
+- 🔒 **Private by design** — your lessons never leave your phone. No account, no ads, no tracking.
+- 🇮🇹 **Italiano and English** — follows your phone's language, or pick one in Settings.
 
-> [!NOTE]
-> **Karvo is the new name of MasterSki.** It's installed as a new app, so it starts empty: if you used MasterSki, uninstall it after switching. See the [changelog](CHANGELOG.md) for what's new.
+## Free vs Pro
 
-> [!WARNING]
-> Uninstalling the app deletes all lessons from the phone (unless your phone's Google backup brings them back on reinstall). Use **Settings → Export to CSV** regularly as a backup; you can bring it back with **Settings → Import from CSV**.
+Karvo is free to use. **Karvo Pro** adds everything you need to check your pay.
+
+| | Free | Pro |
+|---|:---:|:---:|
+| Log, edit and delete lessons (with *Undo*) | ✅ | ✅ |
+| Lessons by month and total hours | ✅ | ✅ |
+| Time zone, season start and language settings | ✅ | ✅ |
+| **Moments**: photo calendar and daily recaps | 1 a day | 3 a day |
+| **Video moments**: hold the shutter for up to 10 seconds | | ✅ |
+| In-app backup | 1 | 3 |
+| **Earnings** per month, season and student, hidden until you tap the eye | | ✅ |
+| **Paid months** and what you're still owed | | ✅ |
+| **Statistics**: last 6 months, average lesson, busiest days, top students podium | | ✅ |
+| **Seasons**: every season's hours, compared with last year | | ✅ |
+| **Export and import CSV** (spreadsheets, moving to a new phone) | | ✅ |
+| **Alpine Night** theme: starry sky, snow and mountains | | ✅ |
+| **Fingerprint lock** before showing any money | | ✅ |
+
+Have a code? Open **Settings → Redeem a code**.
+
+## Privacy
+
+Karvo has no servers and no accounts. Your lessons are stored only on your phone, and the Google Play version doesn't even have internet access. If your phone's Google backup is on, Android includes Karvo's data in it, so your lessons come back when you set up a new phone. Photos and videos go to your phone's gallery and nowhere else. Fingerprint unlock is handled by Android: Karvo never sees your fingerprint.
 
 ## Roadmap
 
-Planned features, ticked off as they ship.
+### 3.0 — Karvo Pro and Moments
+- [x] **Karvo Pro** — free and Pro plans, redeem codes in Settings, and a page showing everything Pro includes.
+- [x] **Google Play build** — updated by the Play Store, with no in-app updater and no internet access.
+- [x] **Moments** — capture your day on the slopes: tap for a photo, hold for a video (Pro), 1 moment a day free and 3 with Pro.
+- [x] **Moments calendar and daily recap** — a photo calendar of your season; tap a day for its moments, lessons and hours.
+- [x] **Full-screen viewer** — swipe through a day's moments, zoom photos, play videos with mute and a seek bar.
+- [x] **Better photos** — full 4:3 sensor quality, Karvo's look on every photo, and the phone's HDR or Night mode where available.
+- [ ] **Share moments** — share a photo or video in one tap, with a Karvo thumbnail card.
+- [ ] **Mascot** — a penguin to give Karvo a face: on the splash screen, empty pages and celebrations.
 
-### 2.1 — Pay and history
-- [x] **Import from CSV** — load a Karvo or MasterSki export, e.g. to bring old lessons over or move to a new phone.
-- [x] **Paid months** — tick a month as paid when the school pays you (the date is saved); Overview shows what's still unpaid, a lesson added later makes the month "partly paid", and the paid status is kept in CSV exports and backups.
-- [x] **Season totals** — totals per ski season (starting in the month you choose, November by default), compared with last season at the same date.
-- [x] **Fingerprint unlock** — reveal earnings with your fingerprint.
-
-### 2.2 — Faster and more fun
+### 3.1 — Faster and more fun
 - [ ] **Repeat a lesson** — long-press a lesson to log the same student and duration again in one tap.
 - [ ] **Badges and achievements** — season milestones (50h, 100h, 250h…) with a small celebration.
-- [ ] **Evening reminder** — optional notification on days with nothing logged.
-- [ ] **Search and filters** — find lessons by student name and filter the list.
+- [ ] **Evening reminder** — an optional notification on days with nothing logged.
+- [ ] **Search and filters** — find lessons by student and filter the list.
+- [ ] **Restore moments** — after a new phone or a reinstall, pick your photos from the gallery's Karvo album to bring them back into the calendar.
 
-### 2.3 — Home screen
-- [ ] **Widget** — this month's hours, badge and goal progress, with a quick **+** to add a lesson.
-- [ ] **Season page** — tap a season in the Seasons list to open a page with every month of that season and all its details (hours, earnings, lessons, paid status).
-- [ ] More to be decided.
+### 3.2 — Your season
+- [ ] **Widget** — this month's hours on your home screen, with a quick **+** to add a lesson.
+- [ ] **Season page** — tap a season to see every month in it, with hours, earnings, lessons and paid status.
+- [ ] **Goals** — set a season target and follow your progress on the Overview.
+- [ ] **Season Wrapped** — your season in one shareable card: hours, students, busiest day.
 
-### Ideas for later
-- Season heatmap (one square per day, coloured by hours taught).
-- Student pages (all lessons and total hours per student).
-- Monthly hours goal with a progress ring on Overview.
+See the [changelog](CHANGELOG.md) for what's new in each version.
 
-## Build from source
+## Download
 
-Requirements: JDK 17 and the Android SDK (platform 35, build-tools 35.0.0).
+Karvo is coming to **Google Play**. Until then, the APK is on the [latest GitHub release](https://github.com/RexSAS/Karvo/releases/latest): download **`Karvo-x.y.apk`**, open it and allow *Install unknown apps* when Android asks.
 
-```sh
-export JAVA_HOME=$HOME/.local/jdk17
-export ANDROID_HOME=$HOME/Android/Sdk
-export PATH=$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH
+<details>
+<summary><b>For developers</b></summary>
 
-./gradlew testDebugUnitTest   # run the tests
-./gradlew installDebug        # install a debug build on a connected phone
-./gradlew assembleRelease     # build app/build/outputs/apk/release/app-release.apk
-```
-
-### Release signing
-
-Create a keystore once:
+Requirements: JDK 17 and the Android SDK (platform 36).
 
 ```sh
-keytool -genkeypair -v -keystore ~/karvo-release.jks -alias karvo -keyalg RSA -keysize 2048 -validity 10000
+./gradlew testGithubDebugUnitTest   # run the tests
+./gradlew assembleGithubRelease     # APK for GitHub releases (with the in-app updater)
+./gradlew bundlePlayRelease         # AAB for Google Play (no updater, no internet permission)
 ```
 
-Then add `keystore.properties` in the repository root:
+Release builds are signed with the key in `keystore.properties` (git-ignored). Every release bumps `versionCode` and `versionName`, is tagged `vX.Y.Z` and has exactly one `Karvo-X.Y.apk` asset, which the in-app updater downloads.
 
-```properties
-storeFile=~/karvo-release.jks
-storePassword=...
-keyAlias=karvo
-keyPassword=...
-```
+Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation Compose · JUnit + Robolectric
 
-Without this file `assembleRelease` produces an unsigned APK that cannot be installed.
-
-> [!CAUTION]
-> Back up the keystore and its password. If you lose them, updates can no longer be installed over the existing app. Never commit the keystore or `keystore.properties` (both are git-ignored).
-
-A debug build is signed differently from the release build: uninstall it (export your lessons first!) before installing the release.
-
-### Publishing a release
-
-The in-app updater reads `https://api.github.com/repos/RexSAS/Karvo/releases/latest`, so every release must:
-
-- use a tag like `v1.3.0` (a higher number than the installed version);
-- have exactly one `.apk` asset;
-- be signed with the same keystore (Android refuses updates signed with another key);
-- bump `versionCode` and `versionName` in `app/build.gradle.kts`.
-
-To test the update flow before publishing, build a private APK that thinks it is older: `./gradlew assembleRelease -PversionNameOverride=1.0.9`.
-
-## Tech
-
-Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation Compose · AppCompat per-app languages · MVVM · JUnit + Robolectric
+</details>

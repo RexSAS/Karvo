@@ -17,6 +17,15 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import com.karvo.ui.moments.rememberZone
+import com.karvo.ui.moments.rememberMoments
+import com.karvo.domain.momentCountsByMonth
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -59,9 +68,14 @@ fun LessonsScreen(
     onEdit: (Long) -> Unit,
     /** Called after a swipe-delete; the caller shows the Undo snackbar (hoisted so it outlives this screen). */
     onDeleted: (Lesson) -> Unit,
+    onOpenCamera: () -> Unit,
+    onOpenMoments: () -> Unit,
     viewModel: LessonsViewModel = viewModel(factory = LessonsViewModel.Factory),
 ) {
     val groupsOrNull by viewModel.groups.collectAsStateWithLifecycle()
+    val moments = rememberMoments()
+    val zone = rememberZone()
+    val momentCounts = remember(moments, zone) { momentCountsByMonth(moments.orEmpty(), zone) }
 
     fun delete(lesson: Lesson) {
         viewModel.delete(lesson)
@@ -75,9 +89,17 @@ fun LessonsScreen(
             ScreenHeader(
                 title = stringResource(R.string.lessons),
                 subtitle = if (total > 0) pluralStringResource(R.plurals.lesson_count, total, total) else null,
+                trailing = {
+                    IconButton(onClick = onOpenMoments) { Icon(Icons.Filled.PhotoLibrary, stringResource(R.string.moments)) }
+                },
             )
         },
-        floatingActionButton = { AddButton(onClick = onAdd, contentDescription = stringResource(R.string.add_lesson)) },
+        floatingActionButton = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SmallFloatingActionButton(onClick = onOpenCamera) { Icon(Icons.Filled.PhotoCamera, stringResource(R.string.take_moment)) }
+                AddButton(onClick = onAdd, contentDescription = stringResource(R.string.add_lesson))
+            }
+        },
     ) { padding ->
         val groups = groupsOrNull
         if (groups == null) {
@@ -95,7 +117,8 @@ fun LessonsScreen(
                 groups.forEach { group ->
                     item(key = "header-${group.month}") {
                         Text(
-                            monthTitle(group.month).uppercase() + "  ·  " + formatDuration(group.totalMinutes),
+                            monthTitle(group.month).uppercase() + "  ·  " + formatDuration(group.totalMinutes) +
+                                (momentCounts[group.month]?.let { "  ·  📷 $it" } ?: ""),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(start = 20.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),

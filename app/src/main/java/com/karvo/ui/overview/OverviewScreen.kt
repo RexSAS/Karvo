@@ -1,5 +1,23 @@
 package com.karvo.ui.overview
 
+import android.os.Build
+import com.karvo.domain.StudentStat
+import com.karvo.domain.OverviewStats
+import com.karvo.domain.MonthBar
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.material3.Button
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import com.karvo.ui.components.ProCrown
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
@@ -65,6 +83,8 @@ import java.time.YearMonth
 fun OverviewScreen(
     onOpenMonth: (YearMonth) -> Unit,
     onOpenSettings: () -> Unit,
+    /** Opens the page listing what Karvo Pro includes. */
+    onOpenPro: () -> Unit,
     /** False while another pager page is on screen: earnings hide as soon as the user swipes away. */
     isCurrentPage: Boolean = true,
     viewModel: OverviewViewModel = viewModel(factory = OverviewViewModel.Factory),
@@ -99,67 +119,80 @@ fun OverviewScreen(
     ) { padding ->
         // Still loading: show nothing rather than flashing 0m / — €.
         if (state.loading) return@Scaffold
-        LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
-            item(key = "total") {
-                GlassPanel(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
-                    Column(Modifier.padding(start = 18.dp, end = 8.dp, top = 16.dp, bottom = if (state.stats != null) 28.dp else 16.dp)) {
+        val totalPanel: @Composable () -> Unit = {
+            GlassPanel(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+                Column(Modifier.padding(start = 18.dp, end = 8.dp, top = 16.dp, bottom = if (state.stats != null) 28.dp else 16.dp)) {
+                    Text(
+                        stringResource(R.string.total_hours).uppercase(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(formatDuration(state.totalMinutes), style = MaterialTheme.typography.displaySmall)
+                    // Without Pro the panel keeps the hours only: no money anywhere.
+                    if (state.pro) Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            stringResource(R.string.total_hours).uppercase(),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            earningsLabel(state.totalEarningsCents, state.revealed),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.weight(1f).clickable(onClick = { if (!state.rateSet) onOpenSettings() }),
                         )
-                        Text(formatDuration(state.totalMinutes), style = MaterialTheme.typography.displaySmall)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                earningsLabel(state.totalEarningsCents, state.revealed),
-                                style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.tertiary,
-                                modifier = Modifier.weight(1f).clickable(onClick = { if (!state.rateSet) onOpenSettings() }),
-                            )
-                            IconButton(onClick = onEarningsTap) {
-                                Icon(
-                                    if (state.revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                    contentDescription = stringResource(if (state.revealed) R.string.hide_earnings else R.string.show_earnings),
-                                )
-                            }
-                        }
-                        state.seasons?.let { seasons ->
-                            val current = seasons.current
-                            Text(
-                                stringResource(R.string.this_season, current.season.label()) + " · " +
-                                    formatDuration(current.minutes) + " · " + earningsLabel(current.earningsCents, state.revealed),
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(top = 8.dp),
-                            )
-                            seasons.previousToDateMinutes?.let { previous ->
-                                Text(
-                                    stringResource(
-                                        R.string.season_vs_last,
-                                        signedDuration(current.minutes - previous),
-                                        Season(current.season.startYear - 1, current.season.startMonth).label(),
-                                    ),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                        if (state.unpaid.minutes > 0) {
-                            Text(
-                                pluralStringResource(
-                                    R.plurals.to_be_paid,
-                                    state.unpaid.months,
-                                    state.unpaid.months,
-                                    formatDuration(state.unpaid.minutes),
-                                    earningsLabel(state.unpaid.earningsCents, state.revealed),
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = PartlyPaidColor,
-                                modifier = Modifier.padding(top = 4.dp),
+                        IconButton(onClick = onEarningsTap) {
+                            Icon(
+                                if (state.revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = stringResource(if (state.revealed) R.string.hide_earnings else R.string.show_earnings),
                             )
                         }
                     }
+                    state.seasons?.takeIf { state.pro }?.let { seasons ->
+                        val current = seasons.current
+                        Text(
+                            stringResource(R.string.this_season, current.season.label()) + " · " +
+                                formatDuration(current.minutes) + " · " + earningsLabel(current.earningsCents, state.revealed),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                        seasons.previousToDateMinutes?.let { previous ->
+                            Text(
+                                stringResource(
+                                    R.string.season_vs_last,
+                                    signedDuration(current.minutes - previous),
+                                    Season(current.season.startYear - 1, current.season.startMonth).label(),
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    if (state.pro && state.unpaid.minutes > 0) {
+                        Text(
+                            pluralStringResource(
+                                R.plurals.to_be_paid,
+                                state.unpaid.months,
+                                state.unpaid.months,
+                                formatDuration(state.unpaid.minutes),
+                                earningsLabel(state.unpaid.earningsCents, state.revealed),
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = PartlyPaidColor,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
                 }
             }
+        }
+        if (!state.pro) {
+            // Not scrollable: the locked area fills the rest of the screen.
+            Column(Modifier.padding(padding).fillMaxSize()) {
+                totalPanel()
+                ProLocked(onUnlock = onOpenPro, Modifier.weight(1f).padding(horizontal = 16.dp)) {
+                    SummaryTiles(SampleStats, Modifier.padding(top = 12.dp))
+                    StatsSection(SampleStats, revealed = false, rateSet = false)
+                }
+            }
+            return@Scaffold
+        }
+        LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
+            item(key = "total") { totalPanel() }
             val stats = state.stats
             if (stats == null) {
                 item(key = "empty") {
@@ -220,6 +253,76 @@ fun OverviewScreen(
                 if (index < state.months.lastIndex) {
                     HorizontalDivider(Modifier.padding(horizontal = 32.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 }
+            }
+        }
+    }
+}
+
+/** Made-up statistics drawn behind the blur, so nothing real shows through. */
+private val SampleStats = YearMonth.now().let { now ->
+    val minutes = listOf(540L, 720L, 1260L, 1680L, 960L, 1440L)
+    OverviewStats(
+        lessonsThisMonth = 14,
+        averageLessonMinutes = 75,
+        studentCount = 9,
+        lastSixMonths = minutes.mapIndexed { i, m -> MonthBar(now.minusMonths(5L - i), m, null) },
+        sixMonthEarningsCents = null,
+        topStudents = listOf("Marco" to 1260L, "Giulia" to 1020L, "Luca" to 840L, "Sofia" to 600L, "Elena" to 420L)
+            .map { (name, m) -> StudentStat(name, m, null) },
+        weekdayCounts = listOf(3, 2, 4, 3, 6, 9, 8),
+    )
+}
+
+/**
+ * Pro-only content drawn blurred, with edges fading out, under a "Pro plan needed" card. Android 11 and
+ * older can't blur, so a near-opaque veil hides the content there. Taps anywhere open the Pro page.
+ */
+@Composable
+private fun ProLocked(onUnlock: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val veil = MaterialTheme.colorScheme.surface.copy(alpha = if (canBlur) 0.2f else 0.92f)
+    Box(modifier.fillMaxSize().clipToBounds()) {
+        Box(
+            Modifier
+                .matchParentSize()
+                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                .drawWithContent {
+                    drawContent()
+                    drawRect(veil)
+                    // Fade all four edges to transparent.
+                    val fade = 0.12f
+                    drawRect(Brush.verticalGradient(0f to Color.Transparent, fade to Color.Black, 1f - fade to Color.Black, 1f to Color.Transparent), blendMode = BlendMode.DstIn)
+                    drawRect(Brush.horizontalGradient(0f to Color.Transparent, fade to Color.Black, 1f - fade to Color.Black, 1f to Color.Transparent), blendMode = BlendMode.DstIn)
+                },
+        ) {
+            Column(
+                Modifier
+                    .wrapContentHeight(Alignment.Top, unbounded = true)
+                    .blur(12.dp, BlurredEdgeTreatment.Unbounded)
+                    .clearAndSetSemantics {},
+            ) { content() }
+        }
+        Box(
+            Modifier
+                .matchParentSize()
+                // No semantics: the Unlock button is the accessible way in.
+                .pointerInput(onUnlock) { detectTapGestures { onUnlock() } },
+        )
+        ElevatedCard(Modifier.align(Alignment.Center).padding(24.dp)) {
+            Column(
+                Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                ProCrown(Modifier.size(40.dp))
+                Text(stringResource(R.string.pro_locked_title), style = MaterialTheme.typography.titleLarge)
+                Text(
+                    stringResource(R.string.pro_locked_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Button(onClick = onUnlock, modifier = Modifier.padding(top = 8.dp)) { Text(stringResource(R.string.pro_unlock)) }
             }
         }
     }
