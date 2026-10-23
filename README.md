@@ -75,9 +75,8 @@ Planned features, ticked off as they ship.
 - [ ] **Evening reminder** — optional notification on days with nothing logged.
 - [ ] **Search and filters** — find lessons by student name and filter the list.
 
-### 2.3 — Home screen and profiles
+### 2.3 — Home screen
 - [ ] **Widget** — this month's hours, badge and goal progress, with a quick **+** to add a lesson.
-- [ ] **Profile manager** — add more profiles on the same phone, each with its own lessons, and switch between them.
 - [ ] **Season page** — tap a season in the Seasons list to open a page with every month of that season and all its details (hours, earnings, lessons, paid status).
 - [ ] More to be decided.
 
