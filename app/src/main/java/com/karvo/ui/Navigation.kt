@@ -223,7 +223,7 @@ fun KarvoNavHost() {
                     DayRecapScreen(
                         date,
                         onBack = dropUnlessResumed { navController.navigateUp() },
-                        onOpenMoment = { index -> dropUnlessResumedNow(entry) { navController.navigate(momentRoute(date, index)) } },
+                        onOpenMoment = { day, index -> dropUnlessResumedNow(entry) { navController.navigate(momentRoute(day, index)) } },
                         onEditLesson = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
                         onOpenCamera = dropUnlessResumed { navController.navigate(ROUTE_CAMERA) },
                     )

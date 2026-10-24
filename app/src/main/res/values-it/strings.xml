@@ -10,6 +10,13 @@
     <string name="cancel">Annulla</string>
     <string name="ok">OK</string>
     <string name="delete">Elimina</string>
+    <string name="share">Condividi</string>
+    <string name="share_pick_title">Condividi con un design Karvo</string>
+    <string name="share_tagline">Fatto con Karvo</string>
+    <string name="share_style_banner">Banner</string>
+    <string name="share_style_polaroid">Polaroid</string>
+    <string name="share_style_story">Storia</string>
+    <string name="share_style_stamp">Timbro</string>
     <string name="save">Salva</string>
     <string name="search">Cerca</string>
     <string name="undo">Ripristina</string>

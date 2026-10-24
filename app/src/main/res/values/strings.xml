@@ -12,6 +12,13 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="delete">Delete</string>
+    <string name="share">Share</string>
+    <string name="share_pick_title">Share with a Karvo design</string>
+    <string name="share_tagline">Made with Karvo</string>
+    <string name="share_style_banner">Banner</string>
+    <string name="share_style_polaroid">Polaroid</string>
+    <string name="share_style_story">Story</string>
+    <string name="share_style_stamp">Stamp</string>
     <string name="save">Save</string>
     <string name="search">Search</string>
     <string name="undo">Undo</string>

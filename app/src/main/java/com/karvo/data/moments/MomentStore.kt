@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import androidx.camera.video.FileOutputOptions
 import androidx.camera.video.MediaStoreOutputOptions
 import androidx.camera.video.OutputOptions
+import androidx.core.content.FileProvider
 import com.karvo.domain.MAX_VIDEO_MILLIS
 import com.karvo.domain.Moment
 import kotlinx.coroutines.Dispatchers
@@ -89,6 +90,11 @@ class MomentStore(context: Context) {
         if (moment.uri.scheme == "file") File(moment.uri.path!!).delete().also { scan(moment.uri) }
         else resolver.delete(moment.uri, null, null) > 0
     }
+
+    /** A uri other apps can read: gallery uris as they are, Android 8–9 files through the FileProvider. */
+    fun shareUri(moment: Moment): Uri =
+        if (moment.uri.scheme == "file") FileProvider.getUriForFile(appContext, "${appContext.packageName}.moments", File(moment.uri.path!!))
+        else moment.uri
 
     // Only files this install created are visible without a gallery permission, which is all Karvo needs.
     private fun query(collection: Uri, isVideo: Boolean): List<Moment> {

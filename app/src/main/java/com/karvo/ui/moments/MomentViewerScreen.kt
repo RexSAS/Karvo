@@ -1,5 +1,29 @@
 package com.karvo.ui.moments
 
+import android.content.ClipData
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import com.karvo.data.moments.ShareStyle
+import com.karvo.data.moments.loadMomentBitmap
+import com.karvo.data.moments.renderShareCard
+import com.karvo.data.moments.saveShareCard
+import com.karvo.domain.dayTitle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
@@ -27,6 +51,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -90,6 +115,7 @@ fun MomentViewerScreen(date: LocalDate, startIndex: Int, onBack: () -> Unit) {
     val moments = rememberMoments()?.let { momentsOn(date, it, zone) }
     val scope = rememberCoroutineScope()
     var confirmDelete by remember { mutableStateOf(false) }
+    var designFor by remember { mutableStateOf<Moment?>(null) }
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         if (moments == null) return@Box // loading
@@ -100,19 +126,26 @@ fun MomentViewerScreen(date: LocalDate, startIndex: Int, onBack: () -> Unit) {
         val pager = rememberPagerState(initialPage = startIndex.coerceIn(0, moments.lastIndex)) { moments.size }
         // Zoomed in, a drag pans the photo instead of turning the page.
         var zoomed by remember { mutableStateOf(false) }
-        HorizontalPager(pager, Modifier.fillMaxSize(), userScrollEnabled = !zoomed) { page ->
+        // Behind the share picker the viewer blurs (Android 12+; older phones just get the picker's dimming).
+        val behind = Modifier.blur(if (designFor != null) 24.dp else 0.dp)
+        HorizontalPager(pager, Modifier.fillMaxSize().then(behind), userScrollEnabled = !zoomed && designFor == null) { page ->
             val moment = moments[page]
             val current = pager.currentPage == page
             if (moment.isVideo) VideoPage(moment, current) else ZoomablePhoto(moment, current, onZoomedChange = { if (current) zoomed = it })
         }
 
-        Row(Modifier.fillMaxWidth().safeDrawingPadding().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().then(behind).safeDrawingPadding().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back), tint = Color.White) }
             Spacer(Modifier.weight(1f))
             if (moments.size > 1) {
                 Text("${pager.currentPage + 1} / ${moments.size}", color = Color.White, style = MaterialTheme.typography.titleSmall)
             }
             Spacer(Modifier.weight(1f))
+            IconButton(onClick = {
+                val moment = moments[pager.currentPage]
+                // Videos go out as they are; photos first pick a Karvo design.
+                if (moment.isVideo) shareFile(context, store.shareUri(moment), "video/mp4") else designFor = moment
+            }) { Icon(Icons.Filled.Share, stringResource(R.string.share), tint = Color.White) }
             IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Filled.Delete, stringResource(R.string.delete), tint = Color.White) }
         }
 
@@ -130,7 +163,125 @@ fun MomentViewerScreen(date: LocalDate, startIndex: Int, onBack: () -> Unit) {
                 dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) } },
             )
         }
+
+        designFor?.let { SharePicker(it, date, onDismiss = { designFor = null }) }
     }
+}
+
+/**
+ * Before a photo is shared: the viewer blurs and its four Karvo designs fill the screen; swipe between them, then tap
+ * the design or Share to send it.
+ */
+@Composable
+private fun SharePicker(moment: Moment, date: LocalDate, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dateText = remember(date) { dayTitle(date) }
+    val tagline = stringResource(R.string.share_tagline)
+    var previews by remember { mutableStateOf<Map<ShareStyle, ImageBitmap>?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    LaunchedEffect(moment.uri) {
+        val photo = withContext(Dispatchers.IO) { loadMomentBitmap(context, moment, 1080) }
+        if (photo == null) {
+            // Can't draw the designs: share the photo as it is rather than not at all.
+            shareFile(context, context.momentStore().shareUri(moment), "image/jpeg")
+            onDismiss()
+            return@LaunchedEffect
+        }
+        previews = withContext(Dispatchers.Default) {
+            ShareStyle.entries.associateWith { renderShareCard(context, photo, it, dateText, tagline).asImageBitmap() }
+        }
+    }
+    val styles = ShareStyle.entries
+    val pager = rememberPagerState { styles.size }
+    fun share(style: ShareStyle) {
+        busy = true
+        scope.launch {
+            // The full-size photo for the shared card; the previews are smaller.
+            val uri = withContext(Dispatchers.IO) {
+                loadMomentBitmap(context, moment, 2048)?.let { saveShareCard(context, renderShareCard(context, it, style, dateText, tagline)) }
+            }
+            if (uri != null) shareFile(context, uri, "image/jpeg")
+            onDismiss()
+        }
+    }
+    BackHandler(onBack = onDismiss)
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.55f))
+            // Taps outside the designs close the picker; the designs and buttons take their own taps first.
+            .pointerInput(Unit) { detectTapGestures { onDismiss() } },
+    ) {
+        Row(Modifier.fillMaxWidth().safeDrawingPadding().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, stringResource(R.string.close), tint = Color.White) }
+            Text(stringResource(R.string.share_pick_title), color = Color.White, style = MaterialTheme.typography.titleMedium)
+        }
+        val shown = previews
+        if (shown == null || busy) {
+            CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
+            return@Box
+        }
+        Column(
+            Modifier.fillMaxSize().safeDrawingPadding().padding(top = 64.dp, bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            HorizontalPager(
+                pager,
+                Modifier.weight(1f).fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 48.dp),
+                pageSpacing = 16.dp,
+            ) { page ->
+                val style = styles[page]
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Image(
+                        shown.getValue(style),
+                        contentDescription = stringResource(style.label),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { share(style) },
+                    )
+                }
+            }
+            Text(
+                stringResource(styles[pager.currentPage].label),
+                color = Color.White,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(top = 16.dp),
+            )
+            Row(Modifier.padding(vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                repeat(styles.size) { i ->
+                    Box(Modifier.size(7.dp).background(Color.White.copy(alpha = if (i == pager.currentPage) 1f else 0.35f), CircleShape))
+                }
+            }
+            Button(onClick = { share(styles[pager.currentPage]) }) {
+                Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(R.string.share))
+            }
+        }
+    }
+}
+
+private val ShareStyle.label
+    get() = when (this) {
+        ShareStyle.Banner -> R.string.share_style_banner
+        ShareStyle.Polaroid -> R.string.share_style_polaroid
+        ShareStyle.Story -> R.string.share_style_story
+        ShareStyle.Stamp -> R.string.share_style_stamp
+    }
+
+private fun Context.momentStore() = (applicationContext as KarvoApp).container.momentStore
+
+/** Opens the share sheet for [uri]; the clip gives the sheet its thumbnail preview. */
+private fun shareFile(context: Context, uri: Uri, mime: String) {
+    val send = Intent(Intent.ACTION_SEND).apply {
+        type = mime
+        putExtra(Intent.EXTRA_STREAM, uri)
+        clipData = ClipData.newRawUri(null, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(send, null))
 }
 
 /** Pinch to zoom (1–5×), drag to pan while zoomed, double-tap to zoom in or back out; resets when swiped away. */

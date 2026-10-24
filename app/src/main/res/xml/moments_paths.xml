@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Files other apps can read when a moment is shared: Android 8–9 moments (plain files) and branded share cards. -->
+<paths>
+    <external-path name="pictures" path="Pictures/Karvo/" />
+    <external-path name="movies" path="Movies/Karvo/" />
+    <!-- Photos redrawn in a Karvo share design. -->
+    <cache-path name="shared" path="shared/" />
+</paths>
