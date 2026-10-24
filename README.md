@@ -74,7 +74,7 @@ Karvo has no servers and no accounts. Your lessons are stored only on your phone
 - [x] **Full-screen viewer** — swipe through a day's moments, zoom photos, play videos with mute and a seek bar.
 - [x] **Better photos** — full 4:3 sensor quality, Karvo's look on every photo, and the phone's HDR or Night mode where available.
 - [ ] **Share moments** — share a photo or video in one tap, with a Karvo thumbnail card.
-- [ ] **Mascot** — a penguin to give Karvo a face: on the splash screen, empty pages and celebrations.
+- [ ] **Mascot: Kevin** — a penguin to give Karvo a face: on the splash screen, empty pages and celebrations.
 
 ### 3.1 — Faster and more fun
 - [ ] **Repeat a lesson** — long-press a lesson to log the same student and duration again in one tap.

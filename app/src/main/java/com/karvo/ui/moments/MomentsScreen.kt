@@ -58,6 +58,7 @@ import com.karvo.domain.Moment
 import com.karvo.domain.calendarCells
 import com.karvo.domain.dayTitle
 import com.karvo.domain.monthTitle
+import com.karvo.ui.components.proGold
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -195,7 +196,9 @@ private fun DayCell(date: LocalDate, moments: List<Moment>, hasLessons: Boolean,
         Text(
             date.dayOfMonth.toString(),
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal),
+            // Days with lessons get the gold accent, over a photo too; other days stay plain.
             color = when {
+                hasLessons -> proGold()
                 first != null -> Color.White
                 isFuture -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
                 else -> MaterialTheme.colorScheme.onSurface
