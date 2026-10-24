@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Karvo emblem: outlined peaks with a snow line and a filled sun. White; recolour with a Color Overlay in Photoshop. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="560" viewBox="0 0 72 56">
+  <path d="M6,50 L34,4 L48.8,28.4 L52,22 L66,50 Z" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M25.5,18 L30,20.5 L34,16 L38.5,20 L41.5,17.5" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="16" cy="14" r="5" fill="#FFFFFF"/>
+</svg>
