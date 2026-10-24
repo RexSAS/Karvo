@@ -50,6 +50,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.SystemUpdate
@@ -80,6 +81,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -97,6 +99,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/** On main, so the link keeps working whichever version is installed. */
+private const val PRIVACY_POLICY_URL = "https://github.com/RexSAS/Karvo/blob/main/PRIVACY.md"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,6 +121,7 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+    val uriHandler = LocalUriHandler.current
     var showZonePicker by remember { mutableStateOf(false) }
     var showThemePicker by remember { mutableStateOf(false) }
     var showSeasonPicker by remember { mutableStateOf(false) }
@@ -347,6 +353,22 @@ fun SettingsScreen(
                     if (!state.pro) return@clickable showProRequired()
                     // Some file managers label CSV files as plain text or as a generic binary type.
                     importLauncher.launch(arrayOf("text/*", "text/comma-separated-values", "application/octet-stream"))
+                },
+            )
+
+            ListItem(
+                colors = transparentRow(),
+                leadingContent = { Icon(Icons.Filled.PrivacyTip, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.privacy_policy)) },
+                supportingContent = { Text(stringResource(R.string.privacy_policy_hint)) },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                modifier = Modifier.clickable {
+                    // The browser does the fetching, so this works in the Play build too (it has no internet permission).
+                    try {
+                        uriHandler.openUri(PRIVACY_POLICY_URL)
+                    } catch (_: Exception) {
+                        scope.launch { showMessage(context.getString(R.string.no_browser)) }
+                    }
                 },
             )
 

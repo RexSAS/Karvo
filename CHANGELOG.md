@@ -11,6 +11,7 @@ All notable changes to Karvo are listed here. Versions 1.0–1.3 were released a
 - **Share moments**: tap *Share* on a moment to send it to any app. Photos first pick one of 4 Karvo designs, shown large over the blurred photo: **Banner**, **Polaroid**, **Story** (9:16, for stories) or **Stamp**. Videos are shared as they are.
 - **Swipe between days**: in a day's recap, swipe to slide in the next or previous day, just like the photos.
 - **Karvo Pro page**: see everything Pro includes, from the Overview or from *Settings → With Karvo Pro*.
+- **Privacy policy**: *Settings → Privacy policy* opens it, in English and Italian. In short: everything stays on your phone.
 - **Google Play build**: a separate build for Google Play that's updated by the Play Store, so it has no in-app updater and no internet access at all.
 
 ### Changed

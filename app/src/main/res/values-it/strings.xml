@@ -10,6 +10,9 @@
     <string name="cancel">Annulla</string>
     <string name="ok">OK</string>
     <string name="delete">Elimina</string>
+    <string name="privacy_policy">Informativa sulla privacy</string>
+    <string name="privacy_policy_hint">Cosa tiene Karvo sul telefono, e cosa non invia mai</string>
+    <string name="no_browser">Nessun browser trovato per aprire il link</string>
     <string name="share">Condividi</string>
     <string name="share_pick_title">Condividi con un design Karvo</string>
     <string name="share_tagline">Fatto con Karvo</string>
