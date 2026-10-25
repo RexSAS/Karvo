@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Google%20Play-coming%20soon-414141?logo=googleplay&logoColor=white" alt="Coming soon to Google Play">
+  <a href="https://play.google.com/store/apps/details?id=com.karvo"><img src="https://img.shields.io/badge/Google%20Play-closed%20test-414141?logo=googleplay&logoColor=white" alt="Karvo on Google Play (closed test)"></a>
   <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white" alt="Android 8.0+">
   <img src="https://img.shields.io/badge/languages-Italiano%20%C2%B7%20English-1565C0" alt="Italiano and English">
   <img src="https://img.shields.io/badge/data-stays%20on%20your%20phone-1565C0" alt="Data stays on your phone">
@@ -93,7 +93,7 @@ See the [changelog](CHANGELOG.md) for what's new in each version.
 
 ## Download
 
-Karvo is coming to **Google Play**. Until then, the APK is on the [latest GitHub release](https://github.com/RexSAS/Karvo/releases/latest): download **`Karvo-x.y.apk`**, open it and allow *Install unknown apps* when Android asks.
+Karvo is on **[Google Play](https://play.google.com/store/apps/details?id=com.karvo)**, in a closed test for now: the page opens once you've joined the test as a tester. Everyone else can install the APK from the [latest GitHub release](https://github.com/RexSAS/Karvo/releases/latest): download **`Karvo-x.y.apk`**, open it and allow *Install unknown apps* when Android asks.
 
 <details>
 <summary><b>For developers</b></summary>
