@@ -73,7 +73,7 @@ Karvo has no servers and no accounts. Your lessons are stored only on your phone
 - [x] **Moments calendar and daily recap** — a photo calendar of your season; tap a day for its moments, lessons and hours.
 - [x] **Full-screen viewer** — swipe through a day's moments, zoom photos, play videos with mute and a seek bar.
 - [x] **Better photos** — full 4:3 sensor quality, Karvo's look on every photo, and the phone's HDR or Night mode where available.
-- [x] **Share moments** — share a photo or video in one tap; photos go out in one of 4 Karvo designs.
+- [x] **Share moments** — share a photo or video in one tap; photos go out in a Karvo design (Banner or Frame).
 - [ ] **Mascot: Kevin** — a penguin to give Karvo a face: on the splash screen, empty pages and celebrations.
 
 ### 3.1 — Faster and more fun

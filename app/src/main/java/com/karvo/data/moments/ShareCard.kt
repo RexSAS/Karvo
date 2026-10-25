@@ -2,10 +2,10 @@ package com.karvo.data.moments
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.LinearGradient
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
@@ -14,29 +14,45 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.karvo.R
 import java.io.File
+import kotlin.math.roundToInt
 
-/** The four Karvo designs a photo can be shared in, so every shared moment carries the app's name. */
-enum class ShareStyle { Banner, Polaroid, Story, Stamp }
+/**
+ * The Karvo designs a photo can be shared in, so every shared moment carries the app's name, in the picker's order:
+ * [Frame] is the designer's PNG (res/drawable-nodpi/share_frame.png), 9:16 and first because it's story-sized;
+ * [Banner] is drawn in code and fits any photo.
+ */
+enum class ShareStyle { Frame, Banner }
 
 private const val NIGHT = 0xFF0A1229.toInt()
-private const val SKY_TOP = 0xFF060A17.toInt()
-private const val SKY_BOTTOM = 0xFF0C1530.toInt()
-private const val GOLD = 0xFFF2C879.toInt()
 private const val WHITE = 0xFFFFFFFF.toInt()
-private const val PAPER = 0xFFF7F4EE.toInt()
-private const val INK_SOFT = 0xFF5B6478.toInt()
+private const val BLACK = 0xFF000000.toInt()
+/** Width of the black line around the photo in the Frame design, in template pixels. */
+private const val PHOTO_EDGE = 4f
 private const val EMBLEM_ASPECT = 72f / 56f
+/** Long side of the small copy of the photo that is blurred, then stretched back up, for the background. */
+private const val BLUR_PX = 96
+private const val BLUR_RADIUS = 3
 
-/** [photo] redrawn in [style], with the Karvo emblem and name, [date] and [tagline]. */
-fun renderShareCard(context: Context, photo: Bitmap, style: ShareStyle, date: String, tagline: String): Bitmap {
+/** Size of an Instagram story. */
+private const val STORY_WIDTH = 1080
+private const val STORY_HEIGHT = 1920
+
+/**
+ * [photo] redrawn in [style], with the Karvo branding and [date]. For a [story], Banner first crops the photo to a
+ * full 9:16 story (Frame is always one).
+ */
+fun renderShareCard(context: Context, photo: Bitmap, style: ShareStyle, date: String, story: Boolean = false): Bitmap {
     // Decoded photos live in GPU memory, which a software Canvas can't draw from.
     val source = if (photo.config == Bitmap.Config.HARDWARE) photo.copy(Bitmap.Config.ARGB_8888, false) else photo
     return when (style) {
-        ShareStyle.Banner -> banner(context, source, date)
-        ShareStyle.Polaroid -> polaroid(context, source, date, tagline)
-        ShareStyle.Story -> story(context, source, date, tagline)
-        ShareStyle.Stamp -> stamp(context, source, date)
+        ShareStyle.Frame -> frame(context, source, date)
+        ShareStyle.Banner -> if (story) banner(context, storySized(source), date, story = true) else banner(context, source, date)
     }
+}
+
+/** [photo] cropped from the centre to fill a story. */
+private fun storySized(photo: Bitmap): Bitmap = draw(STORY_WIDTH, STORY_HEIGHT) {
+    drawBitmap(photo, null, cover(photo, RectF(0f, 0f, STORY_WIDTH.toFloat(), STORY_HEIGHT.toFloat())), Paint(Paint.FILTER_BITMAP_FLAG))
 }
 
 /** Writes [card] to the app's cache (replacing the last one) and returns a uri other apps can read. */
@@ -46,88 +62,136 @@ fun saveShareCard(context: Context, card: Bitmap): Uri {
     return FileProvider.getUriForFile(context, "${context.packageName}.moments", file)
 }
 
-/** The full photo with a dark fade along the bottom carrying the emblem, KARVO and the date. */
-private fun banner(context: Context, photo: Bitmap, date: String): Bitmap {
+/**
+ * The full photo with a dark fade along the bottom carrying the emblem, KARVO and the date. In a [story] the line sits
+ * higher, clear of Instagram's reply bar.
+ */
+private fun banner(context: Context, photo: Bitmap, date: String, story: Boolean = false): Bitmap {
     val w = photo.width.toFloat()
     val h = photo.height.toFloat()
     val u = minOf(w, h) / 100f
     return draw(photo.width, photo.height) {
         drawBitmap(photo, 0f, 0f, null)
-        val fade = Paint().apply { shader = LinearGradient(0f, h * 0.72f, 0f, h, 0x00000000, 0xC0000000.toInt(), Shader.TileMode.CLAMP) }
-        drawRect(0f, h * 0.72f, w, h, fade)
-        val base = h - 6 * u
+        val fadeTop = if (story) h * 0.6f else h * 0.72f
+        val fade = Paint().apply { shader = LinearGradient(0f, fadeTop, 0f, h, 0x00000000, 0xC0000000.toInt(), Shader.TileMode.CLAMP) }
+        drawRect(0f, fadeTop, w, h, fade)
+        val base = if (story) h * 0.84f else h - 6 * u
         emblem(context, WHITE, 6 * u, base - 6 * u, 7 * u)
         val name = text(5.5f * u, WHITE, bold = true, spacing = 0.25f)
-        drawText("KARVO", 6 * u + 7 * u * EMBLEM_ASPECT + 2.5f * u, base - 0.6f * u, name)
-        drawText(date, w - 6 * u, base - 0.6f * u, text(3.4f * u, 0xD9FFFFFF.toInt()).apply { textAlign = Paint.Align.RIGHT })
+        outlinedText("KARVO", 6 * u + 7 * u * EMBLEM_ASPECT + 2.5f * u, base - 0.6f * u, name, 0.35f * u)
+        outlinedText(date, w - 6 * u, base - 0.6f * u, text(3.4f * u, 0xD9FFFFFF.toInt()).apply { textAlign = Paint.Align.RIGHT }, 0.3f * u)
     }
 }
 
-/** An instant-photo print: paper border, wider at the bottom, where the name and date are written. */
-private fun polaroid(context: Context, photo: Bitmap, date: String, tagline: String): Bitmap {
-    val u = minOf(photo.width, photo.height) / 100f
-    val side = 5 * u
-    val bottom = 24 * u
-    val w = photo.width + 2 * side
-    val h = photo.height + side + bottom
-    return draw(w.toInt(), h.toInt()) {
-        drawColor(PAPER)
-        drawBitmap(photo, side, side, null)
-        val mid = photo.height + side + bottom / 2
-        emblem(context, NIGHT, side, mid - 4.5f * u, 9 * u)
-        val textX = side + 9 * u * EMBLEM_ASPECT + 3 * u
-        drawText("Karvo", textX, mid + 1.5f * u, text(7 * u, NIGHT, bold = true))
-        drawText(tagline, textX, mid + 6 * u, text(3.2f * u, INK_SOFT))
-        drawText(date, w - side, mid + 1.5f * u, text(3.6f * u, INK_SOFT).apply { textAlign = Paint.Align.RIGHT })
-    }
-}
-
-/** A 9:16 story card: night-sky backdrop, the photo with rounded corners in the middle, gold Karvo branding. */
-private fun story(context: Context, photo: Bitmap, date: String, tagline: String): Bitmap {
-    val w = 1080f
-    val h = 1920f
-    return draw(w.toInt(), h.toInt()) {
-        drawRect(0f, 0f, w, h, Paint().apply { shader = LinearGradient(0f, 0f, 0f, h, SKY_TOP, SKY_BOTTOM, Shader.TileMode.CLAMP) })
-        val emblemH = 70f
-        emblem(context, GOLD, (w - emblemH * EMBLEM_ASPECT) / 2, 150f, emblemH)
-        drawText("KARVO", w / 2, 300f, text(64f, GOLD, bold = true, spacing = 0.35f).apply { textAlign = Paint.Align.CENTER })
-        // Fit the photo in the middle band, keeping its shape.
-        val scale = minOf(920f / photo.width, 1180f / photo.height)
-        val pw = photo.width * scale
-        val ph = photo.height * scale
-        val rect = RectF((w - pw) / 2, 380f + (1180f - ph) / 2, (w + pw) / 2, 380f + (1180f + ph) / 2)
+/** The designer's tilted frame over a blurred copy of the photo, with the photo itself sharp inside the frame. */
+private fun frame(context: Context, photo: Bitmap, date: String): Bitmap {
+    val template = frameTemplate(context)
+    val w = template.width.toFloat()
+    val h = template.height.toFloat()
+    val smooth = Paint(Paint.FILTER_BITMAP_FLAG)
+    return draw(template.width, template.height) {
+        // Blurred background: a small copy of the photo, blurred, stretched back up with smoothing, and dimmed.
+        val scale = BLUR_PX.toFloat() / maxOf(photo.width, photo.height)
+        val small = Bitmap.createScaledBitmap(photo, (photo.width * scale).roundToInt().coerceAtLeast(1), (photo.height * scale).roundToInt().coerceAtLeast(1), true)
+        val soft = blurred(small, BLUR_RADIUS)
+        drawBitmap(soft, null, cover(soft, RectF(0f, 0f, w, h)), smooth)
+        drawColor(0x40000000)
+        // The sharp photo, turned with the frame and filling its window.
+        val window = template.window
+        val rect = RectF(window.cx - window.width / 2, window.cy - window.height / 2, window.cx + window.width / 2, window.cy + window.height / 2)
         save()
-        clipPath(Path().apply { addRoundRect(rect, 40f, 40f, Path.Direction.CW) })
-        drawBitmap(photo, null, rect, Paint(Paint.FILTER_BITMAP_FLAG))
+        rotate(template.tilt, window.cx, window.cy)
+        clipRect(rect)
+        drawBitmap(photo, null, cover(photo, rect), smooth)
         restore()
-        drawText(date, w / 2, 1680f, text(44f, WHITE).apply { textAlign = Paint.Align.CENTER })
-        drawText(tagline, w / 2, 1750f, text(36f, GOLD).apply { textAlign = Paint.Align.CENTER })
+        drawBitmap(template.image, 0f, 0f, null)
+        // A thin black line where the photo meets the paper.
+        save()
+        rotate(template.tilt, window.cx, window.cy)
+        drawRect(rect, Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = PHOTO_EDGE; color = BLACK })
+        restore()
+        template.date?.let { box ->
+            save()
+            rotate(template.tilt, box.cx, box.cy)
+            val paint = text(box.height * 0.8f, NIGHT).apply { textAlign = Paint.Align.CENTER }
+            // A long date shrinks to fit the box.
+            paint.measureText(date).let { if (it > box.width) paint.textSize *= box.width / it }
+            drawText(date, box.cx, box.cy - (paint.ascent() + paint.descent()) / 2, paint)
+            restore()
+        }
     }
 }
 
-/** The full photo with a round gold-ringed Karvo stamp in the top corner and the date under it. */
-private fun stamp(context: Context, photo: Bitmap, date: String): Bitmap {
-    val w = photo.width.toFloat()
-    val u = minOf(w, photo.height.toFloat()) / 100f
-    val r = 11 * u
-    val cx = w - 5 * u - r
-    val cy = 5 * u + r
-    return draw(photo.width, photo.height) {
-        drawBitmap(photo, 0f, 0f, null)
-        drawCircle(cx, cy, r, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = NIGHT; alpha = 210 })
-        drawCircle(cx, cy, r - 1.2f * u, Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 0.6f * u; color = GOLD })
-        val emblemH = 6 * u
-        emblem(context, GOLD, cx - emblemH * EMBLEM_ASPECT / 2, cy - 6 * u, emblemH)
-        drawText("KARVO", cx, cy + 4.5f * u, text(3.2f * u, GOLD, bold = true, spacing = 0.25f).apply { textAlign = Paint.Align.CENTER })
-        drawText(date, cx, cy + r + 4.5f * u, text(3 * u, WHITE).apply {
-            textAlign = Paint.Align.CENTER
-            setShadowLayer(0.6f * u, 0f, 0f, 0x99000000.toInt())
-        })
+private class FrameTemplate(val image: Bitmap, val width: Int, val height: Int, val tilt: Float, val window: TiltedBox, val date: TiltedBox?)
+
+@Volatile private var frameTemplate: FrameTemplate? = null
+
+/** The frame PNG read once per process: reading its window and date spot scans every pixel. */
+private fun frameTemplate(context: Context): FrameTemplate = frameTemplate ?: run {
+    val png = BitmapFactory.decodeResource(context.resources, R.drawable.share_frame, BitmapFactory.Options().apply { inScaled = false })
+    val pixels = IntArray(png.width * png.height).also { png.getPixels(it, 0, png.width, 0, 0, png.width, png.height) }
+    val t = readShareTemplate(pixels, png.width, png.height)
+    FrameTemplate(Bitmap.createBitmap(t.pixels, t.width, t.height, Bitmap.Config.ARGB_8888), t.width, t.height, t.tilt, t.window, t.date)
+}.also { frameTemplate = it }
+
+/** Three box blurs of [radius] across and down, close to a Gaussian blur; meant for small bitmaps. */
+private fun blurred(bitmap: Bitmap, radius: Int): Bitmap {
+    val w = bitmap.width
+    val h = bitmap.height
+    var pixels = IntArray(w * h).also { bitmap.getPixels(it, 0, w, 0, 0, w, h) }
+    repeat(3) {
+        pixels = boxBlur(pixels, w, h, radius, across = true)
+        pixels = boxBlur(pixels, w, h, radius, across = false)
     }
+    return Bitmap.createBitmap(pixels, w, h, Bitmap.Config.ARGB_8888)
+}
+
+/** Each pixel becomes the average of the 2×[radius]+1 around it along one direction (edges repeat). */
+private fun boxBlur(src: IntArray, w: Int, h: Int, radius: Int, across: Boolean): IntArray {
+    val out = IntArray(src.size)
+    val lines = if (across) h else w
+    val length = if (across) w else h
+    val n = 2 * radius + 1
+    for (line in 0 until lines) {
+        fun index(k: Int): Int = k.coerceIn(0, length - 1).let { if (across) line * w + it else it * w + line }
+        var r = 0
+        var g = 0
+        var b = 0
+        for (k in -radius..radius) src[index(k)].let { r += it shr 16 and 0xFF; g += it shr 8 and 0xFF; b += it and 0xFF }
+        for (k in 0 until length) {
+            out[index(k)] = (0xFF shl 24) or (r / n shl 16) or (g / n shl 8) or (b / n)
+            val add = src[index(k + radius + 1)]
+            val drop = src[index(k - radius)]
+            r += (add shr 16 and 0xFF) - (drop shr 16 and 0xFF)
+            g += (add shr 8 and 0xFF) - (drop shr 8 and 0xFF)
+            b += (add and 0xFF) - (drop and 0xFF)
+        }
+    }
+    return out
+}
+
+/** Where to draw [bitmap] so it covers [target] completely, centred and keeping its shape. */
+private fun cover(bitmap: Bitmap, target: RectF): RectF {
+    val scale = maxOf(target.width() / bitmap.width, target.height() / bitmap.height)
+    val w = bitmap.width * scale / 2
+    val h = bitmap.height * scale / 2
+    return RectF(target.centerX() - w, target.centerY() - h, target.centerX() + w, target.centerY() + h)
 }
 
 private fun draw(width: Int, height: Int, block: Canvas.() -> Unit): Bitmap =
     Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { Canvas(it).block() }
+
+/** [text] drawn with [paint], inside a black outline [outline] pixels wide, so it reads on any photo. */
+private fun Canvas.outlinedText(text: String, x: Float, y: Float, paint: Paint, outline: Float) {
+    val stroke = Paint(paint).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = outline * 2 // half of it is hidden under the letters
+        strokeJoin = Paint.Join.ROUND
+        color = BLACK
+    }
+    drawText(text, x, y, stroke)
+    drawText(text, x, y, paint)
+}
 
 private fun text(size: Float, color: Int, bold: Boolean = false, spacing: Float = 0f) = Paint(Paint.ANTI_ALIAS_FLAG).apply {
     textSize = size

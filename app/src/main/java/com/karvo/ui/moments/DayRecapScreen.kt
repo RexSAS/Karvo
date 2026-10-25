@@ -33,10 +33,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
@@ -77,8 +81,13 @@ fun DayRecapScreen(
     val allLessons by container.lessonRepository.observeLessons().collectAsStateWithLifecycle(initialValue = emptyList())
     val days = rememberPagerState(initialPage = DAY_PAGES / 2) { DAY_PAGES }
     fun dayAt(page: Int): LocalDate = date.plusDays((page - DAY_PAGES / 2).toLong())
+    val context = LocalContext.current
+    // The photo being shared, and its day: the share picker opens over the blurred page.
+    var designFor by remember { mutableStateOf<Pair<Moment, LocalDate>?>(null) }
 
+    Box(Modifier.fillMaxSize()) {
     Scaffold(
+        modifier = Modifier.blur(if (designFor != null) 24.dp else 0.dp),
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
@@ -107,7 +116,16 @@ fun DayRecapScreen(
                             Text(stringResource(R.string.no_moment_this_day), textAlign = TextAlign.Center)
                             if (isToday) Button(onClick = onOpenCamera) { Text(stringResource(R.string.take_moment)) }
                         }
-                        else -> MomentPager(moments, playing = days.currentPage == page, onOpenMoment = { onOpenMoment(day, it) })
+                        else -> MomentPager(
+                            moments,
+                            playing = days.currentPage == page,
+                            onOpenMoment = { onOpenMoment(day, it) },
+                            // Videos go out as they are; photos first pick a Karvo design.
+                            onShare = { moment ->
+                                if (moment.isVideo) shareFile(context, container.momentStore.shareUri(moment), "video/mp4")
+                                else designFor = moment to day
+                            },
+                        )
                     }
                 }
                 item(key = "summary") {
@@ -131,11 +149,13 @@ fun DayRecapScreen(
             }
         }
     }
+    designFor?.let { (moment, day) -> SharePicker(moment, day, onDismiss = { designFor = null }) }
+    }
 }
 
 /** [playing]: whether this day is the one on screen, so videos on the days either side stay still. */
 @Composable
-private fun MomentPager(moments: List<Moment>, playing: Boolean, onOpenMoment: (index: Int) -> Unit) {
+private fun MomentPager(moments: List<Moment>, playing: Boolean, onOpenMoment: (index: Int) -> Unit, onShare: (Moment) -> Unit) {
     val pager = rememberPagerState { moments.size }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         HorizontalPager(pager, Modifier.fillMaxWidth(), contentPadding = PaddingValues(horizontal = 32.dp), pageSpacing = 12.dp) { page ->
@@ -144,6 +164,7 @@ private fun MomentPager(moments: List<Moment>, playing: Boolean, onOpenMoment: (
             Box(
                 Modifier
                     .aspectRatio(0.75f)
+                    .sharedMoment("moment/${moment.uri}")
                     .clip(RoundedCornerShape(20.dp))
                     .clickable(onClickLabel = label) { onOpenMoment(page) },
             ) {
@@ -162,6 +183,18 @@ private fun MomentPager(moments: List<Moment>, playing: Boolean, onOpenMoment: (
                             .background(Color.Black.copy(alpha = 0.4f), CircleShape)
                             .padding(5.dp),
                     )
+                }
+                // Share this moment, in the same Instagram-gradient button as the full-screen viewer, over a soft
+                // dark fade so it reads on bright snow.
+                Box(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f))))
+                        .padding(top = 32.dp, bottom = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    ShareButton(primary = false, gradient = true, modifier = Modifier.sharedMoment("share/${moment.uri}")) { onShare(moment) }
                 }
             }
         }
