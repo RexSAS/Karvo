@@ -10,6 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/RexSAS/Karvo/releases/latest"><img src="https://img.shields.io/github/v/release/RexSAS/Karvo?label=download&color=1565C0" alt="Latest release"></a>
+  <a href="https://play.google.com/store/apps/details?id=com.karvo"><img src="https://img.shields.io/badge/Google%20Play-closed%20test-414141?logo=googleplay&logoColor=white" alt="Karvo on Google Play (closed test)"></a>
   <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white" alt="Android 8.0+">
   <img src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin + Jetpack Compose">
   <img src="https://img.shields.io/badge/data-stays%20on%20your%20phone-1565C0" alt="Data stays on your phone">
@@ -48,6 +49,8 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 - **Private** — no account, no tracking. The internet is used only to check GitHub for updates; Karvo itself never sends your lessons anywhere. If your phone's Google backup is on, Android includes Karvo's data in it, so your lessons come back when you set up a new phone.
 
 ## Install
+
+Karvo is on **[Google Play](https://play.google.com/store/apps/details?id=com.karvo)**, in a closed test for now: the page opens once you've joined the test as a tester. Everyone else can install the APK:
 
 1. On your Android phone, open the [latest release](https://github.com/RexSAS/Karvo/releases/latest) and download **`Karvo-x.y.apk`**.
 2. Open the file and allow *Install unknown apps* when Android asks. Karvo updates itself: it asks once to be allowed to install apps.
