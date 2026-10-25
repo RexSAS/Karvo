@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Kevin, the Karvo penguin. One group per part so Rive imports each as its own layer. -->
+  <g id="shadow">
+    <ellipse cx="256" cy="446" rx="128" ry="14" fill="#000000" opacity="0.28"/>
+  </g>
+  <g id="foot_l">
+    <ellipse cx="212" cy="434" rx="36" ry="14" fill="#E8A73C"/>
+  </g>
+  <g id="foot_r">
+    <ellipse cx="300" cy="434" rx="36" ry="14" fill="#E8A73C"/>
+  </g>
+  <!-- flippers sit behind the body; pivot at the shoulder (~155,250 / ~357,250) -->
+  <g id="flipper_l">
+    <path d="M156 236 C104 258 84 330 96 374 C126 352 152 312 166 268 Z" fill="#2A3D78"/>
+  </g>
+  <g id="flipper_r">
+    <path d="M356 236 C408 258 428 330 416 374 C386 352 360 312 346 268 Z" fill="#2A3D78"/>
+  </g>
+  <g id="body">
+    <path d="M256 88 C340 88 384 170 384 270 C384 370 336 432 256 432 C176 432 128 370 128 270 C128 170 172 88 256 88 Z" fill="#1B2A52"/>
+  </g>
+  <g id="belly">
+    <path d="M256 214 C318 214 348 270 348 326 C348 388 306 420 256 420 C206 420 164 388 164 326 C164 270 194 214 256 214 Z" fill="#F4F7FB"/>
+  </g>
+  <g id="face">
+    <ellipse cx="224" cy="188" rx="44" ry="48" fill="#F4F7FB"/>
+    <ellipse cx="288" cy="188" rx="44" ry="48" fill="#F4F7FB"/>
+  </g>
+  <g id="cheeks">
+    <ellipse cx="196" cy="222" rx="12" ry="7" fill="#F59AA8" opacity="0.65"/>
+    <ellipse cx="316" cy="222" rx="12" ry="7" fill="#F59AA8" opacity="0.65"/>
+  </g>
+  <g id="eye_l">
+    <circle cx="228" cy="192" r="14" fill="#0A1229"/>
+    <circle cx="233" cy="187" r="5" fill="#FFFFFF"/>
+  </g>
+  <g id="eye_r">
+    <circle cx="284" cy="192" r="14" fill="#0A1229"/>
+    <circle cx="289" cy="187" r="5" fill="#FFFFFF"/>
+  </g>
+  <!-- eyelids: hidden; animate opacity (or scaleY from the top) to blink -->
+  <g id="lid_l" opacity="0">
+    <ellipse cx="228" cy="192" rx="16" ry="16" fill="#1B2A52"/>
+  </g>
+  <g id="lid_r" opacity="0">
+    <ellipse cx="284" cy="192" rx="16" ry="16" fill="#1B2A52"/>
+  </g>
+  <g id="beak">
+    <path d="M238 214 Q256 204 274 214 L256 240 Z" fill="#F2C879"/>
+  </g>
+  <g id="scarf">
+    <path d="M140 256 Q256 300 372 256 L376 284 Q256 330 136 284 Z" fill="#F2C879"/>
+    <path d="M150 268 Q256 310 362 268" fill="none" stroke="#E8A73C" stroke-width="4" opacity="0.6"/>
+  </g>
+  <g id="scarf_tail">
+    <path d="M296 292 L332 366 L306 374 L278 300 Z" fill="#E8A73C"/>
+  </g>
+  <g id="goggles">
+    <path d="M186 138 Q256 108 326 138" fill="none" stroke="#F2C879" stroke-width="10" stroke-linecap="round"/>
+    <rect x="248" y="122" width="16" height="8" rx="3" fill="#F2C879"/>
+    <ellipse cx="226" cy="128" rx="27" ry="19" fill="#8FD3FF" stroke="#F2C879" stroke-width="6"/>
+    <ellipse cx="286" cy="128" rx="27" ry="19" fill="#8FD3FF" stroke="#F2C879" stroke-width="6"/>
+    <path d="M210 122 Q216 114 226 114" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+    <path d="M270 122 Q276 114 286 114" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  </g>
+</svg>
