@@ -27,6 +27,26 @@ class MomentsTest {
         assertEquals(listOf(morning, late), days[0].moments)
     }
 
+    @Test fun importFillsEachDayUpToTheLimitOldestFirst() {
+        val existing = listOf(moment("2026-01-02T08:00:00Z"), moment("2026-01-02T09:00:00Z"))
+        val picked = listOf(
+            moment("2026-01-02T12:00:00Z"), moment("2026-01-02T10:00:00Z"), // one slot left on the 2nd: 10:00 wins
+            moment("2026-01-02T08:00:00Z"), // already in the album
+            moment("2026-01-03T10:00:00Z", video = true),
+        )
+        assertEquals(
+            listOf(moment("2026-01-02T10:00:00Z"), moment("2026-01-03T10:00:00Z", video = true)),
+            momentsThatFit(existing, picked, rome),
+        )
+    }
+
+    @Test fun readsTheCaptureTimeFromKarvoNamesOnly() {
+        assertEquals(1761561000000L, karvoNameMillis("karvo-1761561000000.jpg"))
+        assertEquals(1761561000000L, karvoNameMillis("karvo-1761561000000 (1).mp4"))
+        assertEquals(null, karvoNameMillis("IMG_20261027_103000.jpg"))
+        assertEquals(null, karvoNameMillis("karvo-.jpg"))
+    }
+
     @Test fun countsPerMonth() {
         val counts = momentCountsByMonth(
             listOf(moment("2026-01-05T10:00:00Z"), moment("2026-01-20T10:00:00Z"), moment("2026-02-01T10:00:00Z")),

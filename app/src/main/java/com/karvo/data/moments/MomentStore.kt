@@ -8,16 +8,19 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.webkit.MimeTypeMap
 import androidx.camera.video.FileOutputOptions
 import androidx.camera.video.MediaStoreOutputOptions
 import androidx.camera.video.OutputOptions
 import androidx.core.content.FileProvider
 import com.karvo.domain.MAX_VIDEO_MILLIS
 import com.karvo.domain.Moment
+import com.karvo.domain.karvoNameMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import java.time.Instant
 
 private const val ALBUM = "Karvo"
@@ -38,30 +41,76 @@ class MomentStore(context: Context) {
 
     /** Saves [bitmap] as a high-quality JPEG in the Karvo album and returns its uri. */
     suspend fun savePhoto(bitmap: Bitmap): Uri = withContext(Dispatchers.IO) {
-        if (scoped) {
-            val values = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, name("jpg"))
-                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/$ALBUM")
-                put(MediaStore.MediaColumns.DATE_TAKEN, System.currentTimeMillis())
-                // Hidden from the gallery until it's fully written.
-                put(MediaStore.MediaColumns.IS_PENDING, 1)
+        write(isVideo = false, "image/jpeg", name("jpg"), System.currentTimeMillis()) { bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) }
+    }
+
+    /**
+     * Reads a photo or video picked from the gallery as a [Moment] (its uri still the picked one), or null unless
+     * Karvo saved it: after a reinstall, the old album is no longer this install's and has to be picked to come back.
+     */
+    suspend fun inspect(picked: Uri): Moment? = withContext(Dispatchers.IO) {
+        val isVideo = resolver.getType(picked)?.startsWith("video/") ?: return@withContext null
+        val (fileName, dateTaken) = try {
+            resolver.query(picked, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.DATE_TAKEN), null, null, null)?.use { c ->
+                if (!c.moveToFirst()) return@use null
+                c.getString(0) to (if (c.isNull(1)) null else c.getLong(1).takeIf { it > 0 })
             }
-            val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: throw IOException("Can't create the photo")
+        } catch (_: RuntimeException) {
+            null // providers that don't know the date column
+        } ?: return@withContext null
+        // "karvo-<millis>.jpg": the name is the capture time when the gallery has none.
+        val nameMillis = karvoNameMillis(fileName ?: "") ?: return@withContext null
+        Moment(picked, isVideo, Instant.ofEpochMilli(dateTaken ?: nameMillis))
+    }
+
+    /** Copies a picked moment, as read by [inspect], back into the Karvo album as it is, keeping when it was taken. */
+    suspend fun restore(picked: Moment): Uri = withContext(Dispatchers.IO) {
+        val mime = resolver.getType(picked.uri) ?: throw IOException("Unknown file type")
+        val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: if (picked.isVideo) "mp4" else "jpg"
+        val input = resolver.openInputStream(picked.uri) ?: throw IOException("Can't read ${picked.uri}")
+        input.use { source -> write(picked.isVideo, mime, "karvo-${picked.takenAt.toEpochMilli()}.$ext", picked.takenAt.toEpochMilli()) { source.copyTo(it) } }
+    }
+
+    private fun write(isVideo: Boolean, mime: String, fileName: String, takenMillis: Long, body: (OutputStream) -> Unit): Uri {
+        val dir = if (isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES
+        if (!scoped) {
+            val file = File(legacyDir(dir), fileName)
             try {
-                resolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) }
-                    ?: throw IOException("Can't write the photo")
-                resolver.update(uri, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null)
+                file.outputStream().use(body)
             } catch (e: Exception) {
-                resolver.delete(uri, null, null)
+                file.delete()
                 throw e
             }
-            uri
-        } else {
-            val file = File(legacyDir(Environment.DIRECTORY_PICTURES), name("jpg"))
-            file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) }
-            Uri.fromFile(file).also(::scan)
+            // Android 8–9 moments are dated by the file itself.
+            file.setLastModified(takenMillis)
+            return Uri.fromFile(file).also(::scan)
         }
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, mime)
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "$dir/$ALBUM")
+            put(MediaStore.MediaColumns.DATE_TAKEN, takenMillis)
+            // Hidden from the gallery until it's fully written.
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
+        }
+        val collection = if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        val uri = resolver.insert(collection, values) ?: throw IOException("Can't create the file")
+        try {
+            resolver.openOutputStream(uri)?.use(body) ?: throw IOException("Can't write the file")
+            resolver.update(uri, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null)
+        } catch (e: Exception) {
+            resolver.delete(uri, null, null)
+            throw e
+        }
+        return uri
+    }
+
+    private fun queryDateTaken(uri: Uri): Long? = try {
+        resolver.query(uri, arrayOf(MediaStore.MediaColumns.DATE_TAKEN), null, null, null)?.use { c ->
+            if (c.moveToFirst() && !c.isNull(0)) c.getLong(0).takeIf { it > 0 } else null
+        }
+    } catch (_: RuntimeException) {
+        null // providers that don't know the column
     }
 
     fun videoOutput(): OutputOptions = if (scoped) {

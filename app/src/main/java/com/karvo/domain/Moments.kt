@@ -27,6 +27,28 @@ fun momentCountsByMonth(moments: List<Moment>, zone: ZoneId): Map<YearMonth, Int
 /** A day keeps its best moments only. */
 const val MOMENTS_PER_DAY = 3
 
+/** The capture time in a file name Karvo gave, like "karvo-1761561000000.jpg" (or "… (1).jpg" after a clash). */
+fun karvoNameMillis(fileName: String): Long? =
+    Regex("""karvo-(\d+)(?: \(\d+\))?\.\w+""").matchEntire(fileName)?.groupValues?.get(1)?.toLongOrNull()
+
+/**
+ * The [picked] gallery items that can join the album: not already in it (same capture time) and, oldest first,
+ * only while their day has room next to the [existing] moments.
+ */
+fun momentsThatFit(existing: List<Moment>, picked: List<Moment>, zone: ZoneId): List<Moment> {
+    val taken = existing.map { it.takenAt }.toMutableSet()
+    val perDay = existing.groupingBy { it.takenAt.atZone(zone).toLocalDate() }.eachCount().toMutableMap()
+    return picked.sortedBy { it.takenAt }.filter { m ->
+        val day = m.takenAt.atZone(zone).toLocalDate()
+        val fits = m.takenAt !in taken && (perDay[day] ?: 0) < MOMENTS_PER_DAY
+        if (fits) {
+            taken += m.takenAt
+            perDay[day] = (perDay[day] ?: 0) + 1
+        }
+        fits
+    }
+}
+
 /** The moments taken on [date], oldest first. */
 fun momentsOn(date: LocalDate, moments: List<Moment>, zone: ZoneId): List<Moment> =
     moments.filter { it.takenAt.atZone(zone).toLocalDate() == date }.sortedBy { it.takenAt }

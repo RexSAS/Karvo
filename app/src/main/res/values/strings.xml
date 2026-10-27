@@ -198,6 +198,15 @@
     <string name="biometric_turn_off_prompt">Turn off fingerprint unlock</string>
     <string name="moments">Moments</string>
     <string name="take_moment">Capture a moment</string>
+    <string name="restore_moments">Restore moments from the gallery</string>
+    <plurals name="moments_restored">
+        <item quantity="one">Restored %d moment</item>
+        <item quantity="other">Restored %d moments</item>
+    </plurals>
+    <plurals name="moments_skipped">
+        <item quantity="one">%d skipped: not from the Karvo album, already back, or the day is full</item>
+        <item quantity="other">%d skipped: not from the Karvo album, already back, or the day is full</item>
+    </plurals>
     <string name="open_moments">Open moments</string>
     <string name="camera_hint">Tap for a photo · hold for a video</string>
     <string name="camera_consent">Only film students who agreed. For kids, ask their parents first.</string>

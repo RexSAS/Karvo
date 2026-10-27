@@ -1,5 +1,15 @@
 package com.karvo.ui.moments
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.SettingsBackupRestore
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.mutableStateOf
+import com.karvo.domain.momentsThatFit
+import kotlinx.coroutines.CancellationException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -68,13 +78,13 @@ import java.time.ZoneId
 import java.time.format.TextStyle
 import java.util.Locale
 
-/** Every moment in the Karvo album; reloads on resume, e.g. after a capture or a deletion. */
+/** Every moment in the Karvo album; reloads on resume, e.g. after a capture or a deletion, and when [refresh] changes. */
 @Composable
-fun rememberMoments(): List<Moment>? {
+fun rememberMoments(refresh: Any? = null): List<Moment>? {
     val container = (LocalContext.current.applicationContext as KarvoApp).container
     var tick by remember { mutableIntStateOf(0) }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { tick++ }
-    val moments by produceState<List<Moment>?>(null, tick) { value = container.momentStore.list() }
+    val moments by produceState<List<Moment>?>(null, tick, refresh) { value = container.momentStore.list() }
     return moments
 }
 
@@ -89,12 +99,45 @@ fun rememberZone(): ZoneId {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MomentsScreen(onBack: () -> Unit, onOpenCamera: () -> Unit, onOpenDay: (LocalDate) -> Unit) {
-    val container = (LocalContext.current.applicationContext as KarvoApp).container
-    val moments = rememberMoments()
+    val context = LocalContext.current
+    val container = (context.applicationContext as KarvoApp).container
+    var restores by remember { mutableIntStateOf(0) }
+    val moments = rememberMoments(refresh = restores)
     val zone = rememberZone()
     val lessons by container.lessonRepository.observeLessons().collectAsStateWithLifecycle(initialValue = null)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val restoreScope = rememberCoroutineScope()
+    var restoring by remember { mutableStateOf(false) }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
+        if (uris.isEmpty()) return@rememberLauncherForActivityResult
+        restoring = true
+        restoreScope.launch {
+            val store = container.momentStore
+            val picked = uris.mapNotNull { store.inspect(it) }
+            var done = 0
+            for (moment in momentsThatFit(store.list(), picked, zone)) {
+                try {
+                    store.restore(moment)
+                    done++
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    // Counted as skipped below.
+                }
+            }
+            restoring = false
+            restores++
+            val skipped = uris.size - done
+            val res = context.resources
+            snackbarHostState.showSnackbar(
+                res.getQuantityString(R.plurals.moments_restored, done, done) +
+                    if (skipped > 0) "\n" + res.getQuantityString(R.plurals.moments_skipped, skipped, skipped) else "",
+            )
+        }
+    }
     Scaffold(
         containerColor = Color.Transparent, // the alpine backdrop shows through
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
@@ -103,6 +146,13 @@ fun MomentsScreen(onBack: () -> Unit, onOpenCamera: () -> Unit, onOpenDay: (Loca
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back)) }
                 },
                 actions = {
+                    if (restoring) {
+                        CircularProgressIndicator(Modifier.padding(12.dp).size(24.dp), strokeWidth = 2.dp)
+                    } else {
+                        IconButton(onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) }) {
+                            Icon(Icons.Filled.SettingsBackupRestore, stringResource(R.string.restore_moments))
+                        }
+                    }
                     IconButton(onClick = onOpenCamera) { Icon(Icons.Filled.PhotoCamera, stringResource(R.string.take_moment)) }
                 },
             )

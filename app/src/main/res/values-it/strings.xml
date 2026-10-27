@@ -196,6 +196,15 @@
     <string name="biometric_turn_off_prompt">Disattiva lo sblocco con impronta</string>
     <string name="moments">Momenti</string>
     <string name="take_moment">Cattura un momento</string>
+    <string name="restore_moments">Ripristina i momenti dalla galleria</string>
+    <plurals name="moments_restored">
+        <item quantity="one">Ripristinato %d momento</item>
+        <item quantity="other">Ripristinati %d momenti</item>
+    </plurals>
+    <plurals name="moments_skipped">
+        <item quantity="one">%d saltato: non viene dall\'album Karvo, c\'è già, o il giorno è pieno</item>
+        <item quantity="other">%d saltati: non vengono dall\'album Karvo, ci sono già, o il giorno è pieno</item>
+    </plurals>
     <string name="open_moments">Apri i momenti</string>
     <string name="camera_hint">Tocca per una foto · tieni premuto per un video</string>
     <string name="camera_consent">Riprendi solo gli allievi d\'accordo. Per i bambini, chiedi prima ai genitori.</string>
