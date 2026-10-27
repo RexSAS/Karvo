@@ -17,6 +17,7 @@ import com.karvo.data.KarvoDatabase
 import com.karvo.data.RoomLessonRepository
 import com.karvo.data.SettingsRepository
 import com.karvo.data.backup.BackupService
+import com.karvo.data.moments.MomentStore
 import com.karvo.data.backup.BackupStore
 import com.karvo.data.update.GitHubReleaseSource
 import com.karvo.data.update.PackageInstallerUpdater
@@ -55,6 +56,8 @@ class AppContainer(context: Context) {
 
     /** True only for the first caller in this process, so the automatic update check runs once per cold start. */
     fun claimUpdateCheck(): Boolean = updateCheckClaimed.compareAndSet(false, true)
+
+    val momentStore by lazy { MomentStore(appContext) }
 
     val backupService: BackupService by lazy {
         BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository)

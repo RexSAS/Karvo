@@ -8,19 +8,15 @@ import com.karvo.ui.components.PaidBadge
 import com.karvo.ui.components.PartlyPaidColor
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -99,67 +95,68 @@ fun OverviewScreen(
     ) { padding ->
         // Still loading: show nothing rather than flashing 0m / — €.
         if (state.loading) return@Scaffold
-        LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
-            item(key = "total") {
-                GlassPanel(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
-                    Column(Modifier.padding(start = 18.dp, end = 8.dp, top = 16.dp, bottom = if (state.stats != null) 28.dp else 16.dp)) {
+        val totalPanel: @Composable () -> Unit = {
+            GlassPanel(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+                Column(Modifier.padding(start = 18.dp, end = 8.dp, top = 16.dp, bottom = if (state.stats != null) 28.dp else 16.dp)) {
+                    Text(
+                        stringResource(R.string.total_hours).uppercase(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(formatDuration(state.totalMinutes), style = MaterialTheme.typography.displaySmall)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            stringResource(R.string.total_hours).uppercase(),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            earningsLabel(state.totalEarningsCents, state.revealed),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.weight(1f).clickable(onClick = { if (!state.rateSet) onOpenSettings() }),
                         )
-                        Text(formatDuration(state.totalMinutes), style = MaterialTheme.typography.displaySmall)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                earningsLabel(state.totalEarningsCents, state.revealed),
-                                style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.tertiary,
-                                modifier = Modifier.weight(1f).clickable(onClick = { if (!state.rateSet) onOpenSettings() }),
-                            )
-                            IconButton(onClick = onEarningsTap) {
-                                Icon(
-                                    if (state.revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                    contentDescription = stringResource(if (state.revealed) R.string.hide_earnings else R.string.show_earnings),
-                                )
-                            }
-                        }
-                        state.seasons?.let { seasons ->
-                            val current = seasons.current
-                            Text(
-                                stringResource(R.string.this_season, current.season.label()) + " · " +
-                                    formatDuration(current.minutes) + " · " + earningsLabel(current.earningsCents, state.revealed),
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(top = 8.dp),
-                            )
-                            seasons.previousToDateMinutes?.let { previous ->
-                                Text(
-                                    stringResource(
-                                        R.string.season_vs_last,
-                                        signedDuration(current.minutes - previous),
-                                        Season(current.season.startYear - 1, current.season.startMonth).label(),
-                                    ),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                        if (state.unpaid.minutes > 0) {
-                            Text(
-                                pluralStringResource(
-                                    R.plurals.to_be_paid,
-                                    state.unpaid.months,
-                                    state.unpaid.months,
-                                    formatDuration(state.unpaid.minutes),
-                                    earningsLabel(state.unpaid.earningsCents, state.revealed),
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = PartlyPaidColor,
-                                modifier = Modifier.padding(top = 4.dp),
+                        IconButton(onClick = onEarningsTap) {
+                            Icon(
+                                if (state.revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = stringResource(if (state.revealed) R.string.hide_earnings else R.string.show_earnings),
                             )
                         }
                     }
+                    state.seasons?.let { seasons ->
+                        val current = seasons.current
+                        Text(
+                            stringResource(R.string.this_season, current.season.label()) + " · " +
+                                formatDuration(current.minutes) + " · " + earningsLabel(current.earningsCents, state.revealed),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                        seasons.previousToDateMinutes?.let { previous ->
+                            Text(
+                                stringResource(
+                                    R.string.season_vs_last,
+                                    signedDuration(current.minutes - previous),
+                                    Season(current.season.startYear - 1, current.season.startMonth).label(),
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    if (state.unpaid.minutes > 0) {
+                        Text(
+                            pluralStringResource(
+                                R.plurals.to_be_paid,
+                                state.unpaid.months,
+                                state.unpaid.months,
+                                formatDuration(state.unpaid.minutes),
+                                earningsLabel(state.unpaid.earningsCents, state.revealed),
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = PartlyPaidColor,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
                 }
             }
+        }
+        LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
+            item(key = "total") { totalPanel() }
             val stats = state.stats
             if (stats == null) {
                 item(key = "empty") {

@@ -1,0 +1,198 @@
+﻿date,student,duration_minutes,duration_hours,notes,paid_on
+2025-12-06,Elena Gallo,60,1,,2026-01-10
+2025-12-06,Giulia Bianchi,90,1.5,,2026-01-10
+2025-12-07,Tommaso Ricci,60,1,,2026-01-10
+2025-12-07,Tommaso Ricci,120,2,,2026-01-10
+2025-12-08,Davide Greco,60,1,,2026-01-10
+2025-12-08,Rossi family,60,1,Kids 6 and 9,2026-01-10
+2025-12-09,Giulia Bianchi,60,1,,2026-01-10
+2025-12-11,Davide Greco,60,1,,2026-01-10
+2025-12-11,Anna Costa,90,1.5,,2026-01-10
+2025-12-12,Tommaso Ricci,60,1,,2026-01-10
+2025-12-12,Tommaso Ricci,60,1,,2026-01-10
+2025-12-13,Rossi family,60,1,Kids 6 and 9,2026-01-10
+2025-12-13,Luca Moretti,90,1.5,,2026-01-10
+2025-12-14,Elena Gallo,120,2,,2026-01-10
+2025-12-14,Chiara Marino,60,1,,2026-01-10
+2025-12-14,Group Esposito,180,3,"Group, 3 people",2026-01-10
+2025-12-15,Davide Greco,90,1.5,,2026-01-10
+2025-12-17,Rossi family,120,2,Kids 6 and 9,2026-01-10
+2025-12-17,Davide Greco,120,2,,2026-01-10
+2025-12-20,Luca Moretti,120,2,,2026-01-10
+2025-12-20,Marco Ferri,60,1,,2026-01-10
+2025-12-20,Elena Gallo,180,3,,2026-01-10
+2025-12-21,Group Colombo,180,3,,2026-01-10
+2025-12-21,Sofia Conti,90,1.5,,2026-01-10
+2025-12-21,Lukas Weber,180,3,Snowboard,2026-01-10
+2025-12-22,Matteo Bruno,60,1,,2026-01-10
+2025-12-22,Marco Ferri,60,1,,2026-01-10
+2025-12-23,Group Colombo,120,2,"Group, 4 people",2026-01-10
+2025-12-23,Emma Schmidt,180,3,Snowboard,2026-01-10
+2025-12-23,Group Colombo,180,3,"Group, 4 people",2026-01-10
+2025-12-24,Marco Ferri,180,3,,2026-01-10
+2025-12-24,Giulia Bianchi,120,2,,2026-01-10
+2025-12-25,Giulia Bianchi,90,1.5,,2026-01-10
+2025-12-25,Lukas Weber,120,2,Snowboard,2026-01-10
+2025-12-25,Sofia Conti,90,1.5,,2026-01-10
+2025-12-26,Leonardo Serra,90,1.5,,2026-01-10
+2025-12-26,Rossi family,60,1,Kids 6 and 9,2026-01-10
+2025-12-26,Sofia Conti,120,2,,2026-01-10
+2025-12-27,Luca Moretti,120,2,,2026-01-10
+2025-12-27,Group Esposito,120,2,"Group, 3 people",2026-01-10
+2025-12-27,Sofia Conti,90,1.5,,2026-01-10
+2025-12-28,Group Colombo,120,2,"Group, 4 people",2026-01-10
+2025-12-28,Lorenzo Villa,120,2,,2026-01-10
+2025-12-28,Sofia Conti,90,1.5,,2026-01-10
+2025-12-29,Luca Moretti,60,1,,2026-01-10
+2025-12-29,Sofia Conti,60,1,,2026-01-10
+2025-12-29,Noah Müller,90,1.5,,2026-01-10
+2026-01-01,Giulia Bianchi,90,1.5,,2026-02-10
+2026-01-01,Chiara Marino,180,3,,2026-02-10
+2026-01-02,Luca Moretti,120,2,,2026-02-10
+2026-01-02,Giulia Bianchi,90,1.5,,2026-02-10
+2026-01-02,Marco Ferri,120,2,,2026-02-10
+2026-01-03,Lorenzo Villa,180,3,,2026-02-10
+2026-01-03,Elena Gallo,180,3,,2026-02-10
+2026-01-04,Rossi family,120,2,Kids 6 and 9,2026-02-10
+2026-01-04,Matteo Bruno,120,2,,2026-02-10
+2026-01-05,Giulia Bianchi,90,1.5,,2026-02-10
+2026-01-05,Lorenzo Villa,120,2,,2026-02-10
+2026-01-05,Group Esposito,120,2,,2026-02-10
+2026-01-06,Marco Ferri,90,1.5,,2026-02-10
+2026-01-06,Luca Moretti,90,1.5,,2026-02-10
+2026-01-06,Rossi family,120,2,,2026-02-10
+2026-01-09,Giulia Bianchi,60,1,,2026-02-10
+2026-01-09,Lukas Weber,120,2,Snowboard,2026-02-10
+2026-01-10,Marco Ferri,90,1.5,,2026-02-10
+2026-01-10,Group Colombo,180,3,"Group, 4 people",2026-02-10
+2026-01-11,Rossi family,60,1,Kids 6 and 9,2026-02-10
+2026-01-11,Giulia Bianchi,90,1.5,,2026-02-10
+2026-01-11,Lukas Weber,60,1,Snowboard,2026-02-10
+2026-01-14,Tommaso Ricci,90,1.5,,2026-02-10
+2026-01-17,Ben Carter,120,2,Lesson in English,2026-02-10
+2026-01-17,Tommaso Ricci,90,1.5,,2026-02-10
+2026-01-17,Luca Moretti,120,2,,2026-02-10
+2026-01-18,Lorenzo Villa,120,2,,2026-02-10
+2026-01-18,Pietro Mancini,120,2,,2026-02-10
+2026-01-18,Lukas Weber,180,3,Snowboard,2026-02-10
+2026-01-20,Giulia Bianchi,120,2,,2026-02-10
+2026-01-23,Marco Ferri,60,1,,2026-02-10
+2026-01-24,Tommaso Ricci,120,2,,2026-02-10
+2026-01-24,Chiara Marino,60,1,,2026-02-10
+2026-01-24,Giulia Bianchi,180,3,,2026-02-10
+2026-01-25,Sofia Conti,60,1,,2026-02-10
+2026-01-25,Sofia Conti,60,1,,2026-02-10
+2026-01-28,Group Colombo,180,3,"Group, 4 people",2026-02-10
+2026-01-29,Lorenzo Villa,60,1,,2026-02-10
+2026-01-30,Alice Fontana,120,2,Off-piste intro,2026-02-10
+2026-01-31,Sofia Conti,60,1,,2026-02-10
+2026-01-31,Leonardo Serra,90,1.5,,2026-02-10
+2026-02-01,Group Colombo,120,2,,2026-03-10
+2026-02-01,Sofia Conti,60,1,,2026-03-10
+2026-02-03,Sofia Conti,90,1.5,,2026-03-10
+2026-02-04,Leonardo Serra,60,1,,2026-03-10
+2026-02-05,Chiara Marino,60,1,,2026-03-10
+2026-02-07,Chiara Marino,120,2,,2026-03-10
+2026-02-07,Chiara Marino,120,2,,2026-03-10
+2026-02-07,Luca Moretti,120,2,,2026-03-10
+2026-02-08,Leonardo Serra,180,3,,2026-03-10
+2026-02-08,Rossi family,120,2,,2026-03-10
+2026-02-08,Tommaso Ricci,60,1,,2026-03-10
+2026-02-09,Matteo Bruno,60,1,,2026-03-10
+2026-02-09,Sofia Conti,90,1.5,,2026-03-10
+2026-02-10,Elena Gallo,60,1,,2026-03-10
+2026-02-11,Ginevra De Luca,60,1,,2026-03-10
+2026-02-12,Rossi family,60,1,Kids 6 and 9,2026-03-10
+2026-02-13,Giulia Bianchi,120,2,,2026-03-10
+2026-02-14,Rossi family,60,1,Kids 6 and 9,2026-03-10
+2026-02-14,Davide Greco,90,1.5,,2026-03-10
+2026-02-14,Matteo Bruno,120,2,,2026-03-10
+2026-02-15,Pietro Mancini,90,1.5,,2026-03-10
+2026-02-15,Alice Fontana,60,1,,2026-03-10
+2026-02-15,Anna Costa,90,1.5,,2026-03-10
+2026-02-16,Giulia Bianchi,90,1.5,,2026-03-10
+2026-02-16,Federico Rizzo,120,2,,2026-03-10
+2026-02-16,Davide Greco,120,2,,2026-03-10
+2026-02-17,Rossi family,60,1,Kids 6 and 9,2026-03-10
+2026-02-17,Noah Müller,90,1.5,,2026-03-10
+2026-02-18,Alice Fontana,120,2,Off-piste intro,2026-03-10
+2026-02-18,Rossi family,120,2,Kids 6 and 9,2026-03-10
+2026-02-19,Giulia Bianchi,90,1.5,,2026-03-10
+2026-02-19,Chiara Marino,120,2,,2026-03-10
+2026-02-19,Marco Ferri,120,2,,2026-03-10
+2026-02-20,Chiara Marino,90,1.5,,2026-03-10
+2026-02-20,Matteo Bruno,120,2,,2026-03-10
+2026-02-20,Alice Fontana,60,1,Off-piste intro,2026-03-10
+2026-02-21,Anna Costa,120,2,,2026-03-10
+2026-02-21,Chiara Marino,90,1.5,,2026-03-10
+2026-02-21,Giulia Bianchi,60,1,,2026-03-10
+2026-02-22,Tommaso Ricci,90,1.5,,2026-03-10
+2026-02-22,Lukas Weber,60,1,,2026-03-10
+2026-02-22,Ben Carter,60,1,Lesson in English,2026-03-10
+2026-02-25,Elena Gallo,120,2,,2026-03-10
+2026-02-26,Giulia Bianchi,90,1.5,,2026-03-10
+2026-02-27,Chiara Marino,120,2,,2026-03-10
+2026-02-27,Marco Ferri,120,2,,2026-03-10
+2026-02-28,Noah Müller,120,2,,2026-03-10
+2026-02-28,Pietro Mancini,90,1.5,,2026-03-10
+2026-03-01,Rossi family,120,2,,2026-04-10
+2026-03-01,Giulia Bianchi,180,3,,2026-04-10
+2026-03-01,Lukas Weber,60,1,Snowboard,2026-04-10
+2026-03-02,Rossi family,180,3,Kids 6 and 9,2026-04-10
+2026-03-02,Emma Schmidt,60,1,Snowboard,2026-04-10
+2026-03-05,Tommaso Ricci,60,1,,2026-04-10
+2026-03-07,Martina Lombardi,120,2,,2026-04-10
+2026-03-07,Ben Carter,90,1.5,Lesson in English,2026-04-10
+2026-03-08,Elena Gallo,120,2,,2026-04-10
+2026-03-08,Emma Schmidt,90,1.5,,2026-04-10
+2026-03-08,Group Colombo,180,3,"Group, 4 people",2026-04-10
+2026-03-09,Pietro Mancini,120,2,,2026-04-10
+2026-03-09,Sofia Conti,90,1.5,,2026-04-10
+2026-03-10,Giulia Bianchi,60,1,,2026-04-10
+2026-03-10,Chiara Marino,60,1,,2026-04-10
+2026-03-12,Group Colombo,120,2,"Group, 4 people",2026-04-10
+2026-03-13,Elena Gallo,120,2,,2026-04-10
+2026-03-14,Elena Gallo,120,2,,2026-04-10
+2026-03-14,Sofia Conti,120,2,,2026-04-10
+2026-03-14,Davide Greco,90,1.5,,2026-04-10
+2026-03-15,Giulia Bianchi,120,2,,2026-04-10
+2026-03-15,Alice Fontana,90,1.5,Off-piste intro,2026-04-10
+2026-03-18,Anna Costa,120,2,,2026-04-10
+2026-03-19,Rossi family,180,3,,2026-04-10
+2026-03-20,Ginevra De Luca,60,1,,2026-04-10
+2026-03-21,Ginevra De Luca,60,1,,2026-04-10
+2026-03-21,Anna Costa,120,2,,2026-04-10
+2026-03-21,Rossi family,120,2,Kids 6 and 9,2026-04-10
+2026-03-22,Sarah Johnson,120,2,Lesson in English,2026-04-10
+2026-03-22,Giulia Bianchi,60,1,,2026-04-10
+2026-03-22,Anna Costa,60,1,,2026-04-10
+2026-03-23,Marco Ferri,60,1,,2026-04-10
+2026-03-23,Rossi family,90,1.5,,2026-04-10
+2026-03-24,Alice Fontana,120,2,Off-piste intro,2026-04-10
+2026-03-25,Rossi family,90,1.5,Kids 6 and 9,2026-04-10
+2026-03-26,Chiara Marino,120,2,,2026-04-10
+2026-03-27,Tommaso Ricci,90,1.5,,2026-04-10
+2026-03-27,Anna Costa,120,2,,2026-04-10
+2026-03-28,Lorenzo Villa,120,2,,2026-04-10
+2026-03-28,Marco Ferri,180,3,,2026-04-10
+2026-03-29,Tommaso Ricci,60,1,,2026-04-10
+2026-03-29,Giulia Bianchi,120,2,,2026-04-10
+2026-03-31,Rossi family,120,2,,2026-04-10
+2026-03-31,Rossi family,60,1,Kids 6 and 9,2026-04-10
+2026-04-01,Rossi family,90,1.5,,
+2026-04-01,Lukas Weber,120,2,,
+2026-04-03,Matteo Bruno,90,1.5,,
+2026-04-04,Elena Gallo,90,1.5,,
+2026-04-04,Marco Ferri,60,1,,
+2026-04-04,Luca Moretti,180,3,,
+2026-04-06,Group Esposito,180,3,"Group, 3 people",
+2026-07-18,Anna Costa,60,1,,
+2026-07-18,Tommaso Ricci,60,1,,
+2026-08-08,Chiara Marino,120,2,,
+2026-08-08,Alice Fontana,90,1.5,Off-piste intro,
+2026-10-10,Tommaso Ricci,120,2,,
+2026-10-10,Marco Ferri,60,1,,
+2026-10-17,Elena Gallo,90,1.5,,
+2026-10-17,Rossi family,120,2,Kids 6 and 9,
+2026-10-18,Ben Carter,60,1,Lesson in English,
+2026-10-18,Davide Greco,120,2,,

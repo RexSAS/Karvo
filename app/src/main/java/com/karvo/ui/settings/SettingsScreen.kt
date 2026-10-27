@@ -3,6 +3,8 @@ package com.karvo.ui.settings
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import android.net.Uri
+import android.os.Environment
+import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -14,6 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import com.karvo.KarvoApp
+import java.time.ZoneId
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
@@ -38,10 +43,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -68,6 +74,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -86,11 +93,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** On main, so the link keeps working whichever version is installed. */
+private const val PRIVACY_POLICY_URL = "https://github.com/RexSAS/Karvo/blob/main/PRIVACY.md"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onOpenBackups: () -> Unit,
-    onCheckForUpdates: () -> Unit,
+    /** Null in the Play build, which Play keeps up to date. */
+    onCheckForUpdates: (() -> Unit)?,
     /** False while another pager page is on screen: a typed rate is saved as soon as the user swipes away. */
     isCurrentPage: Boolean = true,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
@@ -102,10 +113,13 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+    val uriHandler = LocalUriHandler.current
     var showZonePicker by remember { mutableStateOf(false) }
     var showThemePicker by remember { mutableStateOf(false) }
     var showSeasonPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
+    var showRestoreConsent by remember { mutableStateOf(false) }
+    var restoringMoments by remember { mutableStateOf(false) }
     var rateFocused by remember { mutableStateOf(false) }
 
     // Besides Done and focus loss, save a typed rate when the app stops or the screen leaves
@@ -150,6 +164,22 @@ fun SettingsScreen(
 
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri != null) importViewModel.onFilePicked(uri.toString())
+    }
+
+    // Restore moments: Android asks for the Karvo folder once, then everything in it comes back.
+    val karvoFolderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { folder: Uri? ->
+        if (folder == null) return@rememberLauncherForActivityResult
+        restoringMoments = true
+        scope.launch {
+            val store = (context.applicationContext as KarvoApp).container.momentStore
+            val (restored, skipped) = store.restoreFrom(listOf(folder), ZoneId.of(state.timeZoneId))
+            restoringMoments = false
+            val res = context.resources
+            showMessage(
+                res.getQuantityString(R.plurals.moments_restored, restored, restored) +
+                    if (skipped > 0) "\n" + res.getQuantityString(R.plurals.moments_skipped, skipped, skipped) else "",
+            )
+        }
     }
 
     ImportDialogs(importState, importViewModel::confirm, importViewModel::dismiss)
@@ -245,19 +275,23 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { showLanguagePicker = true },
             )
 
-            ListItem(
-                colors = transparentRow(),
-                leadingContent = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.check_for_updates)) },
-                supportingContent = { Text(stringResource(R.string.version, BuildConfig.VERSION_NAME)) },
-                modifier = Modifier.clickable(onClick = onCheckForUpdates),
-            )
+            if (onCheckForUpdates != null) {
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.check_for_updates)) },
+                    supportingContent = { Text(stringResource(R.string.version, BuildConfig.VERSION_NAME)) },
+                    modifier = Modifier.clickable(onClick = onCheckForUpdates),
+                )
+            }
 
             ListItem(
                 colors = transparentRow(),
                 leadingContent = { Icon(Icons.Filled.Restore, contentDescription = null) },
                 headlineContent = { Text(stringResource(R.string.backups)) },
-                supportingContent = { Text(stringResource(R.string.backups_hint)) },
+                supportingContent = {
+                    Text(stringResource(R.string.backups_hint))
+                },
                 trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                 modifier = Modifier.clickable(onClick = onOpenBackups),
             )
@@ -296,6 +330,34 @@ fun SettingsScreen(
                 },
             )
 
+            ListItem(
+                colors = transparentRow(),
+                leadingContent = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.restore_moments)) },
+                supportingContent = { Text(stringResource(R.string.restore_moments_hint)) },
+                trailingContent = {
+                    if (restoringMoments) CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+                    else Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+                },
+                modifier = Modifier.clickable(enabled = !restoringMoments) { showRestoreConsent = true },
+            )
+
+            ListItem(
+                colors = transparentRow(),
+                leadingContent = { Icon(Icons.Filled.PrivacyTip, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.privacy_policy)) },
+                supportingContent = { Text(stringResource(R.string.privacy_policy_hint)) },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                modifier = Modifier.clickable {
+                    // The browser does the fetching, so this works in the Play build too (it has no internet permission).
+                    try {
+                        uriHandler.openUri(PRIVACY_POLICY_URL)
+                    } catch (_: Exception) {
+                        scope.launch { showMessage(context.getString(R.string.no_browser)) }
+                    }
+                },
+            )
+
             Text(
                 stringResource(R.string.version, BuildConfig.VERSION_NAME),
                 style = MaterialTheme.typography.bodySmall,
@@ -312,6 +374,21 @@ fun SettingsScreen(
                 showZonePicker = false
             },
             onDismiss = { showZonePicker = false },
+        )
+    }
+
+    if (showRestoreConsent) {
+        AlertDialog(
+            onDismissRequest = { showRestoreConsent = false },
+            title = { Text(stringResource(R.string.restore_moments_title)) },
+            text = { Text(stringResource(R.string.restore_moments_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRestoreConsent = false
+                    karvoFolderLauncher.launch(KARVO_FOLDER)
+                }) { Text(stringResource(R.string.restore_moments_continue)) }
+            },
+            dismissButton = { TextButton(onClick = { showRestoreConsent = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 
@@ -358,6 +435,10 @@ fun SettingsScreen(
         )
     }
 }
+
+/** Where the folder prompt opens: the gallery's Karvo album. */
+private val KARVO_FOLDER: Uri =
+    DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "primary:${Environment.DIRECTORY_PICTURES}/Karvo")
 
 @Composable
 private fun themeLabel(choice: ThemeChoice): String = stringResource(

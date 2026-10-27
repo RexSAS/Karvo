@@ -14,15 +14,15 @@ val keystoreProps = Properties().apply {
 
 android {
     namespace = "com.karvo"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.karvo"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 6
+        targetSdk = 36
+        versionCode = 8
         // -PversionNameOverride=1.0.9 builds a private test APK that sees the latest release as newer.
-        versionName = (findProperty("versionNameOverride") as String?) ?: "2.1"
+        versionName = (findProperty("versionNameOverride") as String?) ?: "3.0"
     }
 
     signingConfigs {
@@ -45,6 +45,19 @@ android {
                 keyAlias = prop("keyAlias")
                 keyPassword = prop("keyPassword")
             }
+        }
+    }
+
+    // github: sideloaded APK with the in-app updater. play: Play updates the app, so no updater, install or internet permission.
+    flavorDimensions += "store"
+    productFlavors {
+        create("github") {
+            dimension = "store"
+            buildConfigField("boolean", "UPDATER", "true")
+        }
+        create("play") {
+            dimension = "store"
+            buildConfigField("boolean", "UPDATER", "false")
         }
     }
 
@@ -83,6 +96,11 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.extensions)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.video)
+    implementation(libs.androidx.camera.view)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)

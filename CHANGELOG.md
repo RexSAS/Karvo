@@ -2,6 +2,25 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.0] — 2026-10-27
+
+### Added
+- **Moments**: tap the new camera button on *Lessons* to capture your day on the slopes: tap the shutter for a photo, or hold it for a video of up to 10 seconds. Each day keeps up to 3 moments; when the day is full, you pick the one to replace. Moments are saved to a **Karvo** album in your gallery. Every photo gets Karvo's look: lifted shadows, a soft roll-off on bright snow and sky, and richer colours that leave skin natural. On phones that share their own camera processing with apps, a button turns it on: **HDR** (on by default) or, where only that is offered, **Night** (off by default, for dusk and evening).
+- **Moments calendar and daily recap**: the *Moments* page is a calendar where each day shows its moment, and days with lessons get a dot. Tap a day to see its moments, its lessons and its hours. Videos play muted on loop right in the recap. Tap a moment to open it full screen: swipe through the day, pinch or double-tap photos to zoom, and play videos with sound, a mute button and a seek bar.
+- **Restore moments**: after a new phone or a reinstall, the calendar starts empty even though your moments are still in the gallery. Open *Settings → Restore moments*, tap *Restore* and allow the Karvo folder when Android shows it: every moment goes back on its day, without duplicates in your gallery. Photos and videos are kept together in the gallery's *Pictures/Karvo* album.
+- **Share moments**: tap *Share* on a moment to send it to any app. Photos first pick a Karvo design, shown large over the blurred photo: **Frame** (9:16, story-sized: the photo in a tilted Karvo frame over a blurred copy of itself) or **Banner** (the whole photo with KARVO and the date along the bottom). Videos are shared as they are.
+- **Instagram Stories**: in the share picker, **Story** opens Instagram's story editor with your moment already in place, full screen in either design.
+- **Share from the day page**: every moment in a day's recap has a Share button, and tapping a photo grows it into the full-screen viewer, Share button and all.
+- **Swipe between days**: in a day's recap, swipe to slide in the next or previous day, just like the photos.
+- **Privacy policy**: *Settings → Privacy policy* opens it, in English and Italian. In short: everything stays on your phone.
+- **Google Play build**: a separate build for Google Play that's updated by the Play Store, so it has no in-app updater and no internet access at all.
+
+### Changed
+- Karvo now targets Android 16 (API 36), as Google Play requires.
+
+### Upgrading
+- Install over Karvo 2.1 as usual: your lessons are kept.
+
 ## [2.1] — 2026-10-21
 
 ### Added

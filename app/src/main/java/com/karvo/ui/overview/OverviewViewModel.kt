@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class MonthRow(val summary: MonthSummary, val earningsCents: Long?)
@@ -58,7 +57,8 @@ class OverviewViewModel(
     private val revealed = MutableStateFlow(false)
 
     val uiState: StateFlow<OverviewUiState> = combine(
-        lessons.observeLessons(), settings.hourlyRateCents, revealed, settings.timeZoneId, settings.seasonStartMonth,
+        lessons.observeLessons(), settings.hourlyRateCents, revealed, settings.timeZoneId,
+        settings.seasonStartMonth,
     ) { all, rate, isRevealed, zone, seasonStart ->
         val today = LocalDate.now(clock.withZone(ZoneId.of(zone)))
         val summaries = summarizeByMonth(all)

@@ -5,6 +5,23 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
+    <!-- Moments: photos and videos saved to the gallery's Karvo album. Audio is optional (silent videos if refused). -->
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Android 9 and older need this to save into the shared gallery. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <!-- Lets Karvo see whether Instagram can take a story, to offer the Instagram Story button. -->
+    <queries>
+        <intent>
+            <action android:name="com.instagram.share.ADD_TO_STORY" />
+            <data android:mimeType="image/*" />
+        </intent>
+    </queries>
+
     <application
         android:name=".KarvoApp"
         android:allowBackup="true"
@@ -26,6 +43,17 @@
         <receiver
             android:name=".data.update.InstallResultReceiver"
             android:exported="false" />
+
+        <!-- Shares Android 8–9 moments (plain files) and branded share cards with other apps. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.moments"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/moments_paths" />
+        </provider>
 
         <!-- Lets AppCompat persist the per-app language on Android 8–12. -->
         <service
