@@ -63,7 +63,6 @@ import com.karvo.ui.moments.MomentViewerScreen
 import com.karvo.ui.moments.MomentsScreen
 import com.karvo.ui.overview.MonthDetailScreen
 import com.karvo.ui.overview.OverviewScreen
-import com.karvo.ui.pro.ProScreen
 import com.karvo.ui.settings.SettingsScreen
 import com.karvo.ui.theme.AlpineBackdrop
 import com.karvo.ui.theme.AlpineNight
@@ -82,7 +81,6 @@ const val ROUTE_EDIT = "edit?id={id}"
 const val ROUTE_MONTH = "month/{year}/{month}"
 const val ROUTE_BACKUPS = "backups"
 const val ROUTE_RESTORE = "restore/{fileName}"
-const val ROUTE_PRO = "pro"
 const val ROUTE_CAMERA = "camera"
 const val ROUTE_MOMENTS = "moments"
 const val ROUTE_MOMENT = "moment/{date}/{index}"
@@ -194,14 +192,12 @@ fun KarvoNavHost() {
                             PAGE_OVERVIEW -> OverviewScreen(
                                 onOpenMonth = { month -> dropUnlessResumedNow(entry) { navController.navigate(monthRoute(month)) } },
                                 onOpenSettings = { goToPage(PAGE_SETTINGS) },
-                                onOpenPro = dropUnlessResumed { navController.navigate(ROUTE_PRO) },
                                 isCurrentPage = isCurrent,
                             )
                             else -> Box {
                                 BackdropFigureLayer(BackdropFigure.Snowflakes)
                                 SettingsScreen(
                                     onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
-                                    onOpenPro = dropUnlessResumed { navController.navigate(ROUTE_PRO) },
                                     onCheckForUpdates = updateViewModel?.let { it::checkNow },
                                     isCurrentPage = isCurrent,
                                 )
@@ -214,7 +210,6 @@ fun KarvoNavHost() {
                 CameraScreen(
                     // Not dropUnlessResumed: the camera also closes by itself right after a capture.
                     onClose = { navController.navigateUp() },
-                    onOpenPro = dropUnlessResumed { navController.navigate(ROUTE_PRO) },
                 )
             }
             composable(ROUTE_MOMENTS) { entry ->
@@ -250,11 +245,6 @@ fun KarvoNavHost() {
                 val date = entry.arguments?.getString("date")?.let(LocalDate::parse) ?: return@composable
                 CompositionLocalProvider(LocalNavAnimation provides this) {
                     MomentViewerScreen(date, entry.arguments?.getInt("index") ?: 0, onBack = dropUnlessResumed { navController.navigateUp() })
-                }
-            }
-            composable(ROUTE_PRO) {
-                AlpineBackdrop(BackdropFigure.None) {
-                    ProScreen(onBack = dropUnlessResumed { navController.navigateUp() })
                 }
             }
             composable(ROUTE_BACKUPS) { entry ->

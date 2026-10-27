@@ -11,8 +11,6 @@ import com.karvo.data.SettingsRepository
 import com.karvo.data.backup.Backup
 import com.karvo.data.backup.BackupReason
 import com.karvo.data.backup.BackupService
-import com.karvo.data.backup.FREE_MAX_BACKUPS
-import com.karvo.data.backup.MAX_BACKUPS
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +27,6 @@ data class BackupsUiState(
     val busy: Boolean = false,
     /** False until the first listing has loaded. */
     val loaded: Boolean = false,
-    val maxBackups: Int = FREE_MAX_BACKUPS,
 )
 
 sealed interface BackupEvent {
@@ -46,9 +43,6 @@ class BackupsViewModel(private val service: BackupService, settings: SettingsRep
 
     init {
         viewModelScope.launch { settings.timeZoneId.collect { id -> _uiState.update { it.copy(zoneId = id) } } }
-        viewModelScope.launch {
-            settings.pro.collect { pro -> _uiState.update { it.copy(maxBackups = if (pro) MAX_BACKUPS else FREE_MAX_BACKUPS) } }
-        }
         refresh()
     }
 

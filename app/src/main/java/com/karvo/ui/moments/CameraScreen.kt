@@ -43,7 +43,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Cameraswitch
 import androidx.compose.material3.Button
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -78,7 +77,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.karvo.KarvoApp
 import com.karvo.R
 import androidx.compose.ui.graphics.graphicsLayer
@@ -107,32 +105,29 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.camera.core.FocusMeteringAction
 import java.time.LocalDate
-import com.karvo.domain.momentsPerDay
 import com.karvo.domain.momentsOn
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.alpha
 import androidx.compose.material.icons.filled.PlayArrow
 import com.karvo.domain.MAX_VIDEO_MILLIS
+import com.karvo.domain.MOMENTS_PER_DAY
 import com.karvo.domain.Moment
-import com.karvo.ui.components.ProCrown
-import com.karvo.ui.components.proGold
+import com.karvo.ui.components.accentGold
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * Full-screen camera for today's moment: tap the shutter for a photo, hold it for a video of up to 10 seconds (Pro).
- * A day keeps [momentsPerDay] moments; when it's full, the user first picks the one to replace. After a capture
+ * Full-screen camera for today's moment: tap the shutter for a photo, hold it for a video of up to 10 seconds.
+ * A day keeps [MOMENTS_PER_DAY] moments; when it's full, the user first picks the one to replace. After a capture
  * the new moment is shown full screen and the camera closes by itself.
  */
 @Composable
-fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
+fun CameraScreen(onClose: () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val container = remember { (context.applicationContext as KarvoApp).container }
     val store = container.momentStore
-    val pro by container.settingsRepository.pro.collectAsStateWithLifecycle(initialValue = false)
     val scope = rememberCoroutineScope()
 
     fun granted(permission: String) = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
@@ -140,18 +135,17 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         hasCamera = granted(Manifest.permission.CAMERA)
     }
-    fun requestPermissions(withAudio: Boolean) = permissionLauncher.launch(
+    fun requestPermissions() = permissionLauncher.launch(
         buildList {
             add(Manifest.permission.CAMERA)
-            if (withAudio) add(Manifest.permission.RECORD_AUDIO)
+            add(Manifest.permission.RECORD_AUDIO)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }.toTypedArray(),
     )
-    // The microphone is only asked for when videos are possible; after two refusals Android stops showing the prompt.
+    // After two refusals Android stops showing the prompt.
     LaunchedEffect(Unit) {
-        val withAudio = container.settingsRepository.pro.first()
         val legacyStorage = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && !granted(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        if (!hasCamera || legacyStorage || (withAudio && !granted(Manifest.permission.RECORD_AUDIO))) requestPermissions(withAudio)
+        if (!hasCamera || legacyStorage || !granted(Manifest.permission.RECORD_AUDIO)) requestPermissions()
     }
 
     // Focus is handled by the tap layer below, which also draws the focus ring.
@@ -202,16 +196,14 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
     var videoMode by remember { mutableStateOf(false) }
     var videoPending by remember { mutableStateOf(false) }
     val hdrActive = hdrMode != null && hdrOn && !videoMode
-    LaunchedEffect(pro, hdrActive, baseSelector, hdrMode) {
+    LaunchedEffect(hdrActive, baseSelector, hdrMode) {
         val manager = extensions
         if (hdrActive && manager != null && hdrMode != null) {
             controller.setEnabledUseCases(CameraController.IMAGE_CAPTURE)
             controller.cameraSelector = manager.getExtensionEnabledCameraSelector(baseSelector, hdrMode)
         } else {
             controller.cameraSelector = baseSelector
-            controller.setEnabledUseCases(
-                if (pro) CameraController.IMAGE_CAPTURE or CameraController.VIDEO_CAPTURE else CameraController.IMAGE_CAPTURE,
-            )
+            controller.setEnabledUseCases(CameraController.IMAGE_CAPTURE or CameraController.VIDEO_CAPTURE)
         }
     }
     DisposableEffect(hasCamera, lifecycleOwner) {
@@ -225,7 +217,7 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
     // The moment the next capture replaces, once the user has picked it; deleted only after the new one is saved.
     var replacing by remember { mutableStateOf<Moment?>(null) }
     val todayMoments = today
-    val choosing = todayMoments != null && replacing == null && todayMoments.size >= momentsPerDay(pro)
+    val choosing = todayMoments != null && replacing == null && todayMoments.size >= MOMENTS_PER_DAY
     var captured by remember { mutableStateOf<Moment?>(null) }
     // Set the moment the shutter fires: processing takes a moment, and quick extra taps must not shoot again.
     var busy by remember { mutableStateOf(false) }
@@ -252,13 +244,6 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
         if (message != null) {
             delay(2500)
             message = null
-        }
-    }
-    var showProHint by remember { mutableStateOf(false) }
-    LaunchedEffect(showProHint) {
-        if (showProHint) {
-            delay(4000)
-            showProHint = false
         }
     }
     // Shooting before the preview runs gives black photos, so the shutter waits for it.
@@ -379,7 +364,7 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Text(stringResource(R.string.camera_permission_needed), color = Color.White, textAlign = TextAlign.Center)
-                Button(onClick = { requestPermissions(withAudio = pro) }) { Text(stringResource(R.string.allow_camera)) }
+                Button(onClick = { requestPermissions() }) { Text(stringResource(R.string.allow_camera)) }
             }
         }
         if (hasCamera) {
@@ -394,7 +379,7 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
                 },
             )
             focusAt?.let { at ->
-                val gold = proGold()
+                val gold = accentGold()
                 Canvas(photoFrame) {
                     val radius = 36.dp.toPx() * (1.4f - 0.4f * focusRing.value)
                     drawCircle(Color.White, radius, at, alpha = focusRing.value, style = Stroke(width = 2.dp.toPx()))
@@ -423,7 +408,7 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
                                     else -> R.string.hdr_off
                                 },
                             ),
-                            tint = if (hdrOn) proGold() else Color.White,
+                            tint = if (hdrOn) accentGold() else Color.White,
                         )
                     }
                 }
@@ -454,22 +439,12 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
-            if (showProHint) {
-                ElevatedCard(Modifier.align(Alignment.CenterHorizontally).padding(16.dp)) {
-                    Row(Modifier.padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        ProCrown(Modifier.size(20.dp), contentDescription = null)
-                        Text(stringResource(R.string.videos_are_pro), modifier = Modifier.padding(horizontal = 8.dp))
-                        TextButton(onClick = onOpenPro) { Text(stringResource(R.string.see_karvo_pro)) }
-                    }
-                }
-            }
             Text(
                 // Night mode merges several frames over about a second: moving would blur them.
                 stringResource(
                     when {
                         busy && isNight && hdrActive -> R.string.hold_still
-                        pro -> R.string.camera_hint_pro
-                        else -> R.string.camera_hint_free
+                        else -> R.string.camera_hint
                     },
                 ),
                 style = MaterialTheme.typography.bodyMedium,
@@ -502,7 +477,7 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
                 }
                 val photoLabel = stringResource(R.string.take_photo)
                 val videoLabel = stringResource(R.string.record_video)
-                val gold = proGold()
+                val gold = accentGold()
                 Box(
                     Modifier
                         .size(84.dp)
@@ -511,9 +486,9 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
                             contentDescription = photoLabel
                             onClick(photoLabel) { takePhoto(); true }
                             // Screen readers can't hold: this records a full 10-second clip instead.
-                            if (pro) customActions = listOf(CustomAccessibilityAction(videoLabel) { startVideo(); true })
+                            customActions = listOf(CustomAccessibilityAction(videoLabel) { startVideo(); true })
                         }
-                        .pointerInput(pro, hasCamera) {
+                        .pointerInput(hasCamera) {
                             awaitEachGesture {
                                 awaitFirstDown()
                                 val released = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
@@ -522,7 +497,7 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
                                 }
                                 if (released == true) {
                                     takePhoto()
-                                } else if (pro) {
+                                } else {
                                     if (hdrActive) {
                                         videoMode = true
                                         videoPending = true
@@ -537,9 +512,6 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
                                     } else {
                                         stopVideo()
                                     }
-                                } else {
-                                    showProHint = true
-                                    waitForUpOrCancellation()
                                 }
                             }
                         },
@@ -562,7 +534,7 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
         }
 
         if (choosing && todayMoments != null) {
-            ReplaceChooser(todayMoments, pro, onPick = { replacing = it }, onCancel = onClose, onOpenPro = onOpenPro)
+            ReplaceChooser(todayMoments, onPick = { replacing = it }, onCancel = onClose)
         }
 
         captured?.let { moment ->
@@ -595,14 +567,14 @@ fun CameraScreen(onClose: () -> Unit, onOpenPro: () -> Unit) {
 
 /** Today is full: the user taps the moment to replace before shooting, or leaves. */
 @Composable
-private fun ReplaceChooser(today: List<Moment>, pro: Boolean, onPick: (Moment) -> Unit, onCancel: () -> Unit, onOpenPro: () -> Unit) {
+private fun ReplaceChooser(today: List<Moment>, onPick: (Moment) -> Unit, onCancel: () -> Unit) {
     Column(
         Modifier.fillMaxSize().background(Color.Black).safeDrawingPadding().padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            stringResource(if (pro) R.string.today_full_pro else R.string.today_full_free),
+            stringResource(R.string.today_full),
             style = MaterialTheme.typography.titleLarge,
             color = Color.White,
             textAlign = TextAlign.Center,
@@ -635,12 +607,6 @@ private fun ReplaceChooser(today: List<Moment>, pro: Boolean, onPick: (Moment) -
                         )
                     }
                 }
-            }
-        }
-        if (!pro) {
-            TextButton(onClick = onOpenPro) {
-                ProCrown(Modifier.size(18.dp), contentDescription = null)
-                Text(stringResource(R.string.pro_three_a_day), modifier = Modifier.padding(start = 6.dp))
             }
         }
         TextButton(onClick = onCancel) { Text(stringResource(R.string.cancel), color = Color.White) }

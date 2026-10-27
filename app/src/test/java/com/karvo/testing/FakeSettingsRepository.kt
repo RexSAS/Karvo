@@ -13,7 +13,6 @@ class FakeSettingsRepository(
     zone: String = DEFAULT_TIME_ZONE,
     theme: ThemeChoice = ThemeChoice.ALPINE_NIGHT,
     seasonStart: Int = DEFAULT_SEASON_START_MONTH,
-    pro: Boolean = true,
 ) : SettingsRepository {
     private val seasonStartValue = MutableStateFlow(seasonStart)
     private val rate = MutableStateFlow(initial)
@@ -51,11 +50,5 @@ class FakeSettingsRepository(
     override val biometricReveal: Flow<Boolean> = biometricValue
     override suspend fun setBiometricReveal(on: Boolean) {
         biometricValue.value = on
-    }
-
-    private val proValue = MutableStateFlow(pro)
-    override val pro: Flow<Boolean> = proValue
-    override suspend fun setPro(on: Boolean) {
-        proValue.value = on
     }
 }

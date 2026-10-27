@@ -67,13 +67,6 @@ class BackupStoreTest {
         assertEquals(oldest.fileName, store.oldestToBeRemoved()?.fileName)
     }
 
-    @Test fun freeKeepsOnlyTheNewest() {
-        val first = store.create(BackupReason.Manual, lessons(1), keep = 1)
-        assertEquals(first.fileName, store.oldestToBeRemoved(keep = 1)?.fileName)
-        val second = store.create(BackupReason.Manual, lessons(2), keep = 1)
-        assertEquals(listOf(second.fileName), store.list().map { it.fileName })
-    }
-
     @Test fun ignoresTmpAndForeignFiles() {
         store.create(BackupReason.Manual, lessons(1))
         File(dir, "x.tmp").writeText("partial")

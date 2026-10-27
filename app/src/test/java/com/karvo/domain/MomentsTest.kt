@@ -35,11 +35,6 @@ class MomentsTest {
         assertEquals(mapOf(YearMonth.of(2026, 1) to 2, YearMonth.of(2026, 2) to 1), counts)
     }
 
-    @Test fun dailyLimit() {
-        assertEquals(1, momentsPerDay(pro = false))
-        assertEquals(3, momentsPerDay(pro = true))
-    }
-
     @Test fun momentsOnADayOldestFirst() {
         val b = moment("2026-01-02T10:00:00Z")
         val a = moment("2026-01-02T08:00:00Z")

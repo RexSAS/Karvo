@@ -36,29 +36,8 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 - 📅 **Every hour accounted for** — lessons grouped by month with their totals, plus your lifetime hours.
 - 📷 **Moments** — capture your day on the slopes and watch your season fill up a photo calendar. Tap any day for its recap: the moment, the lessons and the hours. Everything is also saved to a *Karvo* album in your gallery.
 - 🔒 **Private by design** — your lessons never leave your phone. No account, no ads, no tracking.
+- 🎁 **Free, all of it** — every feature for everyone: no Pro plan, no in-app purchases.
 - 🇮🇹 **Italiano and English** — follows your phone's language, or pick one in Settings.
-
-## Free vs Pro
-
-Karvo is free to use. **Karvo Pro** adds everything you need to check your pay.
-
-| | Free | Pro |
-|---|:---:|:---:|
-| Log, edit and delete lessons (with *Undo*) | ✅ | ✅ |
-| Lessons by month and total hours | ✅ | ✅ |
-| Time zone, season start and language settings | ✅ | ✅ |
-| **Moments**: photo calendar and daily recaps | 1 a day | 3 a day |
-| **Video moments**: hold the shutter for up to 10 seconds | | ✅ |
-| In-app backup | 1 | 3 |
-| **Earnings** per month, season and student, hidden until you tap the eye | | ✅ |
-| **Paid months** and what you're still owed | | ✅ |
-| **Statistics**: last 6 months, average lesson, busiest days, top students podium | | ✅ |
-| **Seasons**: every season's hours, compared with last year | | ✅ |
-| **Export and import CSV** (spreadsheets, moving to a new phone) | | ✅ |
-| **Alpine Night** theme: starry sky, snow and mountains | | ✅ |
-| **Fingerprint lock** before showing any money | | ✅ |
-
-Have a code? Open **Settings → Redeem a code**.
 
 ## Privacy
 
@@ -66,10 +45,9 @@ Karvo has no servers and no accounts. Your lessons are stored only on your phone
 
 ## Roadmap
 
-### 3.0 — Karvo Pro and Moments
-- [x] **Karvo Pro** — free and Pro plans, redeem codes in Settings, and a page showing everything Pro includes.
+### 3.0 — Moments
 - [x] **Google Play build** — updated by the Play Store, with no in-app updater and no internet access.
-- [x] **Moments** — capture your day on the slopes: tap for a photo, hold for a video (Pro), 1 moment a day free and 3 with Pro.
+- [x] **Moments** — capture your day on the slopes: tap for a photo, hold for a video, up to 3 moments a day.
 - [x] **Moments calendar and daily recap** — a photo calendar of your season; tap a day for its moments, lessons and hours.
 - [x] **Full-screen viewer** — swipe through a day's moments, zoom photos, play videos with mute and a seek bar.
 - [x] **Better photos** — full 4:3 sensor quality, Karvo's look on every photo, and the phone's HDR or Night mode where available.

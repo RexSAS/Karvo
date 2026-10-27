@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class MonthRow(val summary: MonthSummary, val earningsCents: Long?)
@@ -45,8 +44,6 @@ data class OverviewUiState(
     /** Null when there are no lessons. */
     val seasons: SeasonStats? = null,
     val unpaid: Unpaid = Unpaid(0, 0, null),
-    /** Without Pro only total hours show; money and statistics are locked. */
-    val pro: Boolean = false,
 )
 
 class OverviewViewModel(
@@ -61,8 +58,8 @@ class OverviewViewModel(
 
     val uiState: StateFlow<OverviewUiState> = combine(
         lessons.observeLessons(), settings.hourlyRateCents, revealed, settings.timeZoneId,
-        settings.seasonStartMonth.combine(settings.pro, ::Pair),
-    ) { all, rate, isRevealed, zone, (seasonStart, pro) ->
+        settings.seasonStartMonth,
+    ) { all, rate, isRevealed, zone, seasonStart ->
         val today = LocalDate.now(clock.withZone(ZoneId.of(zone)))
         val summaries = summarizeByMonth(all)
         val total = summaries.sumOf { it.totalMinutes }
@@ -76,7 +73,6 @@ class OverviewViewModel(
             stats = if (all.isEmpty()) null else computeStats(all, today, rate),
             seasons = if (all.isEmpty()) null else computeSeasons(all, today, seasonStart, rate),
             unpaid = unpaidTotals(all, today, rate),
-            pro = pro,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), OverviewUiState())
 

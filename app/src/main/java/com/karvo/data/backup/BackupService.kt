@@ -11,21 +11,15 @@ class BackupService(
     private val store: BackupStore,
     private val lessons: LessonRepository,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    /** How many backups to keep; free users get fewer. */
-    private val keep: suspend () -> Int = { MAX_BACKUPS },
 ) {
     suspend fun backup(reason: BackupReason): Backup {
         val all = lessons.allLessons()
-        val limit = keep()
-        return withContext(io) { store.create(reason, all, limit) }
+        return withContext(io) { store.create(reason, all) }
     }
 
     suspend fun list(): List<Backup> = withContext(io) { store.list() }
 
     suspend fun read(fileName: String): List<Lesson> = withContext(io) { store.read(fileName) }
 
-    suspend fun oldestToBeRemoved(): Backup? {
-        val limit = keep()
-        return withContext(io) { store.oldestToBeRemoved(limit) }
-    }
+    suspend fun oldestToBeRemoved(): Backup? = withContext(io) { store.oldestToBeRemoved() }
 }

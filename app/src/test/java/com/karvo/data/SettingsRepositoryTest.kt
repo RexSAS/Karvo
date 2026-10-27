@@ -46,12 +46,7 @@ class SettingsRepositoryTest {
         assertEquals("Europe/Rome", repo.timeZoneId.first())
     }
 
-    @Test fun themeDefaultsToClassic() = runTest { assertEquals(ThemeChoice.CLASSIC, repo.theme.first()) }
-
-    @Test fun proIsOffUntilUnlocked() = runTest {
-        assertEquals(false, repo.pro.first())
-        repo.setPro(true); assertEquals(true, repo.pro.first())
-    }
+    @Test fun themeDefaultsToAlpineNight() = runTest { assertEquals(ThemeChoice.ALPINE_NIGHT, repo.theme.first()) }
 
     @Test fun themeRoundTrips() = runTest {
         repo.setTheme(ThemeChoice.CLASSIC); assertEquals(ThemeChoice.CLASSIC, repo.theme.first())
@@ -59,7 +54,7 @@ class SettingsRepositoryTest {
 
     @Test fun unknownThemeFallsBack() = runTest {
         store.edit { it[stringPreferencesKey("theme")] = "NEON" }
-        assertEquals(ThemeChoice.CLASSIC, repo.theme.first())
+        assertEquals(ThemeChoice.ALPINE_NIGHT, repo.theme.first())
     }
 
     @Test fun seasonStartDefaultsToNovemberAndRoundTrips() = runTest {

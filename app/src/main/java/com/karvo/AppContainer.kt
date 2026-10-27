@@ -19,15 +19,12 @@ import com.karvo.data.SettingsRepository
 import com.karvo.data.backup.BackupService
 import com.karvo.data.moments.MomentStore
 import com.karvo.data.backup.BackupStore
-import com.karvo.data.backup.FREE_MAX_BACKUPS
-import com.karvo.data.backup.MAX_BACKUPS
 import com.karvo.data.update.GitHubReleaseSource
 import com.karvo.data.update.PackageInstallerUpdater
 import com.karvo.data.update.UrlApkDownloader
 import java.io.File
 import java.time.Clock
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlinx.coroutines.flow.first
 
 class AppContainer(context: Context) {
     private val appContext = context.applicationContext
@@ -63,8 +60,6 @@ class AppContainer(context: Context) {
     val momentStore by lazy { MomentStore(appContext) }
 
     val backupService: BackupService by lazy {
-        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository) {
-            if (settingsRepository.pro.first()) MAX_BACKUPS else FREE_MAX_BACKUPS
-        }
+        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository)
     }
 }

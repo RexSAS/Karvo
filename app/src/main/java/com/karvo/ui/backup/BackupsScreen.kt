@@ -33,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -86,7 +85,7 @@ fun BackupsScreen(
         ) {
             item {
                 Text(
-                    pluralStringResource(R.plurals.backups_explanation, state.maxBackups, state.maxBackups),
+                    stringResource(R.string.backups_explanation),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

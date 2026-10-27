@@ -24,8 +24,8 @@ fun groupMomentsByDay(moments: List<Moment>, zone: ZoneId): List<MomentDay> =
 fun momentCountsByMonth(moments: List<Moment>, zone: ZoneId): Map<YearMonth, Int> =
     moments.groupingBy { YearMonth.from(it.takenAt.atZone(zone)) }.eachCount()
 
-/** A day keeps its best moments only: one for free users, three with Pro. */
-fun momentsPerDay(pro: Boolean): Int = if (pro) 3 else 1
+/** A day keeps its best moments only. */
+const val MOMENTS_PER_DAY = 3
 
 /** The moments taken on [date], oldest first. */
 fun momentsOn(date: LocalDate, moments: List<Moment>, zone: ZoneId): List<Moment> =
