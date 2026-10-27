@@ -53,9 +53,9 @@ Karvo has no servers and no accounts. Your lessons are stored only on your phone
 - [x] **Better photos** — full 4:3 sensor quality, Karvo's look on every photo, and the phone's HDR or Night mode where available.
 - [x] **Restore moments** — after a new phone or a reinstall, *Settings → Restore moments* brings your photos and videos from the gallery's Karvo album back into the calendar.
 - [x] **Share moments** — share a photo or video in one tap; photos go out in a Karvo design (Banner or Frame).
-- [ ] **Mascot: Kevin** — a penguin to give Karvo a face: on the splash screen, empty pages and celebrations.
 
 ### 3.1 — Faster and more fun
+- [ ] **Mascot: Kevin** — a penguin to give Karvo a face: on the splash screen, empty pages and celebrations.
 - [ ] **Repeat a lesson** — long-press a lesson to log the same student and duration again in one tap.
 - [ ] **Badges and achievements** — season milestones (50h, 100h, 250h…) with a small celebration.
 - [ ] **Evening reminder** — an optional notification on days with nothing logged.

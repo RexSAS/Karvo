@@ -20,7 +20,7 @@ android {
         applicationId = "com.karvo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
+        versionCode = 8
         // -PversionNameOverride=1.0.9 builds a private test APK that sees the latest release as newer.
         versionName = (findProperty("versionNameOverride") as String?) ?: "3.0"
     }
