@@ -166,16 +166,13 @@ fun SettingsScreen(
         if (uri != null) importViewModel.onFilePicked(uri.toString())
     }
 
-    // Restore moments: Android asks for the photos folder, then the videos folder; then everything comes back.
-    var photosFolder by remember { mutableStateOf<Uri?>(null) }
-    val videosFolderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { videos: Uri? ->
-        val folders = listOfNotNull(photosFolder, videos)
-        photosFolder = null
-        if (folders.isEmpty()) return@rememberLauncherForActivityResult
+    // Restore moments: Android asks for the Karvo folder once, then everything in it comes back.
+    val karvoFolderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { folder: Uri? ->
+        if (folder == null) return@rememberLauncherForActivityResult
         restoringMoments = true
         scope.launch {
             val store = (context.applicationContext as KarvoApp).container.momentStore
-            val (restored, skipped) = store.restoreFrom(folders, ZoneId.of(state.timeZoneId))
+            val (restored, skipped) = store.restoreFrom(listOf(folder), ZoneId.of(state.timeZoneId))
             restoringMoments = false
             val res = context.resources
             showMessage(
@@ -183,10 +180,6 @@ fun SettingsScreen(
                     if (skipped > 0) "\n" + res.getQuantityString(R.plurals.moments_skipped, skipped, skipped) else "",
             )
         }
-    }
-    val photosFolderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { photos: Uri? ->
-        photosFolder = photos
-        videosFolderLauncher.launch(karvoFolder(Environment.DIRECTORY_MOVIES))
     }
 
     ImportDialogs(importState, importViewModel::confirm, importViewModel::dismiss)
@@ -392,7 +385,7 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showRestoreConsent = false
-                    photosFolderLauncher.launch(karvoFolder(Environment.DIRECTORY_PICTURES))
+                    karvoFolderLauncher.launch(KARVO_FOLDER)
                 }) { Text(stringResource(R.string.restore_moments_continue)) }
             },
             dismissButton = { TextButton(onClick = { showRestoreConsent = false }) { Text(stringResource(R.string.cancel)) } },
@@ -443,9 +436,9 @@ fun SettingsScreen(
     }
 }
 
-/** Where the folder prompt opens: the gallery's Karvo album in [dir] (Pictures or Movies). */
-private fun karvoFolder(dir: String): Uri =
-    DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "primary:$dir/Karvo")
+/** Where the folder prompt opens: the gallery's Karvo album. */
+private val KARVO_FOLDER: Uri =
+    DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "primary:${Environment.DIRECTORY_PICTURES}/Karvo")
 
 @Composable
 private fun themeLabel(choice: ThemeChoice): String = stringResource(

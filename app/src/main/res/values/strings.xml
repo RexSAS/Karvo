@@ -201,8 +201,8 @@
     <string name="restore_moments">Restore moments</string>
     <string name="restore_moments_hint">Bring back your photos and videos after a reinstall or a new phone</string>
     <string name="restore_moments_title">Restore your moments?</string>
-    <string name="restore_moments_body">Your moments are still in the gallery\'s Karvo album, but Karvo needs your OK to take them back.\n\nAndroid will open the Karvo folder twice, first for photos, then for videos. Each time, tap “Use this folder”, then “Allow”.\n\nEvery moment goes back on its day, and nothing is duplicated in your gallery.</string>
-    <string name="restore_moments_continue">Continue</string>
+    <string name="restore_moments_body">Your moments are still in the gallery\'s Karvo album: Karvo can put them back in the calendar, each on its day, with no duplicates.\n\nAndroid will show the Karvo folder: tap “Use this folder”, then “Allow”.</string>
+    <string name="restore_moments_continue">Restore</string>
     <plurals name="moments_restored">
         <item quantity="one">Restored %d moment</item>
         <item quantity="other">Restored %d moments</item>

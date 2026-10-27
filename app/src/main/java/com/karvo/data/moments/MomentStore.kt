@@ -32,7 +32,7 @@ private const val ALBUM = "Karvo"
 private const val JPEG_QUALITY = 95
 
 /**
- * Moments live in the shared gallery (Pictures/Karvo and Movies/Karvo) so Google Photos can back them up and they
+ * Moments live in the shared gallery's Pictures/Karvo (photos and videos together; older videos in Movies/Karvo) so Google Photos can back them up and they
  * survive uninstalling. Android 10+ goes through MediaStore; Android 8–9 write plain files and scan them in.
  */
 class MomentStore(context: Context) {
@@ -51,7 +51,7 @@ class MomentStore(context: Context) {
     }
 
     /**
-     * Brings back the Karvo moments in [folders] (folder-access grants for Pictures/Karvo and Movies/Karvo): after a
+     * Brings back the Karvo moments in [folders] (folder-access grants, normally Pictures/Karvo): after a
      * reinstall the album still holds them, but they're no longer this install's, so Karvo can't see them. Each one is
      * copied back as this install's and the old file is deleted. Returns how many came back and how many were skipped
      * (already back, or their day is full).
@@ -101,7 +101,7 @@ class MomentStore(context: Context) {
     }
 
     private fun write(isVideo: Boolean, mime: String, fileName: String, takenMillis: Long, body: (OutputStream) -> Unit): Uri {
-        val dir = if (isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES
+        val dir = Environment.DIRECTORY_PICTURES
         if (!scoped) {
             val file = File(legacyDir(dir), fileName)
             try {
@@ -145,12 +145,12 @@ class MomentStore(context: Context) {
     fun videoOutput(): OutputOptions = if (scoped) {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name("mp4"))
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_MOVIES}/$ALBUM")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/$ALBUM")
         }
         MediaStoreOutputOptions.Builder(resolver, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
             .setContentValues(values).setDurationLimitMillis(MAX_VIDEO_MILLIS).build()
     } else {
-        FileOutputOptions.Builder(File(legacyDir(Environment.DIRECTORY_MOVIES), name("mp4")))
+        FileOutputOptions.Builder(File(legacyDir(Environment.DIRECTORY_PICTURES), name("mp4")))
             .setDurationLimitMillis(MAX_VIDEO_MILLIS).build()
     }
 
@@ -161,7 +161,7 @@ class MomentStore(context: Context) {
 
     suspend fun list(): List<Moment> = withContext(Dispatchers.IO) {
         if (scoped) query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false) + query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, true)
-        else listFiles(Environment.DIRECTORY_PICTURES, false) + listFiles(Environment.DIRECTORY_MOVIES, true)
+        else listFiles(Environment.DIRECTORY_PICTURES) + listFiles(Environment.DIRECTORY_MOVIES)
     }
 
     suspend fun delete(moment: Moment): Boolean = withContext(Dispatchers.IO) {
@@ -177,9 +177,10 @@ class MomentStore(context: Context) {
     // Only files this install created are visible without a gallery permission, which is all Karvo needs.
     private fun query(collection: Uri, isVideo: Boolean): List<Moment> {
         val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DATE_TAKEN, MediaStore.MediaColumns.DATE_ADDED, MediaStore.MediaColumns.DISPLAY_NAME)
-        val selection = "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?"
-        val dir = if (isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES
-        return resolver.query(collection, projection, selection, arrayOf("$dir/$ALBUM/%"), null)?.use { c ->
+        // Videos were kept in Movies/Karvo before they moved next to the photos.
+        val selection = "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ? OR ${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?"
+        val dirs = arrayOf("${Environment.DIRECTORY_PICTURES}/$ALBUM/%", "${Environment.DIRECTORY_MOVIES}/$ALBUM/%")
+        return resolver.query(collection, projection, selection, dirs, null)?.use { c ->
             buildList {
                 while (c.moveToNext()) {
                     // The name keeps the exact capture time, even after a restore; the gallery's dates can drift.
@@ -190,8 +191,8 @@ class MomentStore(context: Context) {
         }.orEmpty()
     }
 
-    private fun listFiles(type: String, isVideo: Boolean): List<Moment> =
+    private fun listFiles(type: String): List<Moment> =
         legacyDir(type).listFiles().orEmpty()
             .filter { it.isFile && it.length() > 0 && it.name.startsWith("karvo-") }
-            .map { Moment(Uri.fromFile(it), isVideo, Instant.ofEpochMilli(karvoNameMillis(it.name) ?: it.lastModified())) }
+            .map { Moment(Uri.fromFile(it), it.extension == "mp4", Instant.ofEpochMilli(karvoNameMillis(it.name) ?: it.lastModified())) }
 }

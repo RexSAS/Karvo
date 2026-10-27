@@ -199,8 +199,8 @@
     <string name="restore_moments">Ripristina i momenti</string>
     <string name="restore_moments_hint">Recupera foto e video dopo una reinstallazione o un nuovo telefono</string>
     <string name="restore_moments_title">Ripristinare i tuoi momenti?</string>
-    <string name="restore_moments_body">I tuoi momenti sono ancora nell\'album Karvo della galleria, ma Karvo ha bisogno del tuo permesso per riprenderli.\n\nAndroid aprirà la cartella Karvo due volte, prima per le foto, poi per i video. Ogni volta tocca “Usa questa cartella”, poi “Consenti”.\n\nOgni momento torna al suo giorno, e niente viene duplicato nella galleria.</string>
-    <string name="restore_moments_continue">Continua</string>
+    <string name="restore_moments_body">I tuoi momenti sono ancora nell\'album Karvo della galleria: Karvo può rimetterli nel calendario, ognuno nel suo giorno, senza duplicati.\n\nAndroid mostrerà la cartella Karvo: tocca “Usa questa cartella”, poi “Consenti”.</string>
+    <string name="restore_moments_continue">Ripristina</string>
     <plurals name="moments_restored">
         <item quantity="one">Ripristinato %d momento</item>
         <item quantity="other">Ripristinati %d momenti</item>
