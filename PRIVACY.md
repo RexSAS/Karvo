@@ -32,7 +32,6 @@ accounts, no analytics and no ads**: everything you enter stays on your phone.
 - The **GitHub version** checks GitHub (`api.github.com`) for a newer release and downloads it if you choose to update.
   No lesson data is sent; GitHub sees the request like any visit to its website, under the
   [GitHub privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
-- Karvo Pro codes are checked on your phone, without contacting anyone.
 
 ## Your data, your control
 
@@ -84,7 +83,6 @@ statistiche d'uso né pubblicità**: tutto ciò che inserisci resta sul tuo tele
 - La **versione GitHub** controlla su GitHub (`api.github.com`) se c'è una nuova versione e la scarica se scegli di
   aggiornare. Non viene inviato alcun dato delle lezioni; GitHub vede la richiesta come qualsiasi visita al suo sito,
   secondo la sua [informativa sulla privacy](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
-- I codici Karvo Pro vengono verificati sul telefono, senza contattare nessuno.
 
 ## I tuoi dati, sotto il tuo controllo
 
