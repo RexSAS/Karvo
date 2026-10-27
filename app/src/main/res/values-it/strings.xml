@@ -196,14 +196,18 @@
     <string name="biometric_turn_off_prompt">Disattiva lo sblocco con impronta</string>
     <string name="moments">Momenti</string>
     <string name="take_moment">Cattura un momento</string>
-    <string name="restore_moments">Ripristina i momenti dalla galleria</string>
+    <string name="restore_moments">Ripristina i momenti</string>
+    <string name="restore_moments_hint">Recupera foto e video dopo una reinstallazione o un nuovo telefono</string>
+    <string name="restore_moments_title">Ripristinare i tuoi momenti?</string>
+    <string name="restore_moments_body">I tuoi momenti sono ancora nell\'album Karvo della galleria, ma Karvo ha bisogno del tuo permesso per riprenderli.\n\nAndroid aprirà la cartella Karvo due volte, prima per le foto, poi per i video. Ogni volta tocca “Usa questa cartella”, poi “Consenti”.\n\nOgni momento torna al suo giorno, e niente viene duplicato nella galleria.</string>
+    <string name="restore_moments_continue">Continua</string>
     <plurals name="moments_restored">
         <item quantity="one">Ripristinato %d momento</item>
         <item quantity="other">Ripristinati %d momenti</item>
     </plurals>
     <plurals name="moments_skipped">
-        <item quantity="one">%d saltato: non viene dall\'album Karvo, c\'è già, o il giorno è pieno</item>
-        <item quantity="other">%d saltati: non vengono dall\'album Karvo, ci sono già, o il giorno è pieno</item>
+        <item quantity="one">%d saltato: già in Karvo, o il suo giorno è pieno</item>
+        <item quantity="other">%d saltati: già in Karvo, o il loro giorno è pieno</item>
     </plurals>
     <string name="open_moments">Apri i momenti</string>
     <string name="camera_hint">Tocca per una foto · tieni premuto per un video</string>

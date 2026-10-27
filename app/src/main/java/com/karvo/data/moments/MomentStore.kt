@@ -7,6 +7,8 @@ import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.DocumentsContract
+import android.provider.DocumentsContract.Document
 import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import androidx.camera.video.FileOutputOptions
@@ -16,12 +18,15 @@ import androidx.core.content.FileProvider
 import com.karvo.domain.MAX_VIDEO_MILLIS
 import com.karvo.domain.Moment
 import com.karvo.domain.karvoNameMillis
+import com.karvo.domain.momentsThatFit
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.io.OutputStream
 import java.time.Instant
+import java.time.ZoneId
 
 private const val ALBUM = "Karvo"
 private const val JPEG_QUALITY = 95
@@ -41,34 +46,58 @@ class MomentStore(context: Context) {
 
     /** Saves [bitmap] as a high-quality JPEG in the Karvo album and returns its uri. */
     suspend fun savePhoto(bitmap: Bitmap): Uri = withContext(Dispatchers.IO) {
-        write(isVideo = false, "image/jpeg", name("jpg"), System.currentTimeMillis()) { bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) }
+        val now = System.currentTimeMillis()
+        write(isVideo = false, "image/jpeg", "karvo-$now.jpg", now) { bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) }
     }
 
     /**
-     * Reads a photo or video picked from the gallery as a [Moment] (its uri still the picked one), or null unless
-     * Karvo saved it: after a reinstall, the old album is no longer this install's and has to be picked to come back.
+     * Brings back the Karvo moments in [folders] (folder-access grants for Pictures/Karvo and Movies/Karvo): after a
+     * reinstall the album still holds them, but they're no longer this install's, so Karvo can't see them. Each one is
+     * copied back as this install's and the old file is deleted. Returns how many came back and how many were skipped
+     * (already back, or their day is full).
      */
-    suspend fun inspect(picked: Uri): Moment? = withContext(Dispatchers.IO) {
-        val isVideo = resolver.getType(picked)?.startsWith("video/") ?: return@withContext null
-        val (fileName, dateTaken) = try {
-            resolver.query(picked, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.DATE_TAKEN), null, null, null)?.use { c ->
-                if (!c.moveToFirst()) return@use null
-                c.getString(0) to (if (c.isNull(1)) null else c.getLong(1).takeIf { it > 0 })
+    suspend fun restoreFrom(folders: List<Uri>, zone: ZoneId): Pair<Int, Int> {
+        val found = withContext(Dispatchers.IO) { folders.flatMap(::karvoFilesIn) }
+        var restored = 0
+        for (moment in momentsThatFit(list(), found, zone)) {
+            try {
+                restore(moment)
+                restored++
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // Left where it is; counted as skipped.
             }
-        } catch (_: RuntimeException) {
-            null // providers that don't know the date column
-        } ?: return@withContext null
-        // "karvo-<millis>.jpg": the name is the capture time when the gallery has none.
-        val nameMillis = karvoNameMillis(fileName ?: "") ?: return@withContext null
-        Moment(picked, isVideo, Instant.ofEpochMilli(dateTaken ?: nameMillis))
+        }
+        return restored to found.size - restored
     }
 
-    /** Copies a picked moment, as read by [inspect], back into the Karvo album as it is, keeping when it was taken. */
-    suspend fun restore(picked: Moment): Uri = withContext(Dispatchers.IO) {
-        val mime = resolver.getType(picked.uri) ?: throw IOException("Unknown file type")
-        val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: if (picked.isVideo) "mp4" else "jpg"
-        val input = resolver.openInputStream(picked.uri) ?: throw IOException("Can't read ${picked.uri}")
-        input.use { source -> write(picked.isVideo, mime, "karvo-${picked.takenAt.toEpochMilli()}.$ext", picked.takenAt.toEpochMilli()) { source.copyTo(it) } }
+    private suspend fun restore(old: Moment) = withContext(Dispatchers.IO) {
+        val mime = resolver.getType(old.uri) ?: throw IOException("Unknown file type")
+        val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: if (old.isVideo) "mp4" else "jpg"
+        val input = resolver.openInputStream(old.uri) ?: throw IOException("Can't read ${old.uri}")
+        input.use { source -> write(old.isVideo, mime, "karvo-${old.takenAt.toEpochMilli()}.$ext", old.takenAt.toEpochMilli()) { source.copyTo(it) } }
+        try {
+            DocumentsContract.deleteDocument(resolver, old.uri)
+        } catch (_: Exception) {
+            // The copy is safe; a leftover original only shows twice in the gallery.
+        }
+    }
+
+    /** The photos and videos Karvo named, directly inside the granted folder [tree]. */
+    private fun karvoFilesIn(tree: Uri): List<Moment> {
+        val children = DocumentsContract.buildChildDocumentsUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
+        val columns = arrayOf(Document.COLUMN_DOCUMENT_ID, Document.COLUMN_DISPLAY_NAME, Document.COLUMN_MIME_TYPE)
+        return resolver.query(children, columns, null, null, null)?.use { c ->
+            buildList {
+                while (c.moveToNext()) {
+                    val millis = karvoNameMillis(c.getString(1) ?: continue) ?: continue
+                    val mime = c.getString(2) ?: continue
+                    if (!mime.startsWith("image/") && !mime.startsWith("video/")) continue
+                    add(Moment(DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0)), mime.startsWith("video/"), Instant.ofEpochMilli(millis)))
+                }
+            }
+        }.orEmpty()
     }
 
     private fun write(isVideo: Boolean, mime: String, fileName: String, takenMillis: Long, body: (OutputStream) -> Unit): Uri {
@@ -147,13 +176,14 @@ class MomentStore(context: Context) {
 
     // Only files this install created are visible without a gallery permission, which is all Karvo needs.
     private fun query(collection: Uri, isVideo: Boolean): List<Moment> {
-        val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DATE_TAKEN, MediaStore.MediaColumns.DATE_ADDED)
+        val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DATE_TAKEN, MediaStore.MediaColumns.DATE_ADDED, MediaStore.MediaColumns.DISPLAY_NAME)
         val selection = "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?"
         val dir = if (isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES
         return resolver.query(collection, projection, selection, arrayOf("$dir/$ALBUM/%"), null)?.use { c ->
             buildList {
                 while (c.moveToNext()) {
-                    val taken = c.getLong(1).takeIf { it > 0 } ?: (c.getLong(2) * 1000)
+                    // The name keeps the exact capture time, even after a restore; the gallery's dates can drift.
+                    val taken = c.getString(3)?.let(::karvoNameMillis) ?: c.getLong(1).takeIf { it > 0 } ?: (c.getLong(2) * 1000)
                     add(Moment(Uri.withAppendedPath(collection, c.getLong(0).toString()), isVideo, Instant.ofEpochMilli(taken)))
                 }
             }
@@ -163,5 +193,5 @@ class MomentStore(context: Context) {
     private fun listFiles(type: String, isVideo: Boolean): List<Moment> =
         legacyDir(type).listFiles().orEmpty()
             .filter { it.isFile && it.length() > 0 && it.name.startsWith("karvo-") }
-            .map { Moment(Uri.fromFile(it), isVideo, Instant.ofEpochMilli(it.lastModified())) }
+            .map { Moment(Uri.fromFile(it), isVideo, Instant.ofEpochMilli(karvoNameMillis(it.name) ?: it.lastModified())) }
 }

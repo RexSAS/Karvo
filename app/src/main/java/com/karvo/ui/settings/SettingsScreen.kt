@@ -3,6 +3,8 @@ package com.karvo.ui.settings
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import android.net.Uri
+import android.os.Environment
+import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -14,6 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import com.karvo.KarvoApp
+import java.time.ZoneId
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
@@ -38,6 +43,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Restore
@@ -112,6 +118,8 @@ fun SettingsScreen(
     var showThemePicker by remember { mutableStateOf(false) }
     var showSeasonPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
+    var showRestoreConsent by remember { mutableStateOf(false) }
+    var restoringMoments by remember { mutableStateOf(false) }
     var rateFocused by remember { mutableStateOf(false) }
 
     // Besides Done and focus loss, save a typed rate when the app stops or the screen leaves
@@ -156,6 +164,29 @@ fun SettingsScreen(
 
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri != null) importViewModel.onFilePicked(uri.toString())
+    }
+
+    // Restore moments: Android asks for the photos folder, then the videos folder; then everything comes back.
+    var photosFolder by remember { mutableStateOf<Uri?>(null) }
+    val videosFolderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { videos: Uri? ->
+        val folders = listOfNotNull(photosFolder, videos)
+        photosFolder = null
+        if (folders.isEmpty()) return@rememberLauncherForActivityResult
+        restoringMoments = true
+        scope.launch {
+            val store = (context.applicationContext as KarvoApp).container.momentStore
+            val (restored, skipped) = store.restoreFrom(folders, ZoneId.of(state.timeZoneId))
+            restoringMoments = false
+            val res = context.resources
+            showMessage(
+                res.getQuantityString(R.plurals.moments_restored, restored, restored) +
+                    if (skipped > 0) "\n" + res.getQuantityString(R.plurals.moments_skipped, skipped, skipped) else "",
+            )
+        }
+    }
+    val photosFolderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { photos: Uri? ->
+        photosFolder = photos
+        videosFolderLauncher.launch(karvoFolder(Environment.DIRECTORY_MOVIES))
     }
 
     ImportDialogs(importState, importViewModel::confirm, importViewModel::dismiss)
@@ -308,6 +339,18 @@ fun SettingsScreen(
 
             ListItem(
                 colors = transparentRow(),
+                leadingContent = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.restore_moments)) },
+                supportingContent = { Text(stringResource(R.string.restore_moments_hint)) },
+                trailingContent = {
+                    if (restoringMoments) CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+                    else Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+                },
+                modifier = Modifier.clickable(enabled = !restoringMoments) { showRestoreConsent = true },
+            )
+
+            ListItem(
+                colors = transparentRow(),
                 leadingContent = { Icon(Icons.Filled.PrivacyTip, contentDescription = null) },
                 headlineContent = { Text(stringResource(R.string.privacy_policy)) },
                 supportingContent = { Text(stringResource(R.string.privacy_policy_hint)) },
@@ -338,6 +381,21 @@ fun SettingsScreen(
                 showZonePicker = false
             },
             onDismiss = { showZonePicker = false },
+        )
+    }
+
+    if (showRestoreConsent) {
+        AlertDialog(
+            onDismissRequest = { showRestoreConsent = false },
+            title = { Text(stringResource(R.string.restore_moments_title)) },
+            text = { Text(stringResource(R.string.restore_moments_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRestoreConsent = false
+                    photosFolderLauncher.launch(karvoFolder(Environment.DIRECTORY_PICTURES))
+                }) { Text(stringResource(R.string.restore_moments_continue)) }
+            },
+            dismissButton = { TextButton(onClick = { showRestoreConsent = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 
@@ -384,6 +442,10 @@ fun SettingsScreen(
         )
     }
 }
+
+/** Where the folder prompt opens: the gallery's Karvo album in [dir] (Pictures or Movies). */
+private fun karvoFolder(dir: String): Uri =
+    DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "primary:$dir/Karvo")
 
 @Composable
 private fun themeLabel(choice: ThemeChoice): String = stringResource(

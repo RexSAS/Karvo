@@ -198,14 +198,18 @@
     <string name="biometric_turn_off_prompt">Turn off fingerprint unlock</string>
     <string name="moments">Moments</string>
     <string name="take_moment">Capture a moment</string>
-    <string name="restore_moments">Restore moments from the gallery</string>
+    <string name="restore_moments">Restore moments</string>
+    <string name="restore_moments_hint">Bring back your photos and videos after a reinstall or a new phone</string>
+    <string name="restore_moments_title">Restore your moments?</string>
+    <string name="restore_moments_body">Your moments are still in the gallery\'s Karvo album, but Karvo needs your OK to take them back.\n\nAndroid will open the Karvo folder twice, first for photos, then for videos. Each time, tap “Use this folder”, then “Allow”.\n\nEvery moment goes back on its day, and nothing is duplicated in your gallery.</string>
+    <string name="restore_moments_continue">Continue</string>
     <plurals name="moments_restored">
         <item quantity="one">Restored %d moment</item>
         <item quantity="other">Restored %d moments</item>
     </plurals>
     <plurals name="moments_skipped">
-        <item quantity="one">%d skipped: not from the Karvo album, already back, or the day is full</item>
-        <item quantity="other">%d skipped: not from the Karvo album, already back, or the day is full</item>
+        <item quantity="one">%d skipped: already in Karvo, or its day is full</item>
+        <item quantity="other">%d skipped: already in Karvo, or their day is full</item>
     </plurals>
     <string name="open_moments">Open moments</string>
     <string name="camera_hint">Tap for a photo · hold for a video</string>
