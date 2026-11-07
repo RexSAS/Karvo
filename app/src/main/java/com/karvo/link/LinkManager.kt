@@ -24,6 +24,13 @@ interface LinkPeer {
     suspend fun pairOnce(timeoutMs: Long = 15_000): PairResult
 }
 
+/** What the Linked PCs screen needs from the manager. */
+interface LinkControl {
+    val states: StateFlow<Map<String, LinkState>>
+    suspend fun pair(qr: LinkQr): PairResult
+    suspend fun remove(roomId: String)
+}
+
 /** Shows or hides the "Karvo is linked to …" foreground notification. */
 interface ServiceStarter {
     fun start(names: List<String>)
@@ -43,7 +50,7 @@ class LinkManager(
     private val scope: CoroutineScope,
     private val now: () -> Instant = Instant::now,
     private val idle: Duration = Duration.ofMinutes(30),
-) {
+) : LinkControl {
     private class Managed(val peer: LinkPeer, val jobs: List<Job>, var connectedAt: Instant? = null)
 
     private val peers = mutableMapOf<String, Managed>()
@@ -51,7 +58,7 @@ class LinkManager(
     private var foreground = false
     private var serviceRunning = false
     private val _states = MutableStateFlow<Map<String, LinkState>>(emptyMap())
-    val states: StateFlow<Map<String, LinkState>> = _states.asStateFlow()
+    override val states: StateFlow<Map<String, LinkState>> = _states.asStateFlow()
 
     init {
         scope.launch { store.pcs.collect(::sync) }
@@ -126,14 +133,14 @@ class LinkManager(
         peers.values.forEach { scope.launch { it.peer.stop(sendBye = true) } }
     }
 
-    suspend fun remove(roomId: String) {
+    override suspend fun remove(roomId: String) {
         peers.remove(roomId)?.let { m -> m.jobs.forEach(Job::cancel); m.peer.unpair() }
         store.remove(roomId)
         publish()
     }
 
     /** Pairs with the PC from a scanned QR and keeps the link on success. */
-    suspend fun pair(qr: LinkQr): PairResult {
+    override suspend fun pair(qr: LinkQr): PairResult {
         val roomId = LinkCrypto.b64url(qr.roomId)
         pending += roomId
         val peer = attach(newPeer(LinkedPc(roomId, qr.secret, qr.pcName, now())))

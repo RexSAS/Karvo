@@ -1,5 +1,6 @@
 package com.karvo.ui
 
+import com.karvo.ui.link.LinkedPcsScreen
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
@@ -80,6 +81,7 @@ const val ROUTE_HOME = "home"
 const val ROUTE_EDIT = "edit?id={id}"
 const val ROUTE_MONTH = "month/{year}/{month}"
 const val ROUTE_BACKUPS = "backups"
+const val ROUTE_LINKED_PCS = "linked-pcs"
 const val ROUTE_RESTORE = "restore/{fileName}"
 const val ROUTE_CAMERA = "camera"
 const val ROUTE_MOMENTS = "moments"
@@ -198,6 +200,7 @@ fun KarvoNavHost() {
                                 BackdropFigureLayer(BackdropFigure.Snowflakes)
                                 SettingsScreen(
                                     onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
+                                    onOpenLinkedPcs = dropUnlessResumed { navController.navigate(ROUTE_LINKED_PCS) },
                                     onCheckForUpdates = updateViewModel?.let { it::checkNow },
                                     isCurrentPage = isCurrent,
                                 )
@@ -245,6 +248,11 @@ fun KarvoNavHost() {
                 val date = entry.arguments?.getString("date")?.let(LocalDate::parse) ?: return@composable
                 CompositionLocalProvider(LocalNavAnimation provides this) {
                     MomentViewerScreen(date, entry.arguments?.getInt("index") ?: 0, onBack = dropUnlessResumed { navController.navigateUp() })
+                }
+            }
+            composable(ROUTE_LINKED_PCS) {
+                AlpineBackdrop(BackdropFigure.None) {
+                    LinkedPcsScreen(onBack = dropUnlessResumed { navController.navigateUp() }, showMessage = showMessage)
                 }
             }
             composable(ROUTE_BACKUPS) { entry ->

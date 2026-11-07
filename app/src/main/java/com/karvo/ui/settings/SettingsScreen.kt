@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -100,6 +101,7 @@ private const val PRIVACY_POLICY_URL = "https://github.com/RexSAS/Karvo/blob/mai
 @Composable
 fun SettingsScreen(
     onOpenBackups: () -> Unit,
+    onOpenLinkedPcs: () -> Unit,
     /** Null in the Play build, which Play keeps up to date. */
     onCheckForUpdates: (() -> Unit)?,
     /** False while another pager page is on screen: a typed rate is saved as soon as the user swipes away. */
@@ -284,6 +286,15 @@ fun SettingsScreen(
                     modifier = Modifier.clickable(onClick = onCheckForUpdates),
                 )
             }
+
+            ListItem(
+                colors = transparentRow(),
+                leadingContent = { Icon(Icons.Filled.Computer, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.linked_pcs)) },
+                supportingContent = { Text(stringResource(R.string.link_a_pc)) },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                modifier = Modifier.clickable(onClick = onOpenLinkedPcs),
+            )
 
             ListItem(
                 colors = transparentRow(),
