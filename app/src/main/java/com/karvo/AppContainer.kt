@@ -22,6 +22,8 @@ import com.karvo.data.backup.BackupStore
 import com.karvo.data.update.GitHubReleaseSource
 import com.karvo.data.update.PackageInstallerUpdater
 import com.karvo.data.update.UrlApkDownloader
+import com.karvo.link.KeystoreSecretBox
+import com.karvo.link.PairingStore
 import java.io.File
 import java.time.Clock
 import java.util.concurrent.atomic.AtomicBoolean
@@ -58,6 +60,17 @@ class AppContainer(context: Context) {
     fun claimUpdateCheck(): Boolean = updateCheckClaimed.compareAndSet(false, true)
 
     val momentStore by lazy { MomentStore(appContext) }
+
+    /** Linked PCs (phone link). Its own file, so a corrupt link list never touches the app settings. */
+    val pairingStore: PairingStore by lazy {
+        PairingStore(
+            PreferenceDataStoreFactory.create(
+                corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+                produceFile = { appContext.preferencesDataStoreFile("link") },
+            ),
+            KeystoreSecretBox(),
+        )
+    }
 
     val backupService: BackupService by lazy {
         BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository)
