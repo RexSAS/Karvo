@@ -51,6 +51,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // The phone link is reachable while Karvo is in front; a connected PC keeps it alive via LinkService.
+    override fun onStart() {
+        super.onStart()
+        (application as KarvoApp).container.linkManager.onForeground()
+    }
+
+    override fun onStop() {
+        (application as KarvoApp).container.linkManager.onBackground()
+        super.onStop()
+    }
+
     override fun onDestroy() {
         (application as KarvoApp).container.authenticator.detach(this)
         super.onDestroy()

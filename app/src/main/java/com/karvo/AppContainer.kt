@@ -22,7 +22,21 @@ import com.karvo.data.backup.BackupStore
 import com.karvo.data.update.GitHubReleaseSource
 import com.karvo.data.update.PackageInstallerUpdater
 import com.karvo.data.update.UrlApkDownloader
+import android.os.Build
+import android.provider.Settings
+import com.karvo.domain.LessonError
 import com.karvo.link.KeystoreSecretBox
+import com.karvo.link.LinkClient
+import com.karvo.link.LinkCommandHandler
+import com.karvo.link.LinkManager
+import com.karvo.link.LinkService
+import com.karvo.link.OkHttpRelaySocketFactory
+import com.karvo.link.Refusal
+import com.karvo.ui.messageRes
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import okhttp3.OkHttpClient
 import com.karvo.link.PairingStore
 import java.io.File
 import java.time.Clock
@@ -70,6 +84,32 @@ class AppContainer(context: Context) {
             ),
             KeystoreSecretBox(),
         )
+    }
+
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    private val linkHandler by lazy {
+        LinkCommandHandler(lessonRepository, settingsRepository,
+            messages = { e: LessonError -> appContext.getString(e.messageRes()) },
+            refusal = { r -> appContext.getString(when (r) {
+                Refusal.LessonGone -> R.string.link_refused_lesson_gone
+                Refusal.PhoneNotEmpty -> R.string.link_refused_phone_not_empty
+                Refusal.InvalidRate -> R.string.link_refused_invalid_rate
+                Refusal.InvalidMonth -> R.string.link_refused_invalid_month
+                Refusal.InvalidData -> R.string.link_refused_invalid_data
+                Refusal.UnknownCommand -> R.string.link_refused_unknown
+            }) })
+    }
+
+    private val relaySockets by lazy { OkHttpRelaySocketFactory(OkHttpClient()) }
+
+    /** The name the PC shows ("Connected to …"): the phone's own device name, else its model. */
+    private val deviceName: String
+        get() = Settings.Global.getString(appContext.contentResolver, Settings.Global.DEVICE_NAME)?.takeIf { it.isNotBlank() } ?: Build.MODEL
+
+    val linkManager: LinkManager by lazy {
+        LinkManager(pairingStore, { pc -> LinkClient(pc, linkHandler, relaySockets, appScope, BuildConfig.VERSION_NAME, deviceName) },
+            LinkService.starter(appContext), appScope)
     }
 
     val backupService: BackupService by lazy {

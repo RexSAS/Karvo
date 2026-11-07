@@ -237,4 +237,41 @@
     <string name="hold_still">Resta fermo…</string>
     <string name="mute">Disattiva audio</string>
     <string name="unmute">Attiva audio</string>
+    <!-- Phone link: linked PCs -->
+    <string name="linked_pcs">PC collegati</string>
+    <string name="linked_pcs_count">%1$d collegati</string>
+    <string name="linked_pcs_none">Usa Karvo sul PC: apri karvo.rxsas.it e collegalo da qui.</string>
+    <string name="link_a_pc">Collega un PC</string>
+    <string name="link_confirm_title">Collegare %1$s?</string>
+    <string name="link_confirm_body">Questo PC potrà vedere e modificare le tue lezioni mentre Karvo è aperto su questo telefono.</string>
+    <string name="link_allow">Consenti</string>
+    <string name="link_deny">Rifiuta</string>
+    <string name="link_linked">Collegato a %1$s</string>
+    <string name="link_linking">Collegamento…</string>
+    <string name="link_remove">Rimuovi</string>
+    <string name="link_remove_confirm">Rimuovere %1$s? Terrà la sua copia di sola lettura delle lezioni.</string>
+    <string name="link_state_connected">Connesso</string>
+    <string name="link_state_offline">Non connesso</string>
+    <string name="link_state_broken">Collegamento non valido · rimuovi e ricollega</string>
+    <string name="link_state_outdated">Serve un aggiornamento</string>
+    <string name="link_error_not_karvo">Non è un codice di collegamento Karvo</string>
+    <string name="link_error_expired">Questo codice è scaduto. Creane uno nuovo sul PC.</string>
+    <string name="link_error_outdated">Aggiorna Karvo per collegare questo PC</string>
+    <string name="link_error_failed">Impossibile raggiungere il PC. Controlla la connessione e riprova.</string>
+    <string name="link_scan_hint">Inquadra il codice sul tuo PC</string>
+    <string name="link_camera_denied">Karvo ha bisogno della fotocamera per leggere il codice.</string>
+    <string name="link_open_settings">Apri impostazioni</string>
+    <string name="link_biometric_title">Collega un PC</string>
+    <!-- Phone link: notification -->
+    <string name="link_notification_channel">Collegamento PC</string>
+    <string name="link_notification_title">Karvo è collegato a %1$s</string>
+    <string name="link_notification_text">Il PC può vedere e modificare le tue lezioni</string>
+    <string name="link_disconnect">Disconnetti</string>
+    <!-- Phone link: why the phone refused a change made on the PC -->
+    <string name="link_refused_lesson_gone">Quella lezione non esiste più</string>
+    <string name="link_refused_phone_not_empty">Questo telefono ha già delle lezioni, quindi non è stato ripristinato nulla</string>
+    <string name="link_refused_invalid_rate">Inserisci una tariffa come 30 o 27,50</string>
+    <string name="link_refused_invalid_month">Scegli un mese da gennaio a dicembre</string>
+    <string name="link_refused_invalid_data">Il telefono non ha capito questa modifica</string>
+    <string name="link_refused_unknown">Aggiorna Karvo sul telefono per farlo dal PC</string>
 </resources>

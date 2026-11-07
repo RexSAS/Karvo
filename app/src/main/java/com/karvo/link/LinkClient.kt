@@ -40,18 +40,18 @@ class LinkClient(
     private val myName: String,
     relayUrl: String = RELAY_URL,
     private val now: () -> Instant = Instant::now,
-) {
-    val roomId: String = pc.roomId
+) : LinkPeer {
+    override val roomId: String = pc.roomId
     private val roomBytes = LinkCrypto.fromB64url(pc.roomId)
     private val keys = LinkCrypto.deriveKeys(requireNotNull(pc.secret) { "broken pairing" }, roomBytes)
     private val url = "$relayUrl/room/${pc.roomId}?role=phone&auth=${LinkCrypto.b64url(keys.authPhone)}"
 
     private val _state = MutableStateFlow(LinkState.OFFLINE)
-    val state: StateFlow<LinkState> = _state.asStateFlow()
+    override val state: StateFlow<LinkState> = _state.asStateFlow()
     private val _lastCommandAt = MutableStateFlow<Instant?>(null)
-    val lastCommandAt: StateFlow<Instant?> = _lastCommandAt.asStateFlow()
+    override val lastCommandAt: StateFlow<Instant?> = _lastCommandAt.asStateFlow()
     private val _pcName = MutableStateFlow(pc.pcName)
-    val pcName: StateFlow<String> = _pcName.asStateFlow()
+    override val pcName: StateFlow<String> = _pcName.asStateFlow()
 
     private sealed interface Event {
         data object Open : Event
@@ -71,7 +71,7 @@ class LinkClient(
     private var missed = 0
     private var pcOutdated = false
 
-    fun start() {
+    override fun start() {
         if (running) return
         running = true; bad = 0; backoff = FIRST_BACKOFF
         connect()
@@ -192,20 +192,20 @@ class LinkClient(
     }
 
     /** Disconnect (notification, idle timeout, app closed): tell the PC, then close. */
-    suspend fun stop(sendBye: Boolean = true) {
+    override suspend fun stop(sendBye: Boolean) {
         if (sendBye && _state.value == LinkState.CONNECTED) runCatching { send("bye") }
         end(LinkState.OFFLINE)
     }
 
     /** Remove this PC: tell it, close, and delete the room on the relay. */
-    suspend fun unpair() {
+    override suspend fun unpair() {
         if (_state.value == LinkState.CONNECTED) runCatching { send("unpaired") }
         end(LinkState.UNLINKED)
         factory.delete(url.replaceFirst("wss://", "https://").replaceFirst("ws://", "http://"))
     }
 
     /** First connection right after scanning: waits for the PC's hello. */
-    suspend fun pairOnce(timeoutMs: Long = 15_000): PairResult {
+    override suspend fun pairOnce(timeoutMs: Long): PairResult {
         start()
         val terminal = setOf(LinkState.CONNECTED, LinkState.UNLINKED, LinkState.OUTDATED, LinkState.BROKEN, LinkState.REPLACED)
         return when (withTimeoutOrNull(timeoutMs) { state.first { it in terminal } }) {

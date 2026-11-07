@@ -239,4 +239,41 @@
     <string name="hold_still">Hold still…</string>
     <string name="mute">Mute</string>
     <string name="unmute">Unmute</string>
+    <!-- Phone link: linked PCs -->
+    <string name="linked_pcs">Linked PCs</string>
+    <string name="linked_pcs_count">%1$d linked</string>
+    <string name="linked_pcs_none">Use Karvo on your PC: open karvo.rxsas.it and link it here.</string>
+    <string name="link_a_pc">Link a PC</string>
+    <string name="link_confirm_title">Link %1$s?</string>
+    <string name="link_confirm_body">This PC will see and edit your lessons while Karvo is open on this phone.</string>
+    <string name="link_allow">Allow</string>
+    <string name="link_deny">Deny</string>
+    <string name="link_linked">Linked to %1$s</string>
+    <string name="link_linking">Linking…</string>
+    <string name="link_remove">Remove</string>
+    <string name="link_remove_confirm">Remove %1$s? It keeps its read-only copy of your lessons.</string>
+    <string name="link_state_connected">Connected</string>
+    <string name="link_state_offline">Not connected</string>
+    <string name="link_state_broken">Link broken · remove and link again</string>
+    <string name="link_state_outdated">Update needed</string>
+    <string name="link_error_not_karvo">Not a Karvo link code</string>
+    <string name="link_error_expired">This code expired. Make a new one on the PC.</string>
+    <string name="link_error_outdated">Update Karvo to link this PC</string>
+    <string name="link_error_failed">Couldn\'t reach the PC. Check the internet connection and try again.</string>
+    <string name="link_scan_hint">Point the camera at the code on your PC</string>
+    <string name="link_camera_denied">Karvo needs the camera to scan the code.</string>
+    <string name="link_open_settings">Open settings</string>
+    <string name="link_biometric_title">Link a PC</string>
+    <!-- Phone link: notification -->
+    <string name="link_notification_channel">PC link</string>
+    <string name="link_notification_title">Karvo is linked to %1$s</string>
+    <string name="link_notification_text">Your PC can see and edit your lessons</string>
+    <string name="link_disconnect">Disconnect</string>
+    <!-- Phone link: why the phone refused a change made on the PC -->
+    <string name="link_refused_lesson_gone">That lesson no longer exists</string>
+    <string name="link_refused_phone_not_empty">This phone already has lessons, so nothing was restored</string>
+    <string name="link_refused_invalid_rate">Enter a rate like 30 or 27.50</string>
+    <string name="link_refused_invalid_month">Pick a month from January to December</string>
+    <string name="link_refused_invalid_data">The phone couldn\'t read that change</string>
+    <string name="link_refused_unknown">Update Karvo on your phone to do this from the PC</string>
 </resources>
