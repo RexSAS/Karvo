@@ -2,6 +2,8 @@ package com.karvo.link
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -51,12 +53,13 @@ class LinkManager(
     private val now: () -> Instant = Instant::now,
     private val idle: Duration = Duration.ofMinutes(30),
 ) : LinkControl {
-    private class Managed(val peer: LinkPeer, val jobs: List<Job>, var connectedAt: Instant? = null)
+    private class Managed(val peer: LinkPeer, val jobs: List<Job>, var connectedAt: Instant? = null, var wasConnected: Boolean = false)
 
     private val peers = mutableMapOf<String, Managed>()
     private val pending = mutableSetOf<String>() // pairing in progress: not in the store yet
     private var foreground = false
     private var serviceRunning = false
+    private var graceJob: Job? = null
     private val _states = MutableStateFlow<Map<String, LinkState>>(emptyMap())
     override val states: StateFlow<Map<String, LinkState>> = _states.asStateFlow()
 
@@ -90,12 +93,14 @@ class LinkManager(
             LinkState.CONNECTED -> {
                 // Android forbids starting a foreground service from the background: such a link waits for the app.
                 if (!foreground && !serviceRunning) { scope.launch { peer.stop(sendBye = true) }; return }
-                m.connectedAt = now()
+                m.connectedAt = now(); m.wasConnected = true
             }
             LinkState.UNLINKED -> if (peer.roomId !in pending) {
+                m.wasConnected = false
                 peers.remove(peer.roomId)?.jobs?.forEach(Job::cancel)
                 scope.launch { store.remove(peer.roomId) }
             }
+            LinkState.REPLACED, LinkState.BROKEN, LinkState.OUTDATED -> { m.connectedAt = null; m.wasConnected = false }
             else -> m.connectedAt = null
         }
         publish()
@@ -104,6 +109,13 @@ class LinkManager(
     private fun publish() {
         _states.value = peers.mapValues { it.value.peer.state.value }
         val names = peers.values.filter { it.peer.state.value == LinkState.CONNECTED }.map { it.peer.pcName.value }
+        // A connected PC that drops (network blip) gets a short grace with the service kept, so it can come back.
+        val reconnecting = peers.values.filter { it.wasConnected && it.peer.state.value in RECONNECTING }
+        if (names.isEmpty() && reconnecting.isNotEmpty() && serviceRunning) {
+            if (graceJob?.isActive != true) graceJob = scope.launch { delay(GRACE_MS); endGrace() }
+            return
+        }
+        graceJob?.cancel()
         when {
             names.isEmpty() && serviceRunning -> { service.stop(); serviceRunning = false }
             names.isNotEmpty() && serviceRunning -> service.update(names)
@@ -111,7 +123,16 @@ class LinkManager(
         }
     }
 
+    private fun endGrace() {
+        peers.values.filter { it.wasConnected && it.peer.state.value in RECONNECTING }.forEach {
+            it.wasConnected = false
+            if (!foreground) scope.launch { it.peer.stop(sendBye = false) }
+        }
+        publish()
+    }
+
     private fun checkIdle() {
+        if (foreground) return // while Karvo is open the phone stays reachable
         val active = peers.values.filter { it.peer.state.value == LinkState.CONNECTED }
         if (active.isEmpty()) return
         val last = active.mapNotNull { listOfNotNull(it.connectedAt, it.peer.lastCommandAt.value).maxOrNull() }.maxOrNull() ?: return
@@ -134,8 +155,8 @@ class LinkManager(
     }
 
     override suspend fun remove(roomId: String) {
+        store.remove(roomId) // forget it first: the network part below may be slow or cancelled
         peers.remove(roomId)?.let { m -> m.jobs.forEach(Job::cancel); m.peer.unpair() }
-        store.remove(roomId)
         publish()
     }
 
@@ -144,16 +165,27 @@ class LinkManager(
         val roomId = LinkCrypto.b64url(qr.roomId)
         pending += roomId
         val peer = attach(newPeer(LinkedPc(roomId, qr.secret, qr.pcName, now())))
-        val result = peer.pairOnce()
-        if (result is PairResult.Linked) {
-            store.add(LinkQr(qr.roomId, qr.secret, result.pcName))
-            store.pcs.first { list -> list.any { it.roomId == roomId } }
-        } else {
-            peers.remove(roomId)?.jobs?.forEach(Job::cancel)
-            peer.stop(sendBye = false)
+        var kept = false
+        try {
+            val result = peer.pairOnce()
+            if (result is PairResult.Linked) {
+                store.add(LinkQr(qr.roomId, qr.secret, result.pcName))
+                store.pcs.first { list -> list.any { it.roomId == roomId } }
+                kept = true
+            }
+            return result
+        } finally {
+            // Also when the screen is left mid-pairing: never leave a link running that Linked PCs doesn't show.
+            withContext(NonCancellable) {
+                if (!kept) { peers.remove(roomId)?.jobs?.forEach(Job::cancel); peer.stop(sendBye = false) }
+                pending -= roomId
+                publish()
+            }
         }
-        pending -= roomId
-        publish()
-        return result
+    }
+
+    private companion object {
+        val RECONNECTING = setOf(LinkState.OFFLINE, LinkState.CONNECTING)
+        const val GRACE_MS = 2 * 60_000L
     }
 }

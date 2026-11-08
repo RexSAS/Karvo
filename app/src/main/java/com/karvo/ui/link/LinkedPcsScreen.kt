@@ -196,7 +196,13 @@ private fun ScanQr(onCode: (String) -> Unit, onClose: () -> Unit) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (granted) {
             val executor = remember { Executors.newSingleThreadExecutor() }
-            DisposableEffect(Unit) { onDispose { executor.shutdown() } }
+            DisposableEffect(Unit) {
+                onDispose {
+                    // The camera is bound to the Linked PCs screen's lifecycle: release it as soon as the scanner closes.
+                    val f = ProcessCameraProvider.getInstance(context)
+                    f.addListener({ f.get().unbindAll(); executor.shutdown() }, ContextCompat.getMainExecutor(context))
+                }
+            }
             AndroidView(modifier = Modifier.fillMaxSize(), factory = { ctx ->
                 PreviewView(ctx).also { view ->
                     val providerFuture = ProcessCameraProvider.getInstance(ctx)

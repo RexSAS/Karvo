@@ -33,6 +33,7 @@ import com.karvo.link.LinkService
 import com.karvo.link.OkHttpRelaySocketFactory
 import com.karvo.link.Refusal
 import com.karvo.ui.messageRes
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -86,7 +87,9 @@ class AppContainer(context: Context) {
         )
     }
 
-    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    // A failure in background link work (bad frame, storage error) is logged, never a crash.
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate +
+        CoroutineExceptionHandler { _, e -> android.util.Log.w("KarvoLink", "link task failed", e) })
 
     private val linkHandler by lazy {
         LinkCommandHandler(lessonRepository, settingsRepository,
@@ -101,7 +104,7 @@ class AppContainer(context: Context) {
             }) })
     }
 
-    private val relaySockets by lazy { OkHttpRelaySocketFactory(OkHttpClient()) }
+    private val relaySockets by lazy { OkHttpRelaySocketFactory(OkHttpClient.Builder().pingInterval(30, java.util.concurrent.TimeUnit.SECONDS).build()) }
 
     /** The name the PC shows ("Connected to …"): the phone's own device name, else its model. */
     private val deviceName: String

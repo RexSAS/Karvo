@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -31,7 +32,12 @@ class LinkManagerTest {
         override fun start() { started++; if (state.value == LinkState.OFFLINE) state.value = LinkState.CONNECTING }
         override suspend fun stop(sendBye: Boolean) { stopped++; lastBye = sendBye; state.value = LinkState.OFFLINE }
         override suspend fun unpair() { unpaired++; state.value = LinkState.UNLINKED }
-        override suspend fun pairOnce(timeoutMs: Long): PairResult { start(); state.value = LinkState.CONNECTED; return PairResult.Linked(pcName.value) }
+        var hangPairing = false
+        override suspend fun pairOnce(timeoutMs: Long): PairResult {
+            start()
+            if (hangPairing) kotlinx.coroutines.awaitCancellation()
+            state.value = LinkState.CONNECTED; return PairResult.Linked(pcName.value)
+        }
     }
     private class FakeService : ServiceStarter {
         var running = false; var names = emptyList<String>(); var starts = 0
@@ -42,10 +48,11 @@ class LinkManagerTest {
 
     private val box = FakeSecretBox()
     private val peers = mutableMapOf<String, FakePeer>()
+    private var hangNext = false
     private val service = FakeService()
     private fun TestScope.setup(): Pair<PairingStore, LinkManager> {
         val store = PairingStore(PreferenceDataStoreFactory.create(scope = backgroundScope) { File(tmp.root, "link.preferences_pb") }, box)
-        val m = LinkManager(store, { pc -> FakePeer(pc.roomId, pc.pcName).also { peers[pc.roomId] = it } }, service, backgroundScope,
+        val m = LinkManager(store, { pc -> FakePeer(pc.roomId, pc.pcName).also { it.hangPairing = hangNext; peers[pc.roomId] = it } }, service, backgroundScope,
             now = { Instant.ofEpochMilli(currentTime) })
         return store to m
     }
@@ -90,6 +97,7 @@ class LinkManagerTest {
         val a = peers.values.single()
         a.state.value = LinkState.CONNECTED; settle()
         a.state.value = LinkState.OFFLINE; settle()
+        advanceTimeBy(3 * 60_000L); settle() // after the reconnect grace
         assertFalse(service.running)
     }
 
@@ -98,6 +106,7 @@ class LinkManagerTest {
         store.add(qr("A")); settle(); m.onForeground(); settle()
         val a = peers.values.single()
         a.state.value = LinkState.CONNECTED; settle()
+        m.onBackground(); settle()
         advanceTimeBy(29 * 60_000L); settle()
         assertEquals(0, a.stopped)
         advanceTimeBy(2 * 60_000L); settle()
@@ -124,5 +133,50 @@ class LinkManagerTest {
         assertEquals(listOf("Chrome on Windows"), store.pcs.first().map { it.pcName })
         assertEquals(1, peers.size)
         assertTrue(service.running)
+    }
+
+    @Test fun `while Karvo is open the idle timeout does not disconnect`() = runTest {
+        val (store, m) = setup()
+        store.add(qr("A")); settle(); m.onForeground(); settle()
+        val a = peers.values.single()
+        a.state.value = LinkState.CONNECTED; settle()
+        advanceTimeBy(45 * 60_000L); settle()
+        assertEquals(0, a.stopped)
+    }
+
+    @Test fun `a short drop in the background keeps the service and the link`() = runTest {
+        val (store, m) = setup()
+        store.add(qr("A")); settle(); m.onForeground(); settle()
+        val a = peers.values.single()
+        a.state.value = LinkState.CONNECTED; settle()
+        m.onBackground(); settle()
+        a.state.value = LinkState.CONNECTING; settle()
+        assertTrue(service.running)
+        a.state.value = LinkState.CONNECTED; settle()
+        assertTrue(service.running); assertEquals(0, a.stopped)
+    }
+
+    @Test fun `a drop that lasts in the background stops the link and the service`() = runTest {
+        val (store, m) = setup()
+        store.add(qr("A")); settle(); m.onForeground(); settle()
+        val a = peers.values.single()
+        a.state.value = LinkState.CONNECTED; settle()
+        m.onBackground(); settle()
+        a.state.value = LinkState.OFFLINE; settle()
+        advanceTimeBy(3 * 60_000L); settle()
+        assertFalse(service.running); assertEquals(1, a.stopped)
+    }
+
+    @Test fun `leaving the screen during pairing leaves no hidden link`() = runTest {
+        val (store, m) = setup()
+        m.onForeground(); settle()
+        hangNext = true
+        val job = launch { m.pair(qr("Chrome on Windows")) }
+        settle()
+        val p = peers.values.single()
+        job.cancel(); settle()
+        assertEquals(1, p.stopped)
+        assertTrue(m.states.value.isEmpty())
+        assertTrue(store.pcs.first().isEmpty())
     }
 }

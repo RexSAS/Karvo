@@ -23,6 +23,14 @@ class LinkService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_STOP) {
+            // Started and stopped within milliseconds: startForeground must still be called once, or Android crashes the app.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) startForeground(ID, notification(this, emptyList()), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            else startForeground(ID, notification(this, emptyList()))
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            return START_NOT_STICKY
+        }
         if (intent?.action == ACTION_DISCONNECT) {
             (application as KarvoApp).container.linkManager.disconnectAll()
             return START_NOT_STICKY
@@ -44,6 +52,7 @@ class LinkService : Service() {
         private const val CHANNEL = "link"
         private const val EXTRA_NAMES = "names"
         private const val ACTION_DISCONNECT = "com.karvo.link.DISCONNECT"
+        private const val ACTION_STOP = "com.karvo.link.STOP"
 
         fun notification(context: Context, names: List<String>): Notification {
             val nm = context.getSystemService(NotificationManager::class.java)
@@ -72,7 +81,10 @@ class LinkService : Service() {
                 if (Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(app, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
                     NotificationManagerCompat.from(app).notify(ID, notification(app, names))
             }
-            override fun stop() { app.stopService(Intent(app, LinkService::class.java)) }
+            override fun stop() {
+                runCatching { app.startService(Intent(app, LinkService::class.java).setAction(ACTION_STOP)) }
+                    .onFailure { app.stopService(Intent(app, LinkService::class.java)) }
+            }
         }
     }
 }
