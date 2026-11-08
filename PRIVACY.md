@@ -1,6 +1,6 @@
 # Karvo privacy policy
 
-*Last updated: 8 November 2026 (day notes)* · [Italiano](#informativa-sulla-privacy-di-karvo)
+*Last updated: 8 November 2026 (events)* · [Italiano](#informativa-sulla-privacy-di-karvo)
 
 Karvo is an app for ski instructors to log their lesson hours. It is developed by RexSAS. Karvo has **no accounts, no
 analytics and no ads**, and keeps no copy of your data on any server: everything you enter stays on your phone, unless
@@ -36,7 +36,7 @@ you choose to link a PC (see *Linking a PC*).
 
 ## Linking a PC
 
-If you link a PC (Settings → Linked PCs, then karvo.rxsas.it on the PC), your lessons, day notes, rate and settings are sent
+If you link a PC (Settings → Linked PCs, then karvo.rxsas.it on the PC), your lessons, events, rate and settings are sent
 between your phone and that PC while they are connected. Everything is **end-to-end encrypted** with a key shared only
 by scanning the QR code: it travels through a relay we run on Cloudflare (`link.rxsas.it`), which forwards the encrypted
 data without being able to read it and stores none of it. Cloudflare sees connection details such as IP addresses, under
@@ -98,7 +98,7 @@ tuo telefono, a meno che tu non scelga di collegare un PC (vedi *Collegare un PC
 
 ## Collegare un PC
 
-Se colleghi un PC (Impostazioni → PC collegati, poi karvo.rxsas.it sul PC), le tue lezioni, le note del giorno, la tariffa e le impostazioni
+Se colleghi un PC (Impostazioni → PC collegati, poi karvo.rxsas.it sul PC), le tue lezioni, gli eventi, la tariffa e le impostazioni
 vengono inviate tra il telefono e quel PC mentre sono connessi. Tutto è **cifrato end-to-end** con una chiave condivisa
 solo scansionando il codice QR: passa attraverso un relay che gestiamo su Cloudflare (`link.rxsas.it`), che inoltra i
 dati cifrati senza poterli leggere e non ne conserva nessuno. Cloudflare vede i dati di connessione, come gli indirizzi

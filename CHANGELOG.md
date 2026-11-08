@@ -5,9 +5,12 @@ All notable changes to Karvo are listed here. Versions 1.0–1.3 were released a
 ## [3.2] — 2026-11-08
 
 ### Added
-- **Day notes**: add a short note to any day, like "Ski school meeting 17:00", from the new **Notes** card at the top of *Lessons* (tap a note to edit or delete it). On that day Karvo reminds you at **07:30**; allow *Alarms & reminders* (the card offers it) so it rings exactly on time. If the phone was off at 07:30, the reminder shows when it's back on.
-- **Notes on your PC**: linked PCs show day notes as gold dots on the calendar and can add, edit and delete them; the phone stays the master copy.
-- Backups made inside the app now keep your day notes too, and restoring a backup brings them back.
+- **Events**: the calendar icon at the top of *Lessons* opens your **Calendar**; tap any day (even an empty or future one) to add events to it, as many as you like, like "Ski school meeting 17:00". On that day Karvo reminds you at **07:30**; allow *Alarms & reminders* so it rings exactly on time. If the phone was off at 07:30, the reminder shows when it's back on.
+- **Coming up**: the *Lessons* page shows the events of today and the next 3 days (Today, Tomorrow, In 2 days, In 3 days).
+- **Events on your PC**: linked PCs show your events on the calendar and can add, edit and delete them; the phone stays the master copy.
+- Backups made inside the app now keep your events too, and restoring a backup brings them back.
+- **Welcome and quick tour**: the first time you open Karvo it welcomes you and offers a 30-second tour of the main things (adding lessons, the calendar and moments, settings, backups, linking a PC). See it again any time from *Settings → Show the quick tour*.
+- **What's new**: after an update, Karvo shows once what changed.
 
 ## [3.1] — 2026-11-08
 
