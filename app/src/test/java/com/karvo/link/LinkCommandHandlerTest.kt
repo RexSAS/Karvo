@@ -112,4 +112,13 @@ class LinkCommandHandlerTest {
         assertEquals("InvalidData", refused("setDayNote", JSONObject().put("date", "2026-11-10").put("text", "x".repeat(201))))
         assertEquals("InvalidData", refused("setDayNote", JSONObject().put("date", "2026-11-10").put("text", 5)))
     }
+
+    @Test fun `restore into an empty phone also brings the PC notes`() = runTest {
+        val empty = FakeLessonRepository()
+        val n = com.karvo.testing.FakeDayNoteRepository(mapOf(LocalDate.parse("2026-11-12") to "phone"))
+        val h = LinkCommandHandler(empty, settings, n, { it.name }, { it.name })
+        h.handle("restoreAll", JSONObject().put("lessons", JSONArray().put(lessonJson())).put("dayNotes", JSONObject().put("2026-11-10", "Meeting")))
+        assertEquals(mapOf(LocalDate.parse("2026-11-12") to "phone", LocalDate.parse("2026-11-10") to "Meeting"), n.notes.value)
+        assertEquals("InvalidData", runCatching { h.handle("restoreAll", JSONObject().put("lessons", JSONArray()).put("dayNotes", JSONObject().put("nope", "x"))) }.exceptionOrNull()?.message)
+    }
 }

@@ -13,3 +13,9 @@ fun nextReminder(notes: Map<LocalDate, String>, now: ZonedDateTime): Pair<LocalD
     notes.keys.sorted().asSequence()
         .map { it to it.atTime(REMINDER_TIME).atZone(now.zone).toInstant() }
         .firstOrNull { it.second.isAfter(now.toInstant()) }
+
+/** Today has a note, 07:30 has passed and it wasn't shown yet (phone off or locked at 07:30): show it once now. */
+fun missedToday(notes: Map<LocalDate, String>, now: ZonedDateTime, lastNotified: LocalDate?): Boolean {
+    val today = now.toLocalDate()
+    return today in notes && !now.toLocalTime().isBefore(REMINDER_TIME) && lastNotified != today
+}

@@ -118,8 +118,10 @@ class BackupStoreTest {
         val b = store.create(BackupReason.Manual, lessons(2), notes)
         assertEquals(notes, store.readNotes(b.fileName))
         assertEquals(1, store.list().size) // the sidecar is not listed as a backup
-        val old = store.create(BackupReason.Manual, lessons(1))
-        assertEquals(emptyMap<LocalDate, String>(), store.readNotes(old.fileName))
+        val none = store.create(BackupReason.Manual, lessons(1))
+        assertEquals(emptyMap<LocalDate, String>(), store.readNotes(none.fileName)) // 3.2 backup without notes: restore clears
+        File(dir, none.fileName + ".notes.json").delete()
+        assertEquals(null, store.readNotes(none.fileName)) // a pre-3.2 backup: restore keeps the current notes
         repeat(3) { store.create(BackupReason.Manual, lessons(1)) }
         assertFalse(File(dir, b.fileName + ".notes.json").exists())
     }

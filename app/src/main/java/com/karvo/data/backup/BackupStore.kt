@@ -66,10 +66,11 @@ class BackupStore(private val dir: File, private val clock: Clock) {
         val tmp = File(dir, "$name.tmp")
         tmp.writeBytes(csvFileBytes(lessonsToCsv(lessons)))
         // Day notes go in a sidecar written first, so a listed backup never lacks the notes it was made with.
-        if (notes.isNotEmpty()) {
+        // Always written (even "{}"): no sidecar means a backup from before 3.2.
+        run {
             val side = File(dir, "$name$NOTES_SUFFIX.tmp")
             side.writeText(JSONObject(notes.entries.associate { it.key.toString() to it.value }).toString(), Charsets.UTF_8)
-            if (!side.renameTo(File(dir, name + NOTES_SUFFIX))) { side.delete(); throw IOException("Can't save backup $name") }
+            if (!side.renameTo(File(dir, name + NOTES_SUFFIX))) { side.delete(); tmp.delete(); throw IOException("Can't save backup $name") }
         }
         if (!tmp.renameTo(File(dir, name))) {
             tmp.delete()
@@ -83,12 +84,12 @@ class BackupStore(private val dir: File, private val clock: Clock) {
     /** Throws [com.karvo.domain.BackupFormatException] for a damaged file, [IOException] for a missing one. */
     fun read(fileName: String): List<Lesson> = parseLessonsCsv(File(dir, fileName).readText(Charsets.UTF_8))
 
-    /** The backup's day notes; empty for backups made before 3.2 (no sidecar) or an unreadable sidecar. */
-    fun readNotes(fileName: String): Map<LocalDate, String> = try {
-        val o = JSONObject(File(dir, fileName + NOTES_SUFFIX).readText(Charsets.UTF_8))
-        o.keys().asSequence().associate { LocalDate.parse(it) to o.getString(it) }
+    /** The backup's day notes; null for a backup made before 3.2 (no sidecar) or an unreadable sidecar. */
+    fun readNotes(fileName: String): Map<LocalDate, String>? = try {
+        val f = File(dir, fileName + NOTES_SUFFIX)
+        if (!f.exists()) null else JSONObject(f.readText(Charsets.UTF_8)).let { o -> o.keys().asSequence().associate { LocalDate.parse(it) to o.getString(it) } }
     } catch (_: Exception) {
-        emptyMap()
+        null
     }
 
     /** The backup the next [create] would delete, or null while fewer than [MAX_BACKUPS] exist. */

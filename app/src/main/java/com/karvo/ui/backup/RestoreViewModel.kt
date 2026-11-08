@@ -111,7 +111,7 @@ class RestoreViewModel(
             }
         }
         lessons.replaceAll(source)
-        if (notes.isNotEmpty()) dayNotes?.replaceAll(notes) // a pre-3.2 backup has none: keep the current notes
+        if (notes != null) dayNotes?.replaceAll(notes) // a pre-3.2 backup has no notes file: keep the current notes
         return RestoreResult.Done(source.size)
     }
 

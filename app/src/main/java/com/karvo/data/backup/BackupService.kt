@@ -19,7 +19,7 @@ class BackupService(
         return withContext(io) { store.create(reason, all, notes) }
     }
 
-    suspend fun readNotes(fileName: String): Map<java.time.LocalDate, String> = withContext(io) { store.readNotes(fileName) }
+    suspend fun readNotes(fileName: String): Map<java.time.LocalDate, String>? = withContext(io) { store.readNotes(fileName) }
 
     suspend fun list(): List<Backup> = withContext(io) { store.list() }
 

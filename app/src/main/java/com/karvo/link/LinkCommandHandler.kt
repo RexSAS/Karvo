@@ -90,8 +90,18 @@ class LinkCommandHandler(
             }
             "restoreAll" -> {
                 val incoming = lessonsFrom(args.optJSONArray("lessons"))
+                // A 3.2+ PC sends its notes too; validated before anything changes, then merged with the phone's.
+                val notes = args.optJSONObject("dayNotes")?.let { o ->
+                    o.keys().asSequence().associate { k ->
+                        val d = runCatching { LocalDate.parse(k) }.getOrElse { refuse(Refusal.InvalidData) }
+                        val v = o.opt(k) as? String ?: refuse(Refusal.InvalidData)
+                        if (v.trim().length > MAX_DAY_NOTE) refuse(Refusal.InvalidData)
+                        d to v
+                    }
+                }.orEmpty()
                 if (lessons.allLessons().isNotEmpty()) refuse(Refusal.PhoneNotEmpty)
                 lessons.addAll(incoming)
+                notes.forEach { (d, v) -> dayNotes.set(d, v) }
             }
             "setDayNote" -> {
                 val date = runCatching { LocalDate.parse(args.optString("date")) }.getOrElse { refuse(Refusal.InvalidData) }

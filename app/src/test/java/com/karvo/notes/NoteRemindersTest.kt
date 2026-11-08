@@ -27,4 +27,12 @@ class NoteRemindersTest {
         val dst = mapOf(LocalDate.parse("2027-03-28") to "DST day")
         assertEquals(ZonedDateTime.of(2027, 3, 28, 7, 30, 0, 0, rome).toInstant(), nextReminder(dst, at("2027-03-27T12:00"))?.second)
     }
+
+    @Test fun `a reminder missed today is shown once after 07-30`() {
+        val today = LocalDate.parse("2026-11-08")
+        assertEquals(true, missedToday(notes, at("2026-11-08T09:00"), lastNotified = null))
+        assertEquals(false, missedToday(notes, at("2026-11-08T09:00"), lastNotified = today))
+        assertEquals(false, missedToday(notes, at("2026-11-08T07:00"), lastNotified = null)) // not yet time
+        assertEquals(false, missedToday(mapOf(LocalDate.parse("2026-11-09") to "x"), at("2026-11-08T09:00"), null))
+    }
 }

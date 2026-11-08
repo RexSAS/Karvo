@@ -33,11 +33,23 @@ import java.time.ZonedDateTime
 class NoteAlarms(private val context: Context, private val notes: DayNoteRepository, private val settings: SettingsRepository) {
     private val app = context.applicationContext
 
+    private val prefs = app.getSharedPreferences("note_alarms", Context.MODE_PRIVATE)
+    private var lastNotified: LocalDate?
+        get() = prefs.getString("last", null)?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        set(v) { prefs.edit().putString("last", v?.toString()).apply() }
+
     fun start(scope: CoroutineScope) {
-        scope.launch { combine(notes.observe(), settings.timeZoneId) { n, z -> n to z }.collect { (n, z) -> arm(n, zoneOf(z)) } }
+        // runCatching: one failed arm (e.g. exact permission revoked mid-call) must not stop re-arming for good.
+        scope.launch { combine(notes.observe(), settings.timeZoneId) { n, z -> n to z }.collect { (n, z) -> runCatching { arm(n, zoneOf(z)) } } }
+        scope.launch { runCatching { catchUp() } }
     }
 
-    suspend fun rearm() = arm(notes.all(), zoneOf(settings.timeZoneId.first()))
+    suspend fun rearm() { runCatching { arm(notes.all(), zoneOf(settings.timeZoneId.first())) }; catchUp() }
+
+    /** After a reboot, a clock change or app start: today's reminder if it was missed. */
+    private suspend fun catchUp() {
+        if (missedToday(notes.all(), ZonedDateTime.now(zoneOf(settings.timeZoneId.first())), lastNotified)) notifyToday()
+    }
 
     private fun zoneOf(id: String) = runCatching { ZoneId.of(id) }.getOrDefault(ZoneId.systemDefault())
 
@@ -55,7 +67,9 @@ class NoteAlarms(private val context: Context, private val notes: DayNoteReposit
     /** Posts "Karvo · Today: <note>" when today has a note. */
     suspend fun notifyToday() {
         val zone = zoneOf(settings.timeZoneId.first())
-        val text = notes.all()[LocalDate.now(zone)] ?: return
+        val today = LocalDate.now(zone)
+        val text = notes.all()[today] ?: return
+        lastNotified = today
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(app, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
         val nm = app.getSystemService(NotificationManager::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm.getNotificationChannel(CHANNEL) == null)
@@ -77,7 +91,7 @@ class NoteAlarmReceiver : BroadcastReceiver() {
         val alarms = (context.applicationContext as KarvoApp).container.noteAlarms
         val pending = goAsync()
         CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
-            try { alarms.notifyToday(); alarms.rearm() } finally { pending.finish() }
+            try { alarms.notifyToday(); alarms.rearm() } finally { pending.finish() } // notifyToday marks today, so rearm won't repeat it
         }
     }
 }

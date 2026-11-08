@@ -63,7 +63,9 @@ fun NotesCard(notes: List<Pair<LocalDate, String>>, today: LocalDate, onSave: (L
             var exact by remember { mutableStateOf(com.karvo.notes.canRingExactly(context)) }
             androidx.lifecycle.compose.LifecycleResumeEffect(Unit) { exact = com.karvo.notes.canRingExactly(context); onPauseOrDispose { } }
             if (notes.isNotEmpty() && !exact) TextButton(onClick = {
-                context.startActivity(android.content.Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, android.net.Uri.parse("package:" + context.packageName)))
+                // Some phones lack this settings screen: the app's own settings page is the fallback.
+                runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, android.net.Uri.parse("package:" + context.packageName))) }
+                    .onFailure { runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, android.net.Uri.parse("package:" + context.packageName))) } }
             }) { Text(stringResource(R.string.note_exact)) }
             if (notes.isEmpty()) Text(stringResource(R.string.no_notes), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             notes.forEach { (date, text) ->
