@@ -37,6 +37,10 @@ interface SettingsRepository {
     val seasonStartMonth: Flow<Int>
     suspend fun setSeasonStartMonth(month: Int)
     /** Ask for fingerprint/PIN before showing earnings; on by default. */
+    /** The app version last opened (null until 3.2 stores it): drives Welcome / What's new. */
+    val lastSeenVersion: Flow<String?>
+    suspend fun setLastSeenVersion(version: String)
+
     val biometricReveal: Flow<Boolean>
     suspend fun setBiometricReveal(on: Boolean)
 }
@@ -77,6 +81,10 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         require(month in 1..12) { "Invalid month: $month" }
         store.edit { it[seasonStartKey] = month }
     }
+
+    private val lastSeenKey = stringPreferencesKey("last_seen_version")
+    override val lastSeenVersion: Flow<String?> = store.data.map { it[lastSeenKey] }
+    override suspend fun setLastSeenVersion(version: String) { store.edit { it[lastSeenKey] = version } }
 
     override val biometricReveal: Flow<Boolean> = store.data.map { it[biometricKey] ?: true }
 

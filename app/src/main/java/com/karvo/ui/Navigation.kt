@@ -31,6 +31,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.karvo.onboarding.LocalTour
+import com.karvo.onboarding.StartScreen
+import com.karvo.onboarding.TourOverlay
+import com.karvo.onboarding.TourState
+import com.karvo.onboarding.WelcomeDialog
+import com.karvo.onboarding.WhatsNewDialog
+import com.karvo.onboarding.startScreen
+import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -147,6 +158,23 @@ fun KarvoNavHost() {
         }
     }
 
+    // First launch: welcome (+ quick tour); after an update: what's new. Decided once, then the version is remembered.
+    val tour = remember { TourState() }
+    var start by remember { mutableStateOf(StartScreen.None) }
+    LaunchedEffect(Unit) {
+        val container = (context.applicationContext as KarvoApp).container
+        val settings = container.settingsRepository
+        start = startScreen(settings.lastSeenVersion.first(), BuildConfig.VERSION_NAME, lessonRepository.allLessons().isNotEmpty())
+        settings.setLastSeenVersion(BuildConfig.VERSION_NAME)
+    }
+    when (start) {
+        StartScreen.Welcome -> WelcomeDialog(onTour = { start = StartScreen.None; tour.start() }, onSkip = { start = StartScreen.None })
+        StartScreen.WhatsNew -> WhatsNewDialog(onDismiss = { start = StartScreen.None })
+        StartScreen.None -> {}
+    }
+
+    CompositionLocalProvider(LocalTour provides tour) {
+    Box {
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         snackbarHost = {
@@ -203,6 +231,7 @@ fun KarvoNavHost() {
                                     onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
                                     onOpenLinkedPcs = dropUnlessResumed { navController.navigate(ROUTE_LINKED_PCS) },
                                     onCheckForUpdates = updateViewModel?.let { it::checkNow },
+                                    onShowTour = tour::start,
                                     isCurrentPage = isCurrent,
                                 )
                             }
@@ -307,6 +336,11 @@ fun KarvoNavHost() {
         }
         }
         }
+    }
+    // The tour only runs on the home pages; leaving them ends it.
+    if (currentRoute != ROUTE_HOME) tour.stop()
+    TourOverlay(tour) { page -> goToPage(page) }
+    }
     }
 }
 

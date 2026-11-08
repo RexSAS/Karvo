@@ -292,4 +292,31 @@
     <string name="event_today_title">Karvo · Oggi</string>
     <string name="event_exact">Avvisami esattamente alle 07:30</string>
     <string name="calendar">Calendario</string>
+    <!-- Benvenuto, tour, novità -->
+    <string name="welcome_title">Benvenuto in Karvo</string>
+    <string name="welcome_body">Registra le lezioni di sci, vedi quanto ti deve la scuola e conserva le tue giornate in pista. Vuoi un tour di 30 secondi?</string>
+    <string name="welcome_tour">Fai il tour veloce</string>
+    <string name="tour_skip">Salta</string>
+    <string name="tour_next">Avanti</string>
+    <string name="tour_done">Fatto</string>
+    <string name="tour_again">Rivedi il tour veloce</string>
+    <string name="tour_add_title">Aggiungi una lezione</string>
+    <string name="tour_add_body">Tocca + per registrare una lezione in pochi secondi: data, allievo, durata.</string>
+    <string name="tour_calendar_title">Il tuo calendario</string>
+    <string name="tour_calendar_body">Momenti, lezioni ed eventi giorno per giorno. Apri un giorno per aggiungere eventi: Karvo te li ricorda alle 07:30.</string>
+    <string name="tour_camera_title">Cattura un momento</string>
+    <string name="tour_camera_body">Scatta una foto o un breve video della tua giornata in pista: finisce nel calendario.</string>
+    <string name="tour_settings_title">Personalizzala</string>
+    <string name="tour_settings_body">Imposta tariffa oraria, inizio stagione, lingua e aspetto.</string>
+    <string name="tour_backups_title">Backup</string>
+    <string name="tour_backups_body">Karvo conserva qui fino a 3 backup. Esporta un CSV per tenerne una copia anche altrove.</string>
+    <string name="tour_pc_title">Usa Karvo sul PC</string>
+    <string name="tour_pc_body">Apri karvo.rxsas.it sul computer e collegalo da qui scansionando il codice.</string>
+    <string name="whats_new_title">Novità della %1$s</string>
+    <string-array name="whats_new_items">
+        <item>Eventi: aggiungi eventi a qualsiasi giorno dal calendario (l\'icona in alto in Lezioni). Karvo te li ricorda alle 07:30.</item>
+        <item>Gli eventi dei prossimi 3 giorni nella pagina Lezioni: oggi, domani, tra 2 giorni…</item>
+        <item>Anche il PC mostra e modifica i tuoi eventi.</item>
+        <item>I backup ora conservano anche gli eventi.</item>
+    </string-array>
 </resources>

@@ -49,6 +49,9 @@ import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material.icons.filled.School
+import com.karvo.onboarding.TourTarget
+import com.karvo.onboarding.tourTarget
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -104,6 +107,7 @@ fun SettingsScreen(
     onOpenLinkedPcs: () -> Unit,
     /** Null in the Play build, which Play keeps up to date. */
     onCheckForUpdates: (() -> Unit)?,
+    onShowTour: () -> Unit,
     /** False while another pager page is on screen: a typed rate is saved as soon as the user swipes away. */
     isCurrentPage: Boolean = true,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
@@ -225,7 +229,7 @@ fun SettingsScreen(
                     viewModel.saveRate()
                     focusManager.clearFocus()
                 }),
-                modifier = Modifier
+                modifier = Modifier.tourTarget(TourTarget.Rate)
                     .fillMaxWidth()
                     .onFocusChanged {
                         if (rateFocused && !it.isFocused) viewModel.saveRate()
@@ -277,6 +281,13 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { showLanguagePicker = true },
             )
 
+            ListItem(
+                colors = transparentRow(),
+                leadingContent = { Icon(Icons.Filled.School, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.tour_again)) },
+                modifier = Modifier.clickable(onClick = onShowTour),
+            )
+
             if (onCheckForUpdates != null) {
                 ListItem(
                     colors = transparentRow(),
@@ -293,7 +304,7 @@ fun SettingsScreen(
                 headlineContent = { Text(stringResource(R.string.linked_pcs)) },
                 supportingContent = { Text(stringResource(R.string.link_a_pc)) },
                 trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                modifier = Modifier.clickable(onClick = onOpenLinkedPcs),
+                modifier = Modifier.tourTarget(TourTarget.LinkedPcs).clickable(onClick = onOpenLinkedPcs),
             )
 
             ListItem(
@@ -304,7 +315,7 @@ fun SettingsScreen(
                     Text(stringResource(R.string.backups_hint))
                 },
                 trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                modifier = Modifier.clickable(onClick = onOpenBackups),
+                modifier = Modifier.tourTarget(TourTarget.Backups).clickable(onClick = onOpenBackups),
             )
 
             // A navigation-style row, not a filled button, so it doesn't read as "Save".

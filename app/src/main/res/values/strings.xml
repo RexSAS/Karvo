@@ -294,4 +294,31 @@
     <string name="event_today_title">Karvo · Today</string>
     <string name="event_exact">Remind me exactly at 07:30</string>
     <string name="calendar">Calendar</string>
+    <!-- Welcome, tour, what's new -->
+    <string name="welcome_title">Welcome to Karvo</string>
+    <string name="welcome_body">Log your ski lessons, see what the school owes you, and keep your days on the slopes. Want a 30-second tour?</string>
+    <string name="welcome_tour">Take the quick tour</string>
+    <string name="tour_skip">Skip</string>
+    <string name="tour_next">Next</string>
+    <string name="tour_done">Done</string>
+    <string name="tour_again">Show the quick tour</string>
+    <string name="tour_add_title">Add a lesson</string>
+    <string name="tour_add_body">Tap + to log a lesson in a few seconds: date, student, how long.</string>
+    <string name="tour_calendar_title">Your calendar</string>
+    <string name="tour_calendar_body">Moments, lessons and events day by day. Open any day to add events: Karvo reminds you at 07:30.</string>
+    <string name="tour_camera_title">Capture a moment</string>
+    <string name="tour_camera_body">Take a photo or a short video of your day on the slopes; it lands in your calendar.</string>
+    <string name="tour_settings_title">Make it yours</string>
+    <string name="tour_settings_body">Set your hourly rate, when the season starts, the language and the look.</string>
+    <string name="tour_backups_title">Backups</string>
+    <string name="tour_backups_body">Karvo keeps up to 3 backups here. Export a CSV to keep a copy somewhere else too.</string>
+    <string name="tour_pc_title">Use Karvo on your PC</string>
+    <string name="tour_pc_body">Open karvo.rxsas.it on your computer and link it here by scanning the code.</string>
+    <string name="whats_new_title">What\'s new in %1$s</string>
+    <string-array name="whats_new_items">
+        <item>Events: add events to any day from the calendar (the icon at the top of Lessons). Karvo reminds you at 07:30 that day.</item>
+        <item>The next 3 days\' events on the Lessons page: today, tomorrow, in 2 days…</item>
+        <item>Your PC shows and edits your events too.</item>
+        <item>Backups now keep your events.</item>
+    </string-array>
 </resources>

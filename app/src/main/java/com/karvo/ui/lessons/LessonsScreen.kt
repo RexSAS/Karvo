@@ -17,6 +17,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import com.karvo.onboarding.TourTarget
+import com.karvo.onboarding.tourTarget
 import com.karvo.ui.moments.rememberZone
 import com.karvo.ui.moments.rememberMoments
 import com.karvo.domain.momentCountsByMonth
@@ -93,14 +95,14 @@ fun LessonsScreen(
                 title = stringResource(R.string.lessons),
                 subtitle = if (total > 0) pluralStringResource(R.plurals.lesson_count, total, total) else null,
                 trailing = {
-                    IconButton(onClick = onOpenMoments) { Icon(Icons.Filled.CalendarMonth, stringResource(R.string.calendar)) }
+                    IconButton(onClick = onOpenMoments, modifier = Modifier.tourTarget(TourTarget.Calendar)) { Icon(Icons.Filled.CalendarMonth, stringResource(R.string.calendar)) }
                 },
             )
         },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SmallFloatingActionButton(onClick = onOpenCamera) { Icon(Icons.Filled.PhotoCamera, stringResource(R.string.take_moment)) }
-                AddButton(onClick = onAdd, contentDescription = stringResource(R.string.add_lesson))
+                SmallFloatingActionButton(onClick = onOpenCamera, modifier = Modifier.tourTarget(TourTarget.Camera)) { Icon(Icons.Filled.PhotoCamera, stringResource(R.string.take_moment)) }
+                Box(Modifier.tourTarget(TourTarget.AddLesson)) { AddButton(onClick = onAdd, contentDescription = stringResource(R.string.add_lesson)) }
             }
         },
     ) { padding ->
