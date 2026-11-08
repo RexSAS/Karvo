@@ -1,7 +1,21 @@
 package com.karvo.onboarding
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateRectAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -96,15 +110,33 @@ fun TourOverlay(tour: TourState, onShowPage: (Int) -> Unit) {
     val screenH = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
     val rect = tour.bounds[step.target]
     val pad = with(density) { 8.dp.toPx() }
-    Box(Modifier.fillMaxSize().pointerInput(step) { detectTapGestures { } }) { // the app underneath stays untouchable
+    // The highlight glides from one target to the next and pulses a gold ring; the whole overlay fades in.
+    val shown = rememberSaveable { mutableStateOf(false) }
+    val alpha by animateFloatAsState(if (shown.value) 1f else 0f, tween(250), label = "tourFade")
+    LaunchedEffect(Unit) { shown.value = true }
+    val hole by animateRectAsState(rect ?: Rect(Offset(0f, 0f), Size.Zero), tween(400, easing = FastOutSlowInEasing), label = "tourHole")
+    val pulse = rememberInfiniteTransition(label = "tourPulse").animateFloat(0f, 1f, infiniteRepeatable(tween(1600)), label = "tourPulseP")
+    val gold = MaterialTheme.colorScheme.tertiary
+    Box(Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha }.pointerInput(step) { detectTapGestures { } }) { // the app underneath stays untouchable
         Canvas(Modifier.fillMaxSize().graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)) {
             drawRect(Color.Black.copy(alpha = 0.72f))
-            if (rect != null) drawRoundRect(Color.Transparent, Offset(rect.left - pad, rect.top - pad), Size(rect.width + 2 * pad, rect.height + 2 * pad),
-                CornerRadius(pad * 2), blendMode = BlendMode.Clear)
+            if (rect != null) {
+                val tl = Offset(hole.left - pad, hole.top - pad)
+                val sz = Size(hole.width + 2 * pad, hole.height + 2 * pad)
+                drawRoundRect(Color.Transparent, tl, sz, CornerRadius(pad * 2), blendMode = BlendMode.Clear)
+                val grow = pulse.value * pad * 1.5f
+                drawRoundRect(gold.copy(alpha = 0.9f * (1 - pulse.value)), Offset(tl.x - grow, tl.y - grow), Size(sz.width + 2 * grow, sz.height + 2 * grow),
+                    CornerRadius(pad * 2 + grow), style = Stroke(2.dp.toPx()))
+            }
         }
         val atTop = rect != null && rect.center.y > screenH / 2 // the card goes on the side away from the target
+        AnimatedContent(
+            tour.index, Modifier.align(if (atTop) Alignment.TopCenter else Alignment.BottomCenter),
+            transitionSpec = { (fadeIn(tween(300, 100)) + slideInVertically(tween(350, 100)) { it / 6 }) togetherWith fadeOut(tween(120)) },
+            label = "tourCard",
+        ) { _ ->
         Card(
-            Modifier.align(if (atTop) Alignment.TopCenter else Alignment.BottomCenter).safeDrawingPadding().padding(20.dp).fillMaxWidth(),
+            Modifier.safeDrawingPadding().padding(20.dp).fillMaxWidth(),
             shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -116,6 +148,7 @@ fun TourOverlay(tour: TourState, onShowPage: (Int) -> Unit) {
                     Button(onClick = tour::next) { Text(stringResource(if (tour.index == TOUR.lastIndex) R.string.tour_done else R.string.tour_next)) }
                 }
             }
+        }
         }
     }
 }

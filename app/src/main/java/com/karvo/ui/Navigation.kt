@@ -164,8 +164,10 @@ fun KarvoNavHost() {
     LaunchedEffect(Unit) {
         val container = (context.applicationContext as KarvoApp).container
         val settings = container.settingsRepository
-        start = startScreen(settings.lastSeenVersion.first(), BuildConfig.VERSION_NAME, lessonRepository.allLessons().isNotEmpty())
+        val screen = startScreen(settings.lastSeenVersion.first(), BuildConfig.VERSION_NAME, lessonRepository.allLessons().isNotEmpty())
         settings.setLastSeenVersion(BuildConfig.VERSION_NAME)
+        if (screen != StartScreen.None) kotlinx.coroutines.delay(700) // after the splash, so its animations are seen
+        start = screen
     }
     when (start) {
         StartScreen.Welcome -> WelcomeDialog(onTour = { start = StartScreen.None; tour.start() }, onSkip = { start = StartScreen.None })
