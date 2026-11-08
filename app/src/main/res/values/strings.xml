@@ -288,4 +288,5 @@
     <string name="note_reminder_hint">Karvo reminds you at 07:30 that day. Also shown on the calendar on your PC.</string>
     <string name="note_channel">Day notes</string>
     <string name="note_today_title">Karvo · Today</string>
+    <string name="note_exact">Remind me exactly at 07:30</string>
 </resources>

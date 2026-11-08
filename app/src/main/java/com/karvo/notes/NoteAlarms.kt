@@ -45,7 +45,11 @@ class NoteAlarms(private val context: Context, private val notes: DayNoteReposit
         val am = app.getSystemService(AlarmManager::class.java)
         val pi = PendingIntent.getBroadcast(app, 0, Intent(app, NoteAlarmReceiver::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val next = nextReminder(all, ZonedDateTime.now(zone))
-        if (next == null) am.cancel(pi) else am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next.second.toEpochMilli(), pi)
+        when {
+            next == null -> am.cancel(pi)
+            canRingExactly(app) -> am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next.second.toEpochMilli(), pi)
+            else -> am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next.second.toEpochMilli(), pi) // Android may delay it up to ~1 h
+        }
     }
 
     /** Posts "Karvo · Today: <note>" when today has a note. */
@@ -86,3 +90,7 @@ class NoteRearmReceiver : BroadcastReceiver() {
         CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch { try { alarms.rearm() } finally { pending.finish() } }
     }
 }
+
+/** Whether reminders can ring exactly at 07:30 ("Alarms & reminders" allowed; always true before Android 12). */
+fun canRingExactly(context: Context): Boolean =
+    Build.VERSION.SDK_INT < Build.VERSION_CODES.S || context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms()

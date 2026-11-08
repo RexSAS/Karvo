@@ -59,6 +59,12 @@ fun NotesCard(notes: List<Pair<LocalDate, String>>, today: LocalDate, onSave: (L
                 Text(stringResource(R.string.day_notes), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 OutlinedButton(onClick = { editing = null to "" }) { Text(stringResource(R.string.add_note)) }
             }
+            // Without "Alarms & reminders" Android may deliver the 07:30 reminder up to an hour late.
+            var exact by remember { mutableStateOf(com.karvo.notes.canRingExactly(context)) }
+            androidx.lifecycle.compose.LifecycleResumeEffect(Unit) { exact = com.karvo.notes.canRingExactly(context); onPauseOrDispose { } }
+            if (notes.isNotEmpty() && !exact) TextButton(onClick = {
+                context.startActivity(android.content.Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, android.net.Uri.parse("package:" + context.packageName)))
+            }) { Text(stringResource(R.string.note_exact)) }
             if (notes.isEmpty()) Text(stringResource(R.string.no_notes), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             notes.forEach { (date, text) ->
                 Row(Modifier.fillMaxWidth().clickable { editing = date to text }.padding(vertical = 6.dp)) {
