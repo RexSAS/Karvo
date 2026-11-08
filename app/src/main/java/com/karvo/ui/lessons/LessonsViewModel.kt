@@ -19,7 +19,24 @@ data class LessonGroup(val month: YearMonth, val lessons: List<Lesson>) {
     val totalMinutes: Long get() = lessons.sumOf { it.durationMinutes.toLong() }
 }
 
-class LessonsViewModel(private val repo: LessonRepository) : ViewModel() {
+class LessonsViewModel(
+    private val repo: LessonRepository,
+    private val notesRepo: com.karvo.data.DayNoteRepository,
+    private val settings: com.karvo.data.SettingsRepository,
+) : ViewModel() {
+
+    /** Today in the app's time zone (it decides which notes are upcoming). */
+    val today: StateFlow<java.time.LocalDate> = settings.timeZoneId
+        .map { java.time.LocalDate.now(runCatching { java.time.ZoneId.of(it) }.getOrDefault(java.time.ZoneId.systemDefault())) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, java.time.LocalDate.now())
+
+    /** Today's and upcoming day notes, soonest first, at most 5. */
+    val notes: StateFlow<List<Pair<java.time.LocalDate, String>>> = kotlinx.coroutines.flow.combine(notesRepo.observe(), today) { all, t ->
+        all.filterKeys { !it.isBefore(t) }.toSortedMap().entries.take(5).map { it.key to it.value }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun saveNote(date: java.time.LocalDate, text: String?) { viewModelScope.launch { notesRepo.set(date, text) } }
+
 
     /** Lessons grouped by month, newest month first (repository order is date DESC); null while loading. */
     val groups: StateFlow<List<LessonGroup>?> = repo.observeLessons()
@@ -37,7 +54,7 @@ class LessonsViewModel(private val repo: LessonRepository) : ViewModel() {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KarvoApp).container
-                LessonsViewModel(container.lessonRepository)
+                LessonsViewModel(container.lessonRepository, container.dayNoteRepository, container.settingsRepository)
             }
         }
     }

@@ -73,6 +73,9 @@ fun LessonsScreen(
     viewModel: LessonsViewModel = viewModel(factory = LessonsViewModel.Factory),
 ) {
     val groupsOrNull by viewModel.groups.collectAsStateWithLifecycle()
+    val notes by viewModel.notes.collectAsStateWithLifecycle()
+    val today by viewModel.today.collectAsStateWithLifecycle()
+    val notesCard: @Composable (Modifier) -> Unit = { m -> NotesCard(notes, today, viewModel::saveNote, m) }
     val moments = rememberMoments()
     val zone = rememberZone()
     val momentCounts = remember(moments, zone) { momentCountsByMonth(moments.orEmpty(), zone) }
@@ -105,15 +108,19 @@ fun LessonsScreen(
         if (groups == null) {
             // Still loading: show nothing rather than flashing the empty state.
         } else if (groups.isEmpty()) {
-            Box(Modifier.fillMaxSize().padding(padding).padding(32.dp), contentAlignment = Alignment.Center) {
+            Column(Modifier.fillMaxSize().padding(padding)) {
+              notesCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+              Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
                 Text(
                     stringResource(R.string.no_lessons_hint),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                 )
+              }
             }
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 96.dp)) {
+                item(key = "notes") { notesCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
                 groups.forEach { group ->
                     item(key = "header-${group.month}") {
                         Text(

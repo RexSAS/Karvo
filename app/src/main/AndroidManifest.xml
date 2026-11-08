@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Day notes: re-arm the 07:30 reminder after a reboot. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- Moments: photos and videos saved to the gallery's Karvo album. Audio is optional (silent videos if refused). -->
@@ -62,6 +64,16 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/moments_paths" />
         </provider>
+
+        <receiver android:name=".notes.NoteAlarmReceiver" android:exported="false" />
+        <receiver android:name=".notes.NoteRearmReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".link.LinkService"

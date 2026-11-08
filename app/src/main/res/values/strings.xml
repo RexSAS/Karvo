@@ -276,4 +276,16 @@
     <string name="link_refused_invalid_month">Pick a month from January to December</string>
     <string name="link_refused_invalid_data">The phone couldn\'t read that change</string>
     <string name="link_refused_unknown">Update Karvo on your phone to do this from the PC</string>
+    <!-- Day notes -->
+    <string name="day_notes">Notes</string>
+    <string name="add_note">+ Note</string>
+    <string name="new_note">New note</string>
+    <string name="edit_note">Edit note</string>
+    <string name="note">Note</string>
+    <string name="no_notes">No upcoming notes.</string>
+    <string name="today">Today</string>
+    <string name="note_placeholder">e.g. Ski school meeting 17:00</string>
+    <string name="note_reminder_hint">Karvo reminds you at 07:30 that day. Also shown on the calendar on your PC.</string>
+    <string name="note_channel">Day notes</string>
+    <string name="note_today_title">Karvo · Today</string>
 </resources>

@@ -114,6 +114,8 @@ class AppContainer(context: Context) {
     private val deviceName: String
         get() = Settings.Global.getString(appContext.contentResolver, Settings.Global.DEVICE_NAME)?.takeIf { it.isNotBlank() } ?: Build.MODEL
 
+    val noteAlarms by lazy { com.karvo.notes.NoteAlarms(appContext, dayNoteRepository, settingsRepository).also { it.start(appScope) } }
+
     val linkManager: LinkManager by lazy {
         LinkManager(pairingStore, { pc -> LinkClient(pc, linkHandler, relaySockets, appScope, BuildConfig.VERSION_NAME, deviceName) },
             LinkService.starter(appContext), appScope)
