@@ -16,6 +16,17 @@ import java.time.LocalDate
 class MigrationTest {
     @get:Rule val helper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), KarvoDatabase::class.java)
 
+    @Test fun v2LessonsSurviveAndDayNotesAppear() {
+        helper.createDatabase("m3.db", 2).apply {
+            execSQL("INSERT INTO lessons (id, date, durationMinutes, student, notes, paidOn) VALUES (1, ${LocalDate.of(2026, 12, 3).toEpochDay()}, 90, 'Rossi', NULL, NULL)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("m3.db", 3, true, MIGRATION_2_3)
+        db.query("SELECT student FROM lessons").use { c -> assertTrue(c.moveToFirst()); assertEquals("Rossi", c.getString(0)) }
+        db.execSQL("INSERT INTO day_notes (date, text) VALUES (${LocalDate.of(2026, 12, 4).toEpochDay()}, 'Meeting')")
+        db.query("SELECT text FROM day_notes").use { c -> assertTrue(c.moveToFirst()); assertEquals("Meeting", c.getString(0)) }
+    }
+
     @Test fun v1LessonsSurviveAsUnpaid() {
         helper.createDatabase("m.db", 1).apply {
             execSQL(

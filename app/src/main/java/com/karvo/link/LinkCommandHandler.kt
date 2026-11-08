@@ -1,6 +1,8 @@
 package com.karvo.link
 
+import com.karvo.data.DayNoteRepository
 import com.karvo.data.Lesson
+import com.karvo.data.MAX_DAY_NOTE
 import com.karvo.data.LessonRepository
 import com.karvo.data.SettingsRepository
 import com.karvo.domain.LessonError
@@ -29,6 +31,7 @@ fun Lesson.toJson(): JSONObject = JSONObject()
 class LinkCommandHandler(
     private val lessons: LessonRepository,
     private val settings: SettingsRepository,
+    private val dayNotes: DayNoteRepository,
     private val messages: (LessonError) -> String,
     private val refusal: (Refusal) -> String,
 ) {
@@ -90,6 +93,12 @@ class LinkCommandHandler(
                 if (lessons.allLessons().isNotEmpty()) refuse(Refusal.PhoneNotEmpty)
                 lessons.addAll(incoming)
             }
+            "setDayNote" -> {
+                val date = runCatching { LocalDate.parse(args.optString("date")) }.getOrElse { refuse(Refusal.InvalidData) }
+                val text = if (args.isNull("text")) null else args.opt("text") as? String ?: refuse(Refusal.InvalidData)
+                if ((text?.trim()?.length ?: 0) > MAX_DAY_NOTE) refuse(Refusal.InvalidData)
+                dayNotes.set(date, text)
+            }
             else -> refuse(Refusal.UnknownCommand)
         }
         return null
@@ -97,9 +106,10 @@ class LinkCommandHandler(
 
     /** The full data the PC shows, again after every change from either side. */
     fun snapshots(): Flow<JSONObject> = combine(
-        lessons.observeLessons(), settings.hourlyRateCents, settings.seasonStartMonth, settings.timeZoneId,
-    ) { all, rate, seasonStart, zone ->
+        lessons.observeLessons(), settings.hourlyRateCents, settings.seasonStartMonth, settings.timeZoneId, dayNotes.observe(),
+    ) { all, rate, seasonStart, zone, notes ->
         JSONObject().put("lessons", JSONArray(all.map { it.toJson() })).put("rateCents", rate ?: JSONObject.NULL)
             .put("seasonStartMonth", seasonStart).put("timeZoneId", zone)
+            .put("dayNotes", JSONObject(notes.entries.associate { it.key.toString() to it.value }))
     }
 }

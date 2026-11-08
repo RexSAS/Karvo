@@ -21,7 +21,8 @@ class LinkCommandHandlerTest {
     private val anna = Lesson(id = 1, date = LocalDate.parse("2026-01-05"), durationMinutes = 60, student = "Anna")
     private val lessons = FakeLessonRepository(listOf(anna))
     private val settings = FakeSettingsRepository(initial = 3000L, zone = "Europe/Rome")
-    private val handler = LinkCommandHandler(lessons, settings, messages = { it.name }, refusal = { it.name })
+    private val notes = com.karvo.testing.FakeDayNoteRepository()
+    private val handler = LinkCommandHandler(lessons, settings, notes, messages = { it.name }, refusal = { it.name })
 
     private fun lessonJson(id: Long = 0, date: String = "2026-01-06", minutes: Int = 90, student: String = "Bo", paidOn: String? = null) =
         JSONObject().put("id", id).put("date", date).put("durationMinutes", minutes).put("student", student)
@@ -75,7 +76,7 @@ class LinkCommandHandlerTest {
         val args = JSONObject().put("lessons", JSONArray().put(lessonJson()))
         assertEquals("PhoneNotEmpty", refused("restoreAll", args))
         val empty = FakeLessonRepository()
-        LinkCommandHandler(empty, settings, { it.name }, { it.name }).handle("restoreAll", args)
+        LinkCommandHandler(empty, settings, com.karvo.testing.FakeDayNoteRepository(), { it.name }, { it.name }).handle("restoreAll", args)
         assertEquals(listOf("Bo"), empty.allLessons().map { it.student })
     }
 
@@ -99,5 +100,16 @@ class LinkCommandHandlerTest {
         assertEquals(45, handler.snapshots().first().getJSONArray("lessons").getJSONObject(0).getInt("durationMinutes"))
         lessons.save(lessons.get(1)!!.copy(durationMinutes = 50))
         assertEquals(50, handler.snapshots().first().getJSONArray("lessons").getJSONObject(0).getInt("durationMinutes"))
+    }
+
+    @Test fun `day notes are set, replaced, deleted and sent in the snapshot`() = runTest {
+        handler.handle("setDayNote", JSONObject().put("date", "2026-11-10").put("text", "  Meeting 17:00 "))
+        assertEquals("Meeting 17:00", notes.notes.value[LocalDate.parse("2026-11-10")])
+        assertEquals("Meeting 17:00", handler.snapshots().first().getJSONObject("dayNotes").getString("2026-11-10"))
+        handler.handle("setDayNote", JSONObject().put("date", "2026-11-10").put("text", JSONObject.NULL))
+        assertTrue(notes.notes.value.isEmpty())
+        assertEquals("InvalidData", refused("setDayNote", JSONObject().put("date", "2026-02-30").put("text", "x")))
+        assertEquals("InvalidData", refused("setDayNote", JSONObject().put("date", "2026-11-10").put("text", "x".repeat(201))))
+        assertEquals("InvalidData", refused("setDayNote", JSONObject().put("date", "2026-11-10").put("text", 5)))
     }
 }
