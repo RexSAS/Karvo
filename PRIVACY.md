@@ -1,9 +1,10 @@
 # Karvo privacy policy
 
-*Last updated: 24 October 2026* · [Italiano](#informativa-sulla-privacy-di-karvo)
+*Last updated: 8 November 2026* · [Italiano](#informativa-sulla-privacy-di-karvo)
 
-Karvo is an app for ski instructors to log their lesson hours. It is developed by RexSAS. Karvo has **no servers, no
-accounts, no analytics and no ads**: everything you enter stays on your phone.
+Karvo is an app for ski instructors to log their lesson hours. It is developed by RexSAS. Karvo has **no accounts, no
+analytics and no ads**, and keeps no copy of your data on any server: everything you enter stays on your phone, unless
+you choose to link a PC (see *Linking a PC*).
 
 ## What Karvo stores, and where
 
@@ -28,14 +29,24 @@ accounts, no analytics and no ads**: everything you enter stays on your phone.
 
 ## Internet
 
-- The **Google Play version** of Karvo has no internet access at all.
+- Both versions use the internet only for the optional PC link below.
 - The **GitHub version** checks GitHub (`api.github.com`) for a newer release and downloads it if you choose to update.
   No lesson data is sent; GitHub sees the request like any visit to its website, under the
   [GitHub privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
 
+## Linking a PC
+
+If you link a PC (Settings → Linked PCs, then karvo.rxsas.it on the PC), your lessons, rate and settings are sent
+between your phone and that PC while they are connected. Everything is **end-to-end encrypted** with a key shared only
+by scanning the QR code: it travels through a relay we run on Cloudflare (`link.rxsas.it`), which forwards the encrypted
+data without being able to read it and stores none of it. Cloudflare sees connection details such as IP addresses, under
+the [Cloudflare privacy policy](https://www.cloudflare.com/privacypolicy/). The PC keeps a read-only copy of your lessons
+in its browser until you unlink it or clear the browser's data. Linking is optional; remove a PC at any time in
+Settings → Linked PCs.
+
 ## Your data, your control
 
-Because your data never leaves your phone, we can't see, share, sell or delete it for you. You can export it as CSV,
+Unless you link a PC, your data never leaves your phone, so we can't see, share, sell or delete it for you. You can export it as CSV,
 delete single lessons and moments in the app, or remove everything by uninstalling Karvo (moments in your gallery stay
 until you delete them there). The student names you enter are your responsibility; they stay on your phone.
 
@@ -50,10 +61,11 @@ Questions: **andreafaveri@rxsas.it**
 
 # Informativa sulla privacy di Karvo
 
-*Ultimo aggiornamento: 24 ottobre 2026* · [English](#karvo-privacy-policy)
+*Ultimo aggiornamento: 8 novembre 2026* · [English](#karvo-privacy-policy)
 
-Karvo è un'app per maestri di sci che registra le ore di lezione. È sviluppata da RexSAS. Karvo **non ha server, account,
-statistiche d'uso né pubblicità**: tutto ciò che inserisci resta sul tuo telefono.
+Karvo è un'app per maestri di sci che registra le ore di lezione. È sviluppata da RexSAS. Karvo **non ha account,
+statistiche d'uso né pubblicità** e non conserva copie dei tuoi dati su alcun server: tutto ciò che inserisci resta sul
+tuo telefono, a meno che tu non scelga di collegare un PC (vedi *Collegare un PC*).
 
 ## Cosa salva Karvo, e dove
 
@@ -79,14 +91,24 @@ statistiche d'uso né pubblicità**: tutto ciò che inserisci resta sul tuo tele
 
 ## Internet
 
-- La **versione Google Play** di Karvo non ha alcun accesso a internet.
+- Entrambe le versioni usano internet solo per il collegamento facoltativo a un PC descritto sotto.
 - La **versione GitHub** controlla su GitHub (`api.github.com`) se c'è una nuova versione e la scarica se scegli di
   aggiornare. Non viene inviato alcun dato delle lezioni; GitHub vede la richiesta come qualsiasi visita al suo sito,
   secondo la sua [informativa sulla privacy](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
 
+## Collegare un PC
+
+Se colleghi un PC (Impostazioni → PC collegati, poi karvo.rxsas.it sul PC), le tue lezioni, la tariffa e le impostazioni
+vengono inviate tra il telefono e quel PC mentre sono connessi. Tutto è **cifrato end-to-end** con una chiave condivisa
+solo scansionando il codice QR: passa attraverso un relay che gestiamo su Cloudflare (`link.rxsas.it`), che inoltra i
+dati cifrati senza poterli leggere e non ne conserva nessuno. Cloudflare vede i dati di connessione, come gli indirizzi
+IP, secondo la sua [informativa sulla privacy](https://www.cloudflare.com/privacypolicy/). Il PC conserva una copia di
+sola lettura delle lezioni nel browser finché non lo scolleghi o non cancelli i dati del browser. Il collegamento è
+facoltativo; puoi rimuovere un PC in qualsiasi momento da Impostazioni → PC collegati.
+
 ## I tuoi dati, sotto il tuo controllo
 
-Poiché i tuoi dati non lasciano mai il telefono, non possiamo vederli, condividerli, venderli né cancellarli per te.
+Se non colleghi un PC, i tuoi dati non lasciano mai il telefono, quindi non possiamo vederli, condividerli, venderli né cancellarli per te.
 Puoi esportarli in CSV, eliminare singole lezioni e momenti nell'app, oppure rimuovere tutto disinstallando Karvo (i
 momenti nella galleria restano finché non li elimini da lì). I nomi degli allievi che inserisci sono sotto la tua
 responsabilità e restano sul tuo telefono.

@@ -2,6 +2,13 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.1] — 2026-11-08
+
+### Added
+- **Use Karvo on your PC**: open **karvo.rxsas.it** on your computer and link it to your phone in *Settings → Linked PCs → Link a PC* by scanning the code on screen. While Karvo is open on your phone, the PC shows your lessons, calendar, totals and statistics on a big screen, and every change you make there (new lessons, edits, paid months, your rate) is saved on your phone. Your phone stays the master copy.
+- **Stays connected**: once a PC is connected, a notification keeps the link alive when you lock the phone or switch apps; tap **Disconnect** to end it. It also ends after 30 minutes without changes.
+- **Private by design**: phone and PC talk end-to-end encrypted, with a key exchanged only through the QR code. Linking asks for your fingerprint or face if Karvo uses it to show earnings. The PC keeps a read-only copy while the phone is away, and can restore it to an empty phone.
+
 ## [3.0] — 2026-10-27
 
 ### Added
