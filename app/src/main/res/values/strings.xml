@@ -321,4 +321,8 @@
         <item>Your PC shows and edits your events too.</item>
         <item>Backups now keep your events.</item>
     </string-array>
+    <string name="play_update_ready_title">Update ready</string>
+    <string name="play_update_ready_text">The new version of Karvo is downloaded. Restart now to use it? Your lessons stay as they are.</string>
+    <string name="play_update_restart">Restart</string>
+    <string name="play_update_later">Later</string>
 </resources>

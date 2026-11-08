@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         val container = (application as KarvoApp).container
         val settings = container.settingsRepository
         container.authenticator.attach(this)
+        StoreUpdates.check(this, offer = savedInstanceState == null) // Play build: Play's update dialog when a newer version is out
 
         // Keep the splash until the theme setting is read, so the first frame already has the right theme.
         var startTheme: ThemeChoice? = null

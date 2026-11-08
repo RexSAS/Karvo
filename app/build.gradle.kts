@@ -20,7 +20,7 @@ android {
         applicationId = "com.karvo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 10
+        versionCode = 11
         // -PversionNameOverride=1.0.9 builds a private test APK that sees the latest release as newer.
         versionName = (findProperty("versionNameOverride") as String?) ?: "3.2"
     }
@@ -86,6 +86,7 @@ android {
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
 dependencies {
+    "playImplementation"(libs.play.app.update) // Play's in-app update window, Play build only
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)

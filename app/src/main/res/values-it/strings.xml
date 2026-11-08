@@ -319,4 +319,8 @@
         <item>Anche il PC mostra e modifica i tuoi eventi.</item>
         <item>I backup ora conservano anche gli eventi.</item>
     </string-array>
+    <string name="play_update_ready_title">Aggiornamento pronto</string>
+    <string name="play_update_ready_text">La nuova versione di Karvo è scaricata. Riavviare ora per usarla? Le tue lezioni restano come sono.</string>
+    <string name="play_update_restart">Riavvia</string>
+    <string name="play_update_later">Più tardi</string>
 </resources>
