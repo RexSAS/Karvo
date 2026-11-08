@@ -274,17 +274,22 @@
     <string name="link_refused_invalid_month">Scegli un mese da gennaio a dicembre</string>
     <string name="link_refused_invalid_data">Il telefono non ha capito questa modifica</string>
     <string name="link_refused_unknown">Aggiorna Karvo sul telefono per farlo dal PC</string>
-    <!-- Note del giorno -->
-    <string name="day_notes">Note</string>
-    <string name="add_note">+ Nota</string>
-    <string name="new_note">Nuova nota</string>
-    <string name="edit_note">Modifica nota</string>
-    <string name="note">Nota</string>
-    <string name="no_notes">Nessuna nota in arrivo.</string>
+    <string name="link_refused_event_gone">Quell’evento non esiste più</string>
+    <!-- Eventi -->
+    <string name="events">Eventi</string>
+    <string name="event">Evento</string>
+    <string name="add_event">+ Evento</string>
+    <string name="new_event">Nuovo evento</string>
+    <string name="edit_event">Modifica evento</string>
+    <string name="delete_event_question">Eliminare questo evento?</string>
+    <string name="no_events_this_day">Nessun evento in questo giorno.</string>
     <string name="today">Oggi</string>
-    <string name="note_placeholder">es. Riunione scuola sci 17:00</string>
-    <string name="note_reminder_hint">Karvo te lo ricorda alle 07:30 di quel giorno. Visibile anche nel calendario sul PC.</string>
-    <string name="note_channel">Note del giorno</string>
-    <string name="note_today_title">Karvo · Oggi</string>
-    <string name="note_exact">Avvisami esattamente alle 07:30</string>
+    <string name="tomorrow">Domani</string>
+    <plurals name="in_days"><item quantity="one">Tra %d giorno</item><item quantity="other">Tra %d giorni</item></plurals>
+    <string name="event_placeholder">es. Riunione scuola sci 17:00</string>
+    <string name="event_reminder_hint">Karvo te lo ricorda alle 07:30 di quel giorno. Visibile anche nel calendario sul PC.</string>
+    <string name="event_channel">Eventi</string>
+    <string name="event_today_title">Karvo · Oggi</string>
+    <string name="event_exact">Avvisami esattamente alle 07:30</string>
+    <string name="calendar">Calendario</string>
 </resources>

@@ -37,7 +37,7 @@ class LinkClientTest {
     private val keys = LinkCrypto.deriveKeys(secret, roomId)
     private val pcRecord = LinkedPc(LinkCrypto.b64url(roomId), secret, "Chrome on Windows", Instant.EPOCH)
     private val lessons = FakeLessonRepository(listOf(Lesson(1, LocalDate.parse("2026-01-05"), 60, "Anna")))
-    private val handler = LinkCommandHandler(lessons, FakeSettingsRepository(initial = 3000L), com.karvo.testing.FakeDayNoteRepository(), { it.name }, { it.name })
+    private val handler = LinkCommandHandler(lessons, FakeSettingsRepository(initial = 3000L), com.karvo.testing.FakeEventRepository(), { it.name }, { it.name })
     private val factory = FakeFactory()
     private fun TestScope.client() = LinkClient(pcRecord, handler, factory, backgroundScope, "3.1", "Pixel 8", now = { Instant.EPOCH })
     private fun pcChannel() = LinkChannel(keys.pcToPhone, keys.phoneToPc, roomId, 1, 2)

@@ -22,7 +22,7 @@ import com.karvo.ui.moments.rememberMoments
 import com.karvo.domain.momentCountsByMonth
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
@@ -70,12 +70,12 @@ fun LessonsScreen(
     onDeleted: (Lesson) -> Unit,
     onOpenCamera: () -> Unit,
     onOpenMoments: () -> Unit,
+    onOpenDay: (java.time.LocalDate) -> Unit,
     viewModel: LessonsViewModel = viewModel(factory = LessonsViewModel.Factory),
 ) {
     val groupsOrNull by viewModel.groups.collectAsStateWithLifecycle()
-    val notes by viewModel.notes.collectAsStateWithLifecycle()
-    val today by viewModel.today.collectAsStateWithLifecycle()
-    val notesCard: @Composable (Modifier) -> Unit = { m -> NotesCard(notes, today, viewModel::saveNote, m) }
+    val upcoming by viewModel.upcoming.collectAsStateWithLifecycle()
+    val notesCard: @Composable (Modifier) -> Unit = { m -> com.karvo.ui.events.UpcomingEventsCard(upcoming, onOpenDay, m) }
     val moments = rememberMoments()
     val zone = rememberZone()
     val momentCounts = remember(moments, zone) { momentCountsByMonth(moments.orEmpty(), zone) }
@@ -93,7 +93,7 @@ fun LessonsScreen(
                 title = stringResource(R.string.lessons),
                 subtitle = if (total > 0) pluralStringResource(R.plurals.lesson_count, total, total) else null,
                 trailing = {
-                    IconButton(onClick = onOpenMoments) { Icon(Icons.Filled.PhotoLibrary, stringResource(R.string.moments)) }
+                    IconButton(onClick = onOpenMoments) { Icon(Icons.Filled.CalendarMonth, stringResource(R.string.calendar)) }
                 },
             )
         },

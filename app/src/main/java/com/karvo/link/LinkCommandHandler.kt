@@ -1,8 +1,9 @@
 package com.karvo.link
 
-import com.karvo.data.DayNoteRepository
+import com.karvo.data.Event
+import com.karvo.data.EventRepository
 import com.karvo.data.Lesson
-import com.karvo.data.MAX_DAY_NOTE
+import com.karvo.data.MAX_EVENT
 import com.karvo.data.LessonRepository
 import com.karvo.data.SettingsRepository
 import com.karvo.domain.LessonError
@@ -16,7 +17,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 /** Why the phone refused a PC command (shown on the PC in the phone's language). */
-enum class Refusal { LessonGone, PhoneNotEmpty, InvalidRate, InvalidMonth, InvalidData, UnknownCommand }
+enum class Refusal { LessonGone, EventGone, PhoneNotEmpty, InvalidRate, InvalidMonth, InvalidData, UnknownCommand }
 
 class CommandRefused(message: String) : Exception(message)
 
@@ -31,7 +32,7 @@ fun Lesson.toJson(): JSONObject = JSONObject()
 class LinkCommandHandler(
     private val lessons: LessonRepository,
     private val settings: SettingsRepository,
-    private val dayNotes: DayNoteRepository,
+    private val events: EventRepository,
     private val messages: (LessonError) -> String,
     private val refusal: (Refusal) -> String,
 ) {
@@ -57,6 +58,14 @@ class LinkCommandHandler(
 
     private fun lessonsFrom(a: JSONArray?): List<Lesson> =
         (0 until (a ?: refuse(Refusal.InvalidData)).length()).map { lessonFrom(a.optJSONObject(it)) }
+
+    private fun eventFrom(o: JSONObject?): Event {
+        if (o == null) refuse(Refusal.InvalidData)
+        val date = runCatching { LocalDate.parse(o.getString("date")) }.getOrElse { refuse(Refusal.InvalidData) }
+        val text = (o.opt("text") as? String)?.trim() ?: refuse(Refusal.InvalidData)
+        if (text.isEmpty() || text.length > MAX_EVENT) refuse(Refusal.InvalidData)
+        return Event(date = date, text = text)
+    }
 
     private fun month(s: String?): YearMonth = runCatching { YearMonth.parse(s) }.getOrElse { refuse(Refusal.InvalidData) }
 
@@ -90,25 +99,20 @@ class LinkCommandHandler(
             }
             "restoreAll" -> {
                 val incoming = lessonsFrom(args.optJSONArray("lessons"))
-                // A 3.2+ PC sends its notes too; validated before anything changes, then merged with the phone's.
-                val notes = args.optJSONObject("dayNotes")?.let { o ->
-                    o.keys().asSequence().associate { k ->
-                        val d = runCatching { LocalDate.parse(k) }.getOrElse { refuse(Refusal.InvalidData) }
-                        val v = o.opt(k) as? String ?: refuse(Refusal.InvalidData)
-                        if (v.trim().length > MAX_DAY_NOTE) refuse(Refusal.InvalidData)
-                        d to v
-                    }
-                }.orEmpty()
+                // A 3.2+ PC sends its events too; validated before anything changes, then merged with the phone's.
+                val restored = args.optJSONArray("events")?.let { a -> (0 until a.length()).map { eventFrom(a.optJSONObject(it)) } }.orEmpty()
                 if (lessons.allLessons().isNotEmpty()) refuse(Refusal.PhoneNotEmpty)
                 lessons.addAll(incoming)
-                notes.forEach { (d, v) -> dayNotes.set(d, v) }
+                val existing = events.all().map { it.date to it.text }.toSet()
+                restored.filter { (it.date to it.text) !in existing }.distinctBy { it.date to it.text }.forEach { events.add(it.date, it.text) }
             }
-            "setDayNote" -> {
-                val date = runCatching { LocalDate.parse(args.optString("date")) }.getOrElse { refuse(Refusal.InvalidData) }
-                val text = if (args.isNull("text")) null else args.opt("text") as? String ?: refuse(Refusal.InvalidData)
-                if ((text?.trim()?.length ?: 0) > MAX_DAY_NOTE) refuse(Refusal.InvalidData)
-                dayNotes.set(date, text)
+            "addEvent" -> eventFrom(args.optJSONObject("event")).let { events.add(it.date, it.text) }
+            "updateEvent" -> {
+                val e = eventFrom(args.optJSONObject("event"))
+                val id = args.optJSONObject("event")?.optLong("id", 0) ?: 0
+                if (id == 0L || !events.update(e.copy(id = id))) refuse(Refusal.EventGone)
             }
+            "deleteEvent" -> if (!events.delete(args.optLong("id", -1))) refuse(Refusal.EventGone)
             else -> refuse(Refusal.UnknownCommand)
         }
         return null
@@ -116,10 +120,10 @@ class LinkCommandHandler(
 
     /** The full data the PC shows, again after every change from either side. */
     fun snapshots(): Flow<JSONObject> = combine(
-        lessons.observeLessons(), settings.hourlyRateCents, settings.seasonStartMonth, settings.timeZoneId, dayNotes.observe(),
-    ) { all, rate, seasonStart, zone, notes ->
+        lessons.observeLessons(), settings.hourlyRateCents, settings.seasonStartMonth, settings.timeZoneId, events.observe(),
+    ) { all, rate, seasonStart, zone, evs ->
         JSONObject().put("lessons", JSONArray(all.map { it.toJson() })).put("rateCents", rate ?: JSONObject.NULL)
             .put("seasonStartMonth", seasonStart).put("timeZoneId", zone)
-            .put("dayNotes", JSONObject(notes.entries.associate { it.key.toString() to it.value }))
+            .put("events", JSONArray(evs.map { JSONObject().put("id", it.id).put("date", it.date.toString()).put("text", it.text) }))
     }
 }

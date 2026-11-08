@@ -276,17 +276,22 @@
     <string name="link_refused_invalid_month">Pick a month from January to December</string>
     <string name="link_refused_invalid_data">The phone couldn\'t read that change</string>
     <string name="link_refused_unknown">Update Karvo on your phone to do this from the PC</string>
-    <!-- Day notes -->
-    <string name="day_notes">Notes</string>
-    <string name="add_note">+ Note</string>
-    <string name="new_note">New note</string>
-    <string name="edit_note">Edit note</string>
-    <string name="note">Note</string>
-    <string name="no_notes">No upcoming notes.</string>
+    <string name="link_refused_event_gone">That event no longer exists</string>
+    <!-- Events -->
+    <string name="events">Events</string>
+    <string name="event">Event</string>
+    <string name="add_event">+ Event</string>
+    <string name="new_event">New event</string>
+    <string name="edit_event">Edit event</string>
+    <string name="delete_event_question">Delete this event?</string>
+    <string name="no_events_this_day">No events this day.</string>
     <string name="today">Today</string>
-    <string name="note_placeholder">e.g. Ski school meeting 17:00</string>
-    <string name="note_reminder_hint">Karvo reminds you at 07:30 that day. Also shown on the calendar on your PC.</string>
-    <string name="note_channel">Day notes</string>
-    <string name="note_today_title">Karvo · Today</string>
-    <string name="note_exact">Remind me exactly at 07:30</string>
+    <string name="tomorrow">Tomorrow</string>
+    <plurals name="in_days"><item quantity="one">In %d day</item><item quantity="other">In %d days</item></plurals>
+    <string name="event_placeholder">e.g. Ski school meeting 17:00</string>
+    <string name="event_reminder_hint">Karvo reminds you at 07:30 that day. Also shown on the calendar on your PC.</string>
+    <string name="event_channel">Events</string>
+    <string name="event_today_title">Karvo · Today</string>
+    <string name="event_exact">Remind me exactly at 07:30</string>
+    <string name="calendar">Calendar</string>
 </resources>

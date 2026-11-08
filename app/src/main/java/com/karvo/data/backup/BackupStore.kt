@@ -12,7 +12,7 @@ import java.time.Instant
 import java.time.LocalDate
 
 const val MAX_BACKUPS = 3
-private const val NOTES_SUFFIX = ".notes.json"
+private const val EVENTS_SUFFIX = ".events.json"
 
 sealed interface BackupReason {
     data object Manual : BackupReason
@@ -56,7 +56,7 @@ class BackupStore(private val dir: File, private val clock: Clock) {
     }
 
     /** Writes a new backup atomically (temp file, then rename), then deletes the oldest beyond [MAX_BACKUPS]. */
-    fun create(reason: BackupReason, lessons: List<Lesson>, notes: Map<LocalDate, String> = emptyMap()): Backup {
+    fun create(reason: BackupReason, lessons: List<Lesson>, events: List<com.karvo.data.Event> = emptyList()): Backup {
         if (!dir.isDirectory && !dir.mkdirs()) throw IOException("Can't create $dir")
         // Always newer than every existing backup, even if the clock went backwards; otherwise the
         // rotation below would treat the new backup as the oldest and delete it straight away.
@@ -65,29 +65,31 @@ class BackupStore(private val dir: File, private val clock: Clock) {
         val name = "backup-$millis-${reason.slug()}.csv"
         val tmp = File(dir, "$name.tmp")
         tmp.writeBytes(csvFileBytes(lessonsToCsv(lessons)))
-        // Day notes go in a sidecar written first, so a listed backup never lacks the notes it was made with.
+        // Events go in a sidecar written first, so a listed backup never lacks the events it was made with.
         // Always written (even "{}"): no sidecar means a backup from before 3.2.
         run {
-            val side = File(dir, "$name$NOTES_SUFFIX.tmp")
-            side.writeText(JSONObject(notes.entries.associate { it.key.toString() to it.value }).toString(), Charsets.UTF_8)
-            if (!side.renameTo(File(dir, name + NOTES_SUFFIX))) { side.delete(); tmp.delete(); throw IOException("Can't save backup $name") }
+            val side = File(dir, "$name$EVENTS_SUFFIX.tmp")
+            side.writeText(org.json.JSONArray(events.map { JSONObject().put("date", it.date.toString()).put("text", it.text) }).toString(), Charsets.UTF_8)
+            if (!side.renameTo(File(dir, name + EVENTS_SUFFIX))) { side.delete(); tmp.delete(); throw IOException("Can't save backup $name") }
         }
         if (!tmp.renameTo(File(dir, name))) {
             tmp.delete()
-            File(dir, name + NOTES_SUFFIX).delete()
+            File(dir, name + EVENTS_SUFFIX).delete()
             throw IOException("Can't save backup $name")
         }
-        list().drop(MAX_BACKUPS).forEach { File(dir, it.fileName).delete(); File(dir, it.fileName + NOTES_SUFFIX).delete() }
+        list().drop(MAX_BACKUPS).forEach { File(dir, it.fileName).delete(); File(dir, it.fileName + EVENTS_SUFFIX).delete() }
         return Backup(name, Instant.ofEpochMilli(millis), reason, lessons.size)
     }
 
     /** Throws [com.karvo.domain.BackupFormatException] for a damaged file, [IOException] for a missing one. */
     fun read(fileName: String): List<Lesson> = parseLessonsCsv(File(dir, fileName).readText(Charsets.UTF_8))
 
-    /** The backup's day notes; null for a backup made before 3.2 (no sidecar) or an unreadable sidecar. */
-    fun readNotes(fileName: String): Map<LocalDate, String>? = try {
-        val f = File(dir, fileName + NOTES_SUFFIX)
-        if (!f.exists()) null else JSONObject(f.readText(Charsets.UTF_8)).let { o -> o.keys().asSequence().associate { LocalDate.parse(it) to o.getString(it) } }
+    /** The backup's events; null for a backup made before 3.2 (no sidecar) or an unreadable sidecar. */
+    fun readEvents(fileName: String): List<com.karvo.data.Event>? = try {
+        val f = File(dir, fileName + EVENTS_SUFFIX)
+        if (!f.exists()) null else org.json.JSONArray(f.readText(Charsets.UTF_8)).let { a ->
+            (0 until a.length()).map { a.getJSONObject(it).let { o -> com.karvo.data.Event(date = LocalDate.parse(o.getString("date")), text = o.getString("text")) } }
+        }
     } catch (_: Exception) {
         null
     }

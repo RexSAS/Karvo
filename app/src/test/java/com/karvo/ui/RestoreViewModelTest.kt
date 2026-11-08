@@ -97,16 +97,16 @@ class RestoreViewModelTest {
         assertEquals(setOf("Now1", "Now2"), store.read(newest.fileName).map { it.student }.toSet())
     }
 
-    @Test fun restoreBringsBackTheBackupsNotesEvenWhenTheSourceRotatesAway() = runTest {
-        val notes = com.karvo.testing.FakeDayNoteRepository(mapOf(LocalDate.of(2026, 11, 1) to "current"))
-        val withNotes = BackupService(store, repo, Dispatchers.Unconfined, dayNotes = notes)
-        val source = store.create(BackupReason.Manual, lessons("Old", 1), mapOf(LocalDate.of(2026, 11, 10) to "Meeting"))
+    @Test fun restoreBringsBackTheBackupsEventsEvenWhenTheSourceRotatesAway() = runTest {
+        val ev = com.karvo.testing.FakeEventRepository(listOf(com.karvo.data.Event(1, LocalDate.of(2026, 11, 1), "current")))
+        val withEvents = BackupService(store, repo, Dispatchers.Unconfined, events = ev)
+        val source = store.create(BackupReason.Manual, lessons("Old", 1), listOf(com.karvo.data.Event(date = LocalDate.of(2026, 11, 10), text = "Meeting")))
         store.create(BackupReason.Manual, lessons("Mid", 1)); store.create(BackupReason.Manual, lessons("New", 1))
-        val vm = RestoreViewModel(source.fileName, withNotes, repo, FakeSettingsRepository(), notes)
+        val vm = RestoreViewModel(source.fileName, withEvents, repo, FakeSettingsRepository(), ev)
         vm.restore(backupFirst = true)
         assertEquals(RestoreResult.Done(1), vm.uiState.value.result)
-        assertEquals(mapOf(LocalDate.of(2026, 11, 10) to "Meeting"), notes.notes.value)
-        assertEquals(mapOf(LocalDate.of(2026, 11, 1) to "current"), store.readNotes(store.list().first().fileName)) // the safety backup kept the old notes
+        assertEquals(listOf("Meeting"), ev.events.value.map { it.text })
+        assertEquals(listOf("current"), store.readEvents(store.list().first().fileName)!!.map { it.text }) // the safety backup kept the old events
     }
 
     @Test fun corruptBackupChangesNothing() = runTest {

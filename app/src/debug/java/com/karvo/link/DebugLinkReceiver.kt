@@ -15,7 +15,7 @@ import java.time.LocalDate
 /**
  * Debug builds only. `adb shell am broadcast -n com.karvo/.link.DebugLinkReceiver --es op <op> ...`
  * ops: pair (--es qr), add (--es student --es date --ei minutes), list, disconnect, remove (--es room), count,
- * note (--es date --es text; empty text deletes), notes, fireNote (posts today's reminder now).
+ * event (--es date --es text), events, fireEvent (posts today's reminder now).
  * Results go to logcat with tag KarvoLinkDebug.
  */
 class DebugLinkReceiver : BroadcastReceiver() {
@@ -31,9 +31,9 @@ class DebugLinkReceiver : BroadcastReceiver() {
                     "disconnect" -> { c.linkManager.disconnectAll(); "ok" }
                     "remove" -> { c.linkManager.remove(c.pairingStore.pcs.first().first().roomId); "ok" }
                     "count" -> c.lessonRepository.allLessons().size.toString()
-                    "note" -> { c.dayNoteRepository.set(LocalDate.parse(intent.getStringExtra("date")), intent.getStringExtra("text")); "ok" }
-                    "notes" -> c.dayNoteRepository.all().toString()
-                    "fireNote" -> { c.noteAlarms.notifyToday(); "ok" }
+                    "event" -> c.eventRepository.add(LocalDate.parse(intent.getStringExtra("date")), intent.getStringExtra("text")!!).toString()
+                    "events" -> c.eventRepository.all().joinToString { "${it.date}=${it.text}" }
+                    "fireEvent" -> { c.noteAlarms.notifyToday(); "ok" }
                     else -> "unknown op"
                 }
             }.getOrElse { "ERROR ${it.javaClass.simpleName}: ${it.message}" }

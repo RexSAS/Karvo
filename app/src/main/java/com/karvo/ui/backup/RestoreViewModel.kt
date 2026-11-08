@@ -50,7 +50,7 @@ class RestoreViewModel(
     private val service: BackupService,
     private val lessons: LessonRepository,
     private val settings: SettingsRepository,
-    private val dayNotes: com.karvo.data.DayNoteRepository? = null,
+    private val events: com.karvo.data.EventRepository? = null,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RestoreUiState())
     val uiState: StateFlow<RestoreUiState> = _uiState.asStateFlow()
@@ -100,7 +100,7 @@ class RestoreViewModel(
         } catch (_: Exception) {
             return RestoreResult.ReadError(0)
         }
-        val notes = service.readNotes(fileName) // read now: the safety backup below may rotate this backup away
+        val restoredEvents = service.readEvents(fileName) // read now: the safety backup below may rotate this backup away
         if (backupFirst) {
             try {
                 service.backup(BackupReason.BeforeRestore)
@@ -111,7 +111,7 @@ class RestoreViewModel(
             }
         }
         lessons.replaceAll(source)
-        if (notes != null) dayNotes?.replaceAll(notes) // a pre-3.2 backup has no notes file: keep the current notes
+        if (restoredEvents != null) events?.replaceAll(restoredEvents) // a pre-3.2 backup has no events file: keep the current events
         return RestoreResult.Done(source.size)
     }
 
@@ -119,7 +119,7 @@ class RestoreViewModel(
         fun factory(fileName: String): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KarvoApp).container
-                RestoreViewModel(fileName, container.backupService, container.lessonRepository, container.settingsRepository, container.dayNoteRepository)
+                RestoreViewModel(fileName, container.backupService, container.lessonRepository, container.settingsRepository, container.eventRepository)
             }
         }
     }

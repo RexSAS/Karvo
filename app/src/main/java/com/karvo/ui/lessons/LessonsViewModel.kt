@@ -21,7 +21,7 @@ data class LessonGroup(val month: YearMonth, val lessons: List<Lesson>) {
 
 class LessonsViewModel(
     private val repo: LessonRepository,
-    private val notesRepo: com.karvo.data.DayNoteRepository,
+    private val eventsRepo: com.karvo.data.EventRepository,
     private val settings: com.karvo.data.SettingsRepository,
 ) : ViewModel() {
 
@@ -30,12 +30,10 @@ class LessonsViewModel(
         .map { java.time.LocalDate.now(runCatching { java.time.ZoneId.of(it) }.getOrDefault(java.time.ZoneId.systemDefault())) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, java.time.LocalDate.now())
 
-    /** Today's and upcoming day notes, soonest first, at most 5. */
-    val notes: StateFlow<List<Pair<java.time.LocalDate, String>>> = kotlinx.coroutines.flow.combine(notesRepo.observe(), today) { all, t ->
-        all.filterKeys { !it.isBefore(t) }.toSortedMap().entries.take(5).map { it.key to it.value }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    fun saveNote(date: java.time.LocalDate, text: String?) { viewModelScope.launch { notesRepo.set(date, text) } }
+    /** Events of today and the next 3 days, for the home card. */
+    val upcoming: StateFlow<List<Triple<java.time.LocalDate, Int, List<com.karvo.data.Event>>>> =
+        kotlinx.coroutines.flow.combine(eventsRepo.observe(), today) { all, t -> com.karvo.data.upcomingDays(all, t) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
 
     /** Lessons grouped by month, newest month first (repository order is date DESC); null while loading. */
@@ -54,7 +52,7 @@ class LessonsViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KarvoApp).container
-                LessonsViewModel(container.lessonRepository, container.dayNoteRepository, container.settingsRepository)
+                LessonsViewModel(container.lessonRepository, container.eventRepository, container.settingsRepository)
             }
         }
     }

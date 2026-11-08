@@ -58,6 +58,7 @@ import com.karvo.ui.components.LessonRow
 import com.karvo.ui.theme.groupedShape
 import com.karvo.ui.theme.tileColor
 import java.time.LocalDate
+import kotlinx.coroutines.launch
 
 /** Days a swipe can reach either side of the one opened: far more than anyone will swipe. */
 private const val DAY_PAGES = 20_000
@@ -79,6 +80,8 @@ fun DayRecapScreen(
     val zone = rememberZone()
     val allMoments = rememberMoments()
     val allLessons by container.lessonRepository.observeLessons().collectAsStateWithLifecycle(initialValue = emptyList())
+    val allEvents by container.eventRepository.observe().collectAsStateWithLifecycle(initialValue = emptyList())
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val days = rememberPagerState(initialPage = DAY_PAGES / 2) { DAY_PAGES }
     fun dayAt(page: Int): LocalDate = date.plusDays((page - DAY_PAGES / 2).toLong())
     val context = LocalContext.current
@@ -105,6 +108,16 @@ fun DayRecapScreen(
             val lessons = remember(allLessons, day) { allLessons.filter { it.date == day } }
             val isToday = day == LocalDate.now(zone)
             LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
+                item(key = "events") {
+                    val repo = container.eventRepository
+                    com.karvo.ui.events.DayEventsSection(
+                        allEvents.filter { it.date == day }.sortedBy { it.id },
+                        onAdd = { text -> scope.launch { runCatching { repo.add(day, text) } } },
+                        onUpdate = { e -> scope.launch { runCatching { repo.update(e) } } },
+                        onDelete = { e -> scope.launch { runCatching { repo.delete(e.id) } } },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
                 item(key = "moments") {
                     when {
                         moments == null -> Unit

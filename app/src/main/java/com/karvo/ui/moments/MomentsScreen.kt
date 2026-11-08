@@ -93,12 +93,13 @@ fun MomentsScreen(onBack: () -> Unit, onOpenCamera: () -> Unit, onOpenDay: (Loca
     val moments = rememberMoments()
     val zone = rememberZone()
     val lessons by container.lessonRepository.observeLessons().collectAsStateWithLifecycle(initialValue = null)
+    val events by container.eventRepository.observe().collectAsStateWithLifecycle(initialValue = emptyList())
     Scaffold(
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-                title = { Text(stringResource(R.string.moments)) },
+                title = { Text(stringResource(R.string.calendar)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back)) }
                 },
@@ -115,13 +116,16 @@ fun MomentsScreen(onBack: () -> Unit, onOpenCamera: () -> Unit, onOpenDay: (Loca
             allMoments.groupBy { it.takenAt.atZone(zone).toLocalDate() }.mapValues { (_, items) -> items.sortedBy { it.takenAt } }
         }
         val lessonDays = remember(allLessons) { allLessons.map { it.date }.toSet() }
+        val eventDays = remember(events) { events.map { it.date }.toSet() }
         val today = LocalDate.now(zone)
-        val months = remember(byDay, lessonDays, today) {
+        // From the oldest moment or lesson to a year ahead (or the last event), so future events can be planned.
+        val months = remember(byDay, lessonDays, eventDays, today) {
             val current = YearMonth.from(today)
-            val first = (byDay.keys + lessonDays).minOrNull()?.let(YearMonth::from)?.takeIf { it < current } ?: current
-            generateSequence(first) { it.plusMonths(1) }.takeWhile { it <= current }.toList()
+            val first = (byDay.keys + lessonDays + eventDays).minOrNull()?.let(YearMonth::from)?.takeIf { it < current } ?: current
+            val last = maxOf(current.plusMonths(12), eventDays.maxOrNull()?.let(YearMonth::from) ?: current)
+            generateSequence(first) { it.plusMonths(1) }.takeWhile { it <= last }.toList()
         }
-        val pager = rememberPagerState(initialPage = months.lastIndex) { months.size }
+        val pager = rememberPagerState(initialPage = months.indexOf(YearMonth.from(today)).coerceAtLeast(0)) { months.size }
         val scope = rememberCoroutineScope()
         Column(Modifier.padding(padding).fillMaxSize().padding(horizontal = 12.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -151,7 +155,7 @@ fun MomentsScreen(onBack: () -> Unit, onOpenCamera: () -> Unit, onOpenDay: (Loca
                 }
             }
             HorizontalPager(pager, Modifier.fillMaxWidth()) { page ->
-                MonthGrid(months[page], byDay, lessonDays, today, onOpenDay)
+                MonthGrid(months[page], byDay, lessonDays, eventDays, today, onOpenDay)
             }
         }
     }
@@ -162,6 +166,7 @@ private fun MonthGrid(
     month: YearMonth,
     byDay: Map<LocalDate, List<Moment>>,
     lessonDays: Set<LocalDate>,
+    eventDays: Set<LocalDate>,
     today: LocalDate,
     onOpenDay: (LocalDate) -> Unit,
 ) {
@@ -170,7 +175,7 @@ private fun MonthGrid(
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 week.forEach { date ->
                     Box(Modifier.weight(1f).aspectRatio(0.75f)) {
-                        if (date != null) DayCell(date, byDay[date].orEmpty(), date in lessonDays, date == today, date > today, onOpenDay)
+                        if (date != null) DayCell(date, byDay[date].orEmpty(), date in lessonDays, date in eventDays, date == today, date > today, onOpenDay)
                     }
                 }
             }
@@ -179,9 +184,9 @@ private fun MonthGrid(
 }
 
 @Composable
-private fun DayCell(date: LocalDate, moments: List<Moment>, hasLessons: Boolean, isToday: Boolean, isFuture: Boolean, onOpenDay: (LocalDate) -> Unit) {
+private fun DayCell(date: LocalDate, moments: List<Moment>, hasLessons: Boolean, hasEvents: Boolean, isToday: Boolean, isFuture: Boolean, onOpenDay: (LocalDate) -> Unit) {
     val shape = RoundedCornerShape(10.dp)
-    val open = moments.isNotEmpty() || hasLessons
+    val open = true // every day opens, so events can be added to empty and future days
     val description = dayTitle(date)
     Box(
         Modifier
@@ -205,6 +210,15 @@ private fun DayCell(date: LocalDate, moments: List<Moment>, hasLessons: Boolean,
             },
             modifier = Modifier.align(if (first != null) Alignment.TopStart else Alignment.Center).padding(4.dp),
         )
+        if (hasEvents) {
+            Box(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(5.dp)
+                    .size(7.dp)
+                    .background(accentGold(), CircleShape),
+            )
+        }
         if (first == null && hasLessons) {
             Box(
                 Modifier

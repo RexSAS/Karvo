@@ -113,16 +113,15 @@ class BackupStoreTest {
         assertEquals(2, listed.lessonCount)
     }
 
-    @Test fun `day notes are kept next to the backup, rotate with it, and are empty for old backups`() {
-        val notes = mapOf(LocalDate.of(2026, 11, 10) to "Meeting 17:00")
-        val b = store.create(BackupReason.Manual, lessons(2), notes)
-        assertEquals(notes, store.readNotes(b.fileName))
-        assertEquals(1, store.list().size) // the sidecar is not listed as a backup
+    @Test fun `events are kept next to the backup, rotate with it, and are null for pre-3_2 backups`() {
+        val b = store.create(BackupReason.Manual, lessons(2), listOf(com.karvo.data.Event(date = LocalDate.of(2026, 11, 10), text = "Meeting")))
+        assertEquals(listOf("Meeting"), store.readEvents(b.fileName)!!.map { it.text })
+        assertEquals(1, store.list().size)
         val none = store.create(BackupReason.Manual, lessons(1))
-        assertEquals(emptyMap<LocalDate, String>(), store.readNotes(none.fileName)) // 3.2 backup without notes: restore clears
-        File(dir, none.fileName + ".notes.json").delete()
-        assertEquals(null, store.readNotes(none.fileName)) // a pre-3.2 backup: restore keeps the current notes
+        assertEquals(emptyList<com.karvo.data.Event>(), store.readEvents(none.fileName))
+        File(dir, none.fileName + ".events.json").delete()
+        assertEquals(null, store.readEvents(none.fileName))
         repeat(3) { store.create(BackupReason.Manual, lessons(1)) }
-        assertFalse(File(dir, b.fileName + ".notes.json").exists())
+        assertFalse(File(dir, b.fileName + ".events.json").exists())
     }
 }

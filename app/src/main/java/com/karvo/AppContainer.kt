@@ -14,8 +14,9 @@ import com.karvo.data.LanguageController
 import com.karvo.data.LessonRepository
 import com.karvo.data.MIGRATION_1_2
 import com.karvo.data.MIGRATION_2_3
-import com.karvo.data.RoomDayNoteRepository
-import com.karvo.data.DayNoteRepository
+import com.karvo.data.MIGRATION_3_4
+import com.karvo.data.RoomEventRepository
+import com.karvo.data.EventRepository
 import com.karvo.data.KarvoDatabase
 import com.karvo.data.RoomLessonRepository
 import com.karvo.data.SettingsRepository
@@ -51,7 +52,7 @@ class AppContainer(context: Context) {
 
     private val database: KarvoDatabase by lazy {
         Room.databaseBuilder(appContext, KarvoDatabase::class.java, "karvo.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
             .build()
     }
 
@@ -63,7 +64,7 @@ class AppContainer(context: Context) {
     }
 
     val lessonRepository: LessonRepository by lazy { RoomLessonRepository(database.lessonDao()) }
-    val dayNoteRepository: DayNoteRepository by lazy { RoomDayNoteRepository(database.dayNoteDao()) }
+    val eventRepository: EventRepository by lazy { RoomEventRepository(database.eventDao()) }
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(dataStore) }
     val languageController: LanguageController = AppCompatLanguageController()
     val textFileReader by lazy { ContentResolverTextFileReader(appContext) }
@@ -96,10 +97,11 @@ class AppContainer(context: Context) {
         CoroutineExceptionHandler { _, e -> android.util.Log.w("KarvoLink", "link task failed", e) })
 
     private val linkHandler by lazy {
-        LinkCommandHandler(lessonRepository, settingsRepository, dayNoteRepository,
+        LinkCommandHandler(lessonRepository, settingsRepository, eventRepository,
             messages = { e: LessonError -> appContext.getString(e.messageRes()) },
             refusal = { r -> appContext.getString(when (r) {
                 Refusal.LessonGone -> R.string.link_refused_lesson_gone
+                Refusal.EventGone -> R.string.link_refused_event_gone
                 Refusal.PhoneNotEmpty -> R.string.link_refused_phone_not_empty
                 Refusal.InvalidRate -> R.string.link_refused_invalid_rate
                 Refusal.InvalidMonth -> R.string.link_refused_invalid_month
@@ -114,7 +116,7 @@ class AppContainer(context: Context) {
     private val deviceName: String
         get() = Settings.Global.getString(appContext.contentResolver, Settings.Global.DEVICE_NAME)?.takeIf { it.isNotBlank() } ?: Build.MODEL
 
-    val noteAlarms by lazy { com.karvo.notes.NoteAlarms(appContext, dayNoteRepository, settingsRepository).also { it.start(appScope) } }
+    val noteAlarms by lazy { com.karvo.notes.NoteAlarms(appContext, eventRepository, settingsRepository).also { it.start(appScope) } }
 
     val linkManager: LinkManager by lazy {
         LinkManager(pairingStore, { pc -> LinkClient(pc, linkHandler, relaySockets, appScope, BuildConfig.VERSION_NAME, deviceName) },
@@ -122,6 +124,6 @@ class AppContainer(context: Context) {
     }
 
     val backupService: BackupService by lazy {
-        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository, dayNotes = dayNoteRepository)
+        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository, events = eventRepository)
     }
 }

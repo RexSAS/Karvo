@@ -21,8 +21,8 @@ class LinkCommandHandlerTest {
     private val anna = Lesson(id = 1, date = LocalDate.parse("2026-01-05"), durationMinutes = 60, student = "Anna")
     private val lessons = FakeLessonRepository(listOf(anna))
     private val settings = FakeSettingsRepository(initial = 3000L, zone = "Europe/Rome")
-    private val notes = com.karvo.testing.FakeDayNoteRepository()
-    private val handler = LinkCommandHandler(lessons, settings, notes, messages = { it.name }, refusal = { it.name })
+    private val events = com.karvo.testing.FakeEventRepository()
+    private val handler = LinkCommandHandler(lessons, settings, events, messages = { it.name }, refusal = { it.name })
 
     private fun lessonJson(id: Long = 0, date: String = "2026-01-06", minutes: Int = 90, student: String = "Bo", paidOn: String? = null) =
         JSONObject().put("id", id).put("date", date).put("durationMinutes", minutes).put("student", student)
@@ -76,7 +76,7 @@ class LinkCommandHandlerTest {
         val args = JSONObject().put("lessons", JSONArray().put(lessonJson()))
         assertEquals("PhoneNotEmpty", refused("restoreAll", args))
         val empty = FakeLessonRepository()
-        LinkCommandHandler(empty, settings, com.karvo.testing.FakeDayNoteRepository(), { it.name }, { it.name }).handle("restoreAll", args)
+        LinkCommandHandler(empty, settings, com.karvo.testing.FakeEventRepository(), { it.name }, { it.name }).handle("restoreAll", args)
         assertEquals(listOf("Bo"), empty.allLessons().map { it.student })
     }
 
@@ -102,23 +102,30 @@ class LinkCommandHandlerTest {
         assertEquals(50, handler.snapshots().first().getJSONArray("lessons").getJSONObject(0).getInt("durationMinutes"))
     }
 
-    @Test fun `day notes are set, replaced, deleted and sent in the snapshot`() = runTest {
-        handler.handle("setDayNote", JSONObject().put("date", "2026-11-10").put("text", "  Meeting 17:00 "))
-        assertEquals("Meeting 17:00", notes.notes.value[LocalDate.parse("2026-11-10")])
-        assertEquals("Meeting 17:00", handler.snapshots().first().getJSONObject("dayNotes").getString("2026-11-10"))
-        handler.handle("setDayNote", JSONObject().put("date", "2026-11-10").put("text", JSONObject.NULL))
-        assertTrue(notes.notes.value.isEmpty())
-        assertEquals("InvalidData", refused("setDayNote", JSONObject().put("date", "2026-02-30").put("text", "x")))
-        assertEquals("InvalidData", refused("setDayNote", JSONObject().put("date", "2026-11-10").put("text", "x".repeat(201))))
-        assertEquals("InvalidData", refused("setDayNote", JSONObject().put("date", "2026-11-10").put("text", 5)))
+    @Test fun `events are added, updated, deleted and sent in the snapshot`() = runTest {
+        handler.handle("addEvent", JSONObject().put("event", JSONObject().put("date", "2026-11-10").put("text", "  Meeting 17:00 ")))
+        handler.handle("addEvent", JSONObject().put("event", JSONObject().put("date", "2026-11-10").put("text", "Dinner")))
+        assertEquals(listOf("Meeting 17:00", "Dinner"), events.events.value.map { it.text })
+        val snap = handler.snapshots().first().getJSONArray("events")
+        assertEquals(2, snap.length()); assertEquals("2026-11-10", snap.getJSONObject(0).getString("date"))
+        handler.handle("updateEvent", JSONObject().put("event", JSONObject().put("id", 2).put("date", "2026-11-11").put("text", "Dinner moved")))
+        assertEquals(LocalDate.parse("2026-11-11"), events.events.value[1].date)
+        handler.handle("deleteEvent", JSONObject().put("id", 1))
+        assertEquals(listOf(2L), events.events.value.map { it.id })
+        assertEquals("EventGone", refused("deleteEvent", JSONObject().put("id", 9)))
+        assertEquals("EventGone", refused("updateEvent", JSONObject().put("event", JSONObject().put("id", 9).put("date", "2026-11-11").put("text", "x"))))
+        assertEquals("InvalidData", refused("addEvent", JSONObject().put("event", JSONObject().put("date", "2026-02-30").put("text", "x"))))
+        assertEquals("InvalidData", refused("addEvent", JSONObject().put("event", JSONObject().put("date", "2026-11-10").put("text", " "))))
+        assertEquals("InvalidData", refused("addEvent", JSONObject().put("event", JSONObject().put("date", "2026-11-10").put("text", "x".repeat(201)))))
     }
 
-    @Test fun `restore into an empty phone also brings the PC notes`() = runTest {
+    @Test fun `restore into an empty phone also brings the PC events, without duplicates`() = runTest {
         val empty = FakeLessonRepository()
-        val n = com.karvo.testing.FakeDayNoteRepository(mapOf(LocalDate.parse("2026-11-12") to "phone"))
-        val h = LinkCommandHandler(empty, settings, n, { it.name }, { it.name })
-        h.handle("restoreAll", JSONObject().put("lessons", JSONArray().put(lessonJson())).put("dayNotes", JSONObject().put("2026-11-10", "Meeting")))
-        assertEquals(mapOf(LocalDate.parse("2026-11-12") to "phone", LocalDate.parse("2026-11-10") to "Meeting"), n.notes.value)
-        assertEquals("InvalidData", runCatching { h.handle("restoreAll", JSONObject().put("lessons", JSONArray()).put("dayNotes", JSONObject().put("nope", "x"))) }.exceptionOrNull()?.message)
+        val ev = com.karvo.testing.FakeEventRepository(listOf(com.karvo.data.Event(1, LocalDate.parse("2026-11-12"), "phone")))
+        val h = LinkCommandHandler(empty, settings, ev, { it.name }, { it.name })
+        h.handle("restoreAll", JSONObject().put("lessons", JSONArray().put(lessonJson())).put("events", JSONArray()
+            .put(JSONObject().put("date", "2026-11-10").put("text", "Meeting")).put(JSONObject().put("date", "2026-11-12").put("text", "phone"))))
+        assertEquals(listOf("phone", "Meeting"), ev.events.value.map { it.text })
+        assertEquals("InvalidData", runCatching { h.handle("restoreAll", JSONObject().put("lessons", JSONArray()).put("events", JSONArray().put(JSONObject().put("date", "nope").put("text", "x")))) }.exceptionOrNull()?.message)
     }
 }

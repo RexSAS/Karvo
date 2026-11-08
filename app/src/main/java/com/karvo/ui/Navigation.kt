@@ -190,6 +190,7 @@ fun KarvoNavHost() {
                                 onDeleted = showUndo,
                                 onOpenCamera = dropUnlessResumed { navController.navigate(ROUTE_CAMERA) },
                                 onOpenMoments = dropUnlessResumed { navController.navigate(ROUTE_MOMENTS) },
+                                onOpenDay = { date -> dropUnlessResumedNow(entry) { navController.navigate(dayRoute(date)) } },
                             )
                             PAGE_OVERVIEW -> OverviewScreen(
                                 onOpenMonth = { month -> dropUnlessResumedNow(entry) { navController.navigate(monthRoute(month)) } },

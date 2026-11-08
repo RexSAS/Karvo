@@ -4,9 +4,9 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [Lesson::class, DayNote::class], version = 3, exportSchema = true)
+@Database(entities = [Lesson::class, Event::class], version = 4, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class KarvoDatabase : RoomDatabase() {
     abstract fun lessonDao(): LessonDao
-    abstract fun dayNoteDao(): DayNoteDao
+    abstract fun eventDao(): EventDao
 }

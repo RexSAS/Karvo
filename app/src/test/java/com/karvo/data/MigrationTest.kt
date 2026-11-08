@@ -27,6 +27,21 @@ class MigrationTest {
         db.query("SELECT text FROM day_notes").use { c -> assertTrue(c.moveToFirst()); assertEquals("Meeting", c.getString(0)) }
     }
 
+    @Test fun v3NotesBecomeEventsAnd3_1DatabasesGoStraightToEvents() {
+        helper.createDatabase("m4.db", 3).apply {
+            execSQL("INSERT INTO lessons (id, date, durationMinutes, student, notes, paidOn) VALUES (1, ${LocalDate.of(2026, 12, 3).toEpochDay()}, 90, 'Rossi', NULL, NULL)")
+            execSQL("INSERT INTO day_notes (date, text) VALUES (${LocalDate.of(2026, 12, 4).toEpochDay()}, 'Meeting')")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("m4.db", 4, true, MIGRATION_3_4)
+        db.query("SELECT date, text FROM events").use { c ->
+            assertTrue(c.moveToFirst()); assertEquals(LocalDate.of(2026, 12, 4).toEpochDay(), c.getLong(0)); assertEquals("Meeting", c.getString(1))
+        }
+        db.query("SELECT student FROM lessons").use { c -> assertTrue(c.moveToFirst()); assertEquals("Rossi", c.getString(0)) }
+        helper.createDatabase("m24.db", 2).close()
+        helper.runMigrationsAndValidate("m24.db", 4, true, MIGRATION_2_3, MIGRATION_3_4)
+    }
+
     @Test fun v1LessonsSurviveAsUnpaid() {
         helper.createDatabase("m.db", 1).apply {
             execSQL(
