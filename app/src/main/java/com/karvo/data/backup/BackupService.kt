@@ -11,11 +11,15 @@ class BackupService(
     private val store: BackupStore,
     private val lessons: LessonRepository,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    private val dayNotes: com.karvo.data.DayNoteRepository? = null,
 ) {
     suspend fun backup(reason: BackupReason): Backup {
         val all = lessons.allLessons()
-        return withContext(io) { store.create(reason, all) }
+        val notes = dayNotes?.all().orEmpty()
+        return withContext(io) { store.create(reason, all, notes) }
     }
+
+    suspend fun readNotes(fileName: String): Map<java.time.LocalDate, String> = withContext(io) { store.readNotes(fileName) }
 
     suspend fun list(): List<Backup> = withContext(io) { store.list() }
 

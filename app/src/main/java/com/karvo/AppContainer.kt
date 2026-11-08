@@ -122,6 +122,6 @@ class AppContainer(context: Context) {
     }
 
     val backupService: BackupService by lazy {
-        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository)
+        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository, dayNotes = dayNoteRepository)
     }
 }

@@ -97,6 +97,18 @@ class RestoreViewModelTest {
         assertEquals(setOf("Now1", "Now2"), store.read(newest.fileName).map { it.student }.toSet())
     }
 
+    @Test fun restoreBringsBackTheBackupsNotesEvenWhenTheSourceRotatesAway() = runTest {
+        val notes = com.karvo.testing.FakeDayNoteRepository(mapOf(LocalDate.of(2026, 11, 1) to "current"))
+        val withNotes = BackupService(store, repo, Dispatchers.Unconfined, dayNotes = notes)
+        val source = store.create(BackupReason.Manual, lessons("Old", 1), mapOf(LocalDate.of(2026, 11, 10) to "Meeting"))
+        store.create(BackupReason.Manual, lessons("Mid", 1)); store.create(BackupReason.Manual, lessons("New", 1))
+        val vm = RestoreViewModel(source.fileName, withNotes, repo, FakeSettingsRepository(), notes)
+        vm.restore(backupFirst = true)
+        assertEquals(RestoreResult.Done(1), vm.uiState.value.result)
+        assertEquals(mapOf(LocalDate.of(2026, 11, 10) to "Meeting"), notes.notes.value)
+        assertEquals(mapOf(LocalDate.of(2026, 11, 1) to "current"), store.readNotes(store.list().first().fileName)) // the safety backup kept the old notes
+    }
+
     @Test fun corruptBackupChangesNothing() = runTest {
         dir.mkdirs(); File(dir, "backup-1-manual.csv").writeText("date,student,duration_minutes,duration_hours,notes\r\nbad,A,60,1,\r\n")
         val vm = vm("backup-1-manual.csv")

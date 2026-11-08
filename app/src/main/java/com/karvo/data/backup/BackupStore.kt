@@ -4,12 +4,15 @@ import com.karvo.data.Lesson
 import com.karvo.domain.csvFileBytes
 import com.karvo.domain.lessonsToCsv
 import com.karvo.domain.parseLessonsCsv
+import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.time.Clock
 import java.time.Instant
+import java.time.LocalDate
 
 const val MAX_BACKUPS = 3
+private const val NOTES_SUFFIX = ".notes.json"
 
 sealed interface BackupReason {
     data object Manual : BackupReason
@@ -53,7 +56,7 @@ class BackupStore(private val dir: File, private val clock: Clock) {
     }
 
     /** Writes a new backup atomically (temp file, then rename), then deletes the oldest beyond [MAX_BACKUPS]. */
-    fun create(reason: BackupReason, lessons: List<Lesson>): Backup {
+    fun create(reason: BackupReason, lessons: List<Lesson>, notes: Map<LocalDate, String> = emptyMap()): Backup {
         if (!dir.isDirectory && !dir.mkdirs()) throw IOException("Can't create $dir")
         // Always newer than every existing backup, even if the clock went backwards; otherwise the
         // rotation below would treat the new backup as the oldest and delete it straight away.
@@ -62,16 +65,31 @@ class BackupStore(private val dir: File, private val clock: Clock) {
         val name = "backup-$millis-${reason.slug()}.csv"
         val tmp = File(dir, "$name.tmp")
         tmp.writeBytes(csvFileBytes(lessonsToCsv(lessons)))
+        // Day notes go in a sidecar written first, so a listed backup never lacks the notes it was made with.
+        if (notes.isNotEmpty()) {
+            val side = File(dir, "$name$NOTES_SUFFIX.tmp")
+            side.writeText(JSONObject(notes.entries.associate { it.key.toString() to it.value }).toString(), Charsets.UTF_8)
+            if (!side.renameTo(File(dir, name + NOTES_SUFFIX))) { side.delete(); throw IOException("Can't save backup $name") }
+        }
         if (!tmp.renameTo(File(dir, name))) {
             tmp.delete()
+            File(dir, name + NOTES_SUFFIX).delete()
             throw IOException("Can't save backup $name")
         }
-        list().drop(MAX_BACKUPS).forEach { File(dir, it.fileName).delete() }
+        list().drop(MAX_BACKUPS).forEach { File(dir, it.fileName).delete(); File(dir, it.fileName + NOTES_SUFFIX).delete() }
         return Backup(name, Instant.ofEpochMilli(millis), reason, lessons.size)
     }
 
     /** Throws [com.karvo.domain.BackupFormatException] for a damaged file, [IOException] for a missing one. */
     fun read(fileName: String): List<Lesson> = parseLessonsCsv(File(dir, fileName).readText(Charsets.UTF_8))
+
+    /** The backup's day notes; empty for backups made before 3.2 (no sidecar) or an unreadable sidecar. */
+    fun readNotes(fileName: String): Map<LocalDate, String> = try {
+        val o = JSONObject(File(dir, fileName + NOTES_SUFFIX).readText(Charsets.UTF_8))
+        o.keys().asSequence().associate { LocalDate.parse(it) to o.getString(it) }
+    } catch (_: Exception) {
+        emptyMap()
+    }
 
     /** The backup the next [create] would delete, or null while fewer than [MAX_BACKUPS] exist. */
     fun oldestToBeRemoved(): Backup? = list().takeIf { it.size >= MAX_BACKUPS }?.last()

@@ -112,4 +112,15 @@ class BackupStoreTest {
         assertEquals(BackupReason.BeforeImport, listed.reason)
         assertEquals(2, listed.lessonCount)
     }
+
+    @Test fun `day notes are kept next to the backup, rotate with it, and are empty for old backups`() {
+        val notes = mapOf(LocalDate.of(2026, 11, 10) to "Meeting 17:00")
+        val b = store.create(BackupReason.Manual, lessons(2), notes)
+        assertEquals(notes, store.readNotes(b.fileName))
+        assertEquals(1, store.list().size) // the sidecar is not listed as a backup
+        val old = store.create(BackupReason.Manual, lessons(1))
+        assertEquals(emptyMap<LocalDate, String>(), store.readNotes(old.fileName))
+        repeat(3) { store.create(BackupReason.Manual, lessons(1)) }
+        assertFalse(File(dir, b.fileName + ".notes.json").exists())
+    }
 }
