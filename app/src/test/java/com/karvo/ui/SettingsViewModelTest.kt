@@ -124,10 +124,10 @@ class SettingsViewModelTest {
 
     @Test fun settingSeasonStartPersists() = runTest {
         val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo, FakeLanguageController())
-        assertEquals(11, vm.uiState.value.seasonStartMonth)
-        vm.onSeasonStartSelected(12)
-        assertEquals(12, s.seasonStartMonth.first())
         assertEquals(12, vm.uiState.value.seasonStartMonth)
+        vm.onSeasonStartSelected(11)
+        assertEquals(11, s.seasonStartMonth.first())
+        assertEquals(11, vm.uiState.value.seasonStartMonth)
     }
 
     @Test fun turningSettingOffNeedsAuth() = runTest {

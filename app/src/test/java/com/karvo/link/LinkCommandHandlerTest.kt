@@ -61,8 +61,8 @@ class LinkCommandHandlerTest {
         handler.handle("setRate", JSONObject().put("rateCents", JSONObject.NULL))
         assertNull(settings.hourlyRateCents.first())
         assertEquals("InvalidRate", refused("setRate", JSONObject().put("rateCents", 0)))
-        handler.handle("setSeasonStart", JSONObject().put("month", 12))
-        assertEquals(12, settings.seasonStartMonth.first())
+        handler.handle("setSeasonStart", JSONObject().put("month", 10))
+        assertEquals(10, settings.seasonStartMonth.first())
         assertEquals("InvalidMonth", refused("setSeasonStart", JSONObject().put("month", 13)))
     }
 
@@ -89,7 +89,7 @@ class LinkCommandHandlerTest {
         assertEquals(1, first.getJSONArray("lessons").length())
         assertEquals(3000, first.getLong("rateCents"))
         assertEquals("Europe/Rome", first.getString("timeZoneId"))
-        assertEquals(11, first.getInt("seasonStartMonth"))
+        assertEquals(12, first.getInt("seasonStartMonth"))
         val l = first.getJSONArray("lessons").getJSONObject(0)
         assertEquals("2026-01-05", l.getString("date")); assertTrue(l.isNull("paidOn")); assertEquals(1L, l.getLong("id"))
     }

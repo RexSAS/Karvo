@@ -14,8 +14,8 @@ import java.time.ZoneId
 
 const val DEFAULT_TIME_ZONE = "Europe/Rome"
 
-/** Ski seasons start in November unless the user picks another month. */
-const val DEFAULT_SEASON_START_MONTH = 11
+/** Ski seasons start in December unless the user picks another month. */
+const val DEFAULT_SEASON_START_MONTH = 12
 
 /** True if [id] is a valid [ZoneId]; shared by all settings implementations. */
 fun isValidZoneId(id: String): Boolean =

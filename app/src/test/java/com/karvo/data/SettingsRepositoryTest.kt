@@ -57,14 +57,14 @@ class SettingsRepositoryTest {
         assertEquals(ThemeChoice.ALPINE_NIGHT, repo.theme.first())
     }
 
-    @Test fun seasonStartDefaultsToNovemberAndRoundTrips() = runTest {
-        assertEquals(11, repo.seasonStartMonth.first())
-        repo.setSeasonStartMonth(12); assertEquals(12, repo.seasonStartMonth.first())
+    @Test fun seasonStartDefaultsToDecemberAndRoundTrips() = runTest {
+        assertEquals(12, repo.seasonStartMonth.first())
+        repo.setSeasonStartMonth(11); assertEquals(11, repo.seasonStartMonth.first())
     }
 
     @Test fun outOfRangeSeasonStartFallsBack() = runTest {
         store.edit { it[intPreferencesKey("season_start_month")] = 0 }
-        assertEquals(11, repo.seasonStartMonth.first())
+        assertEquals(12, repo.seasonStartMonth.first())
     }
 
     @Test(expected = IllegalArgumentException::class)

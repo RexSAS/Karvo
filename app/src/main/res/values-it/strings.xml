@@ -314,10 +314,8 @@
     <string name="tour_pc_body">Apri karvo.rxsas.it sul computer e collegalo da qui scansionando il codice.</string>
     <string name="whats_new_title">Novità della %1$s</string>
     <string-array name="whats_new_items">
-        <item>Eventi: aggiungi eventi a qualsiasi giorno dal calendario (l\'icona in alto in Lezioni). Karvo te li ricorda alle 07:30.</item>
-        <item>Gli eventi dei prossimi 3 giorni nella pagina Lezioni: oggi, domani, tra 2 giorni…</item>
-        <item>Anche il PC mostra e modifica i tuoi eventi.</item>
-        <item>I backup ora conservano anche gli eventi.</item>
+        <item>Ora la stagione inizia a dicembre di default. Se la tua inizia in un altro mese, sceglilo in Impostazioni → La stagione inizia a.</item>
+        <item>Un nuovo look per la schermata di benvenuto e il tour rapido.</item>
     </string-array>
     <string name="play_update_ready_title">Aggiornamento pronto</string>
     <string name="play_update_ready_text">La nuova versione di Karvo è scaricata. Riavviare ora per usarla? Le tue lezioni restano come sono.</string>

@@ -316,10 +316,8 @@
     <string name="tour_pc_body">Open karvo.rxsas.it on your computer and link it here by scanning the code.</string>
     <string name="whats_new_title">What\'s new in %1$s</string>
     <string-array name="whats_new_items">
-        <item>Events: add events to any day from the calendar (the icon at the top of Lessons). Karvo reminds you at 07:30 that day.</item>
-        <item>The next 3 days\' events on the Lessons page: today, tomorrow, in 2 days…</item>
-        <item>Your PC shows and edits your events too.</item>
-        <item>Backups now keep your events.</item>
+        <item>Seasons now start in December by default. If your season starts in another month, pick it in Settings → Season starts in.</item>
+        <item>A fresh look for the welcome screen and the quick tour.</item>
     </string-array>
     <string name="play_update_ready_title">Update ready</string>
     <string name="play_update_ready_text">The new version of Karvo is downloaded. Restart now to use it? Your lessons stay as they are.</string>

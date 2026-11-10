@@ -2,6 +2,16 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.2.1] — 2026-11-10
+
+### Changed
+- **Seasons start in December by default** (was November), on the phone and on karvo.rxsas.it. If you already picked a month in Settings, it stays as it is.
+- The welcome screen shows the animated Karvo logo, and the quick tour glides between the things it points at.
+- Play Store installs offer the update when a newer Karvo is on Play, download it in the background and ask to restart.
+
+### PC
+- On the calendar, click the **Unpaid** badge to mark that month as paid.
+
 ## [3.2] — 2026-11-08
 
 ### Added
