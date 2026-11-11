@@ -7,7 +7,8 @@ A photo can be shared (Moments → Share) in two Karvo designs:
 | **Banner** | code (`data/moments/ShareCard.kt`) | The whole photo, any shape, with a dark fade at the bottom carrying the emblem, KARVO and the date |
 | **Frame** | `share_2.png`, shipped as `app/src/main/res/drawable-nodpi/share_frame.png` | 9:16: the photo blurred across the background, and sharp inside a tilted paper frame |
 
-`share_banner.png` is the Banner design as a PNG, for reference only: the app draws Banner in code.
+`share_banner.png` is the Banner design on a white photo, for reference only: the app draws Banner in code (the emblem, KARVO
+and the date in Jost, the app's display font).
 `karvo-emblem.svg` is the Karvo logo (the carved peak) in white: place it as a smart object and recolour it with a Color Overlay.
 
 ## Frame rules
@@ -19,6 +20,12 @@ A photo can be shared (Moments → Share) in two Karvo designs:
 - **Date spot: one solid magenta (#FF00FF) rectangle**, tilted like the frame. The app paints it over with the
   frame colour just below it and writes the date there in dark navy, as tall as the box. No other #FF00FF pixels.
 - **Tilt:** the app turns the photo by the date box's angle, so keep the box parallel to the frame.
+
+## The frame's header
+
+The header of `share_2.png` (the logo, "Karvo", "Made with Karvo") was redrawn on the PNG for the new logo (the carved
+peak) and the Jost font. The paper, the tilt, the window and the date spot are the original design. A Photoshop source
+that still has the old header needs `karvo-emblem.svg` and Jost SemiBold before the next export.
 
 ## Updating the frame
 
