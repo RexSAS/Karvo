@@ -400,9 +400,10 @@ private fun TabBar(selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = 
     ) {
         tabs.forEachIndexed { page, tab ->
             val on = selected == page
-            val tint by animateColorAsState(
-                if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, label = "tab",
-            )
+            // Alpine Night marks the selected tab in glacier blue. Classic uses Material's own pair (on a plain dark
+            // theme the primary blue is too dim for small text).
+            val active = if (night) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            val tint by animateColorAsState(if (on) active else MaterialTheme.colorScheme.onSurfaceVariant, label = "tab")
             Column(
                 Modifier.weight(1f).fillMaxHeight().selectable(selected = on, role = Role.Tab, onClick = { onSelect(page) }),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -410,7 +411,14 @@ private fun TabBar(selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = 
             ) {
                 Box(
                     Modifier.size(width = 56.dp, height = 28.dp)
-                        .background(if (on) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f) else Color.Transparent, CircleShape),
+                        .background(
+                            when {
+                                !on -> Color.Transparent
+                                night -> MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                                else -> MaterialTheme.colorScheme.secondaryContainer
+                            },
+                            CircleShape,
+                        ),
                     contentAlignment = Alignment.Center,
                 ) { Icon(tab.icon, contentDescription = null, tint = tint, modifier = Modifier.size(22.dp)) }
                 Text(stringResource(tab.labelRes), style = MaterialTheme.typography.labelMedium, color = tint, maxLines = 1)

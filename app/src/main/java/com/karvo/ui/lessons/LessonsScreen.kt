@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.semantics.semantics
+import com.karvo.ui.theme.isAlpineNight
 import com.karvo.ui.theme.rowNumber
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.HorizontalDivider
@@ -140,7 +141,12 @@ fun LessonsScreen(
                                 Text("$count", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(end = 8.dp))
                             }
-                            Text(formatDuration(group.totalMinutes), style = MaterialTheme.typography.rowNumber, color = MaterialTheme.colorScheme.primary)
+                            Text(
+                                formatDuration(group.totalMinutes),
+                                style = MaterialTheme.typography.rowNumber,
+                                // Glacier blue in Alpine Night; Classic's primary can be too dim on a dark page.
+                                color = if (isAlpineNight()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                     }
                     itemsIndexed(group.lessons, key = { _, lesson -> lesson.id }) { index, lesson ->
