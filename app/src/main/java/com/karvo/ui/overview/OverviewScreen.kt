@@ -47,8 +47,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import com.karvo.domain.dayTitle
-import com.karvo.ui.theme.AlpineNight
 import com.karvo.ui.theme.GlassPanel
+import com.karvo.ui.theme.HorizonLine
+import com.karvo.ui.theme.bigDuration
+import com.karvo.ui.theme.rowNumber
 import com.karvo.ui.theme.ScreenHeader
 import com.karvo.ui.theme.groupedShape
 import com.karvo.ui.theme.isAlpineNight
@@ -86,7 +88,8 @@ fun OverviewScreen(
                     Icon(
                         painterResource(R.drawable.ic_emblem),
                         contentDescription = null,
-                        tint = if (isAlpineNight()) AlpineNight.Gold else MaterialTheme.colorScheme.tertiary,
+                        // Alpine Night shows the logo in its own colours; Classic tints it with the theme.
+                        tint = if (isAlpineNight()) Color.Unspecified else MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(width = 58.dp, height = 45.dp),
                     )
                 },
@@ -103,11 +106,16 @@ fun OverviewScreen(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Text(formatDuration(state.totalMinutes), style = MaterialTheme.typography.displaySmall)
+                    Text(
+                        bigDuration(formatDuration(state.totalMinutes), MaterialTheme.colorScheme.onSurfaceVariant),
+                        style = if (isAlpineNight()) MaterialTheme.typography.displayLarge else MaterialTheme.typography.displaySmall,
+                        maxLines = 1,
+                    )
+                    HorizonLine(Modifier.padding(end = 10.dp, top = 2.dp, bottom = 6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             earningsLabel(state.totalEarningsCents, state.revealed),
-                            style = MaterialTheme.typography.titleLarge,
+                            style = if (isAlpineNight()) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.weight(1f).clickable(onClick = { if (!state.rateSet) onOpenSettings() }),
                         )
@@ -198,7 +206,7 @@ fun OverviewScreen(
                             Text(monthTitle(row.summary.month), style = MaterialTheme.typography.titleMedium)
                             PaidBadge(row.summary.paidStatus)
                         }
-                        Text(formatDuration(row.summary.totalMinutes), style = MaterialTheme.typography.titleMedium)
+                        Text(formatDuration(row.summary.totalMinutes), style = MaterialTheme.typography.rowNumber)
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         val n = row.summary.lessonCount
