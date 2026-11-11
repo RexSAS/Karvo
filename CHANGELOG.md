@@ -2,6 +2,20 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.3] — 2026-11-11
+
+### Changed
+- **A new look, "First Light"**: the night sky at sunrise over three mountain ranges, glass cards, a floating tab bar, a gold add button, and the season's hours as a large number on a gold horizon line. The Classic theme keeps its colours with the same shapes.
+- **A new logo and app icon**: the carved peak, a summit split by one ski carve, with the sun. The icon also has a themed (one-colour) version for Android 13 and later.
+- **A new opening**: the first light runs down the peak and the sun rises.
+- **Jost** for titles and large numbers (a free font, included in the app).
+- **Kevin, the Karvo penguin**, says hello on the first start and sleeps in the snow on empty pages.
+- The last 6 months are drawn as a mountain ridge; Settings are grouped in cards.
+- Share images use the new logo and font.
+
+### PC and iPhone
+- The same new look, logo, opening and Kevin on karvo.rxsas.it.
+
 ## [3.2.1] — 2026-11-10
 
 ### Changed

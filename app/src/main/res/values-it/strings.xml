@@ -314,8 +314,9 @@
     <string name="tour_pc_body">Apri karvo.rxsas.it sul computer e collegalo da qui scansionando il codice.</string>
     <string name="whats_new_title">Novità della %1$s</string>
     <string-array name="whats_new_items">
-        <item>Ora la stagione inizia a dicembre di default. Se la tua inizia in un altro mese, sceglilo in Impostazioni → La stagione inizia a.</item>
-        <item>Un nuovo look per la schermata di benvenuto e il tour rapido.</item>
+        <item>Un nuovo look: il cielo all\'alba sopra le montagne, un nuovo logo e una nuova icona.</item>
+        <item>Ecco Kevin, il pinguino di Karvo. Dorme nella neve dove non c\'è ancora niente.</item>
+        <item>Numeri più chiari, una barra delle schede più pulita, e le foto si condividono con il nuovo logo.</item>
     </string-array>
     <string name="play_update_ready_title">Aggiornamento pronto</string>
     <string name="play_update_ready_text">La nuova versione di Karvo è scaricata. Riavviare ora per usarla? Le tue lezioni restano come sono.</string>
