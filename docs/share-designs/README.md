@@ -8,7 +8,7 @@ A photo can be shared (Moments → Share) in two Karvo designs:
 | **Frame** | `share_2.png`, shipped as `app/src/main/res/drawable-nodpi/share_frame.png` | 9:16: the photo blurred across the background, and sharp inside a tilted paper frame |
 
 `share_banner.png` is the Banner design as a PNG, for reference only: the app draws Banner in code.
-`karvo-emblem.svg` is the Karvo logo in white: place it as a smart object and recolour it with a Color Overlay.
+`karvo-emblem.svg` is the Karvo logo (the carved peak) in white: place it as a smart object and recolour it with a Color Overlay.
 
 ## Frame rules
 
