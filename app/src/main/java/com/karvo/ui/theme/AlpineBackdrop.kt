@@ -62,8 +62,6 @@ private val Stars = listOf(
 /** Alpine Night's sky: deep gradient, two soft glows and stars. */
 private fun DrawScope.nightSky() {
     drawRect(Brush.verticalGradient(listOf(AlpineNight.SkyTop, AlpineNight.SkyMid, AlpineNight.SkyBottom)))
-    drawRect(Brush.radialGradient(listOf(AlpineNight.GlowBlue, Color.Transparent), center = Offset(size.width * .85f, 0f), radius = size.width * 1.1f))
-    drawRect(Brush.radialGradient(listOf(AlpineNight.GlowTeal.copy(alpha = .8f), Color.Transparent), center = Offset(0f, size.height * .08f), radius = size.width * .9f))
     Stars.forEachIndexed { i, (x, y, alpha) ->
         val r = if (i % 3 == 0) 1.6f else 1.1f
         drawCircle(Color.White.copy(alpha = alpha), radius = r * density, center = Offset(x * size.width, y * size.height))

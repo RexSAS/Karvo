@@ -50,7 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.karvo.domain.LessonError
 import androidx.compose.material3.MaterialTheme
-import com.karvo.ui.components.PartlyPaidColor
+import com.karvo.ui.components.partlyPaidColor
 import com.karvo.domain.monthTitle
 import com.karvo.domain.pickerMillisToLocalDate
 import com.karvo.domain.toPickerMillis
@@ -121,7 +121,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                 Text(
                     stringResource(R.string.paid_month_note, monthTitle(month)),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = PartlyPaidColor,
+                    color = partlyPaidColor(),
                 )
             }
 

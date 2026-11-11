@@ -45,19 +45,23 @@ fun isAlpineNight(): Boolean = LocalThemeChoice.current == ThemeChoice.ALPINE_NI
 
 /** Alpine Night palette extras that Material's colour scheme has no slot for. */
 object AlpineNight {
-    val SkyTop = Color(0xFF060A17)
-    val SkyMid = Color(0xFF0A1229)
-    val SkyBottom = Color(0xFF0C1530)
-    val GlowBlue = Color(0xFF24367C)
-    val GlowTeal = Color(0xFF0E4F5E)
-    val TileTop = Color(0xFF16213F)
-    val TileBottom = Color(0xFF111A33)
-    /** Flat tile colour for list rows (the middle of the tile gradient). */
-    val Tile = Color(0xFF141E3A)
-    val NavBar = Color(0xFF080D1F)
-    val Gold = Color(0xFFF2C879)
-    val GoldDeep = Color(0xFFE8A73C)
-    val Glacier = Color(0xFF8FD3FF)
+    // The sky, top to horizon: night, blue hour, then the first warm light.
+    val SkyTop = Color(0xFF060918)
+    val SkyMid = Color(0xFF0D1538)
+    val SkyBottom = Color(0xFF1F2760)
+    val SkyHorizon = Color(0xFF3A3672)
+    val SkyDawn = Color(0xFF5A4478)
+    /** Alpenglow: the warm light low in the sky and on the far summits. Art only, never text. */
+    val Alpenglow = Color(0xFFF08F6E)
+    // Smoked night glass: the cards. A little see-through, so the ridges stay behind them.
+    val TileTop = Color(0xCC222E62)
+    val TileBottom = Color(0xD6111940)
+    /** Solid night glass for list rows and text fields (nothing shows through). */
+    val Tile = Color(0xFF151E40)
+    val NavBar = Color(0xF00D1330)
+    val Gold = Color(0xFFF4C06A)
+    val GoldDeep = Color(0xFFE5A23C)
+    val Glacier = Color(0xFF8CCBFF)
 }
 
 private val TileShape = RoundedCornerShape(18.dp)
@@ -134,7 +138,7 @@ fun ScreenHeader(title: String, subtitle: String? = null, trailing: (@Composable
             if (subtitle != null) {
                 Text(subtitle, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(title, style = MaterialTheme.typography.headlineMedium)
+            Text(title, style = MaterialTheme.typography.headlineLarge)
         }
         trailing?.invoke()
     }
@@ -164,7 +168,7 @@ fun AddButton(onClick: () -> Unit, contentDescription: String) {
     FloatingActionButton(
         onClick = onClick,
         containerColor = AlpineNight.Gold,
-        contentColor = Color(0xFF2A1D00),
+        contentColor = Color(0xFF2B1C00),
         shape = RoundedCornerShape(18.dp),
     ) { Icon(Icons.Filled.Add, contentDescription = contentDescription, modifier = Modifier.size(28.dp)) }
 }

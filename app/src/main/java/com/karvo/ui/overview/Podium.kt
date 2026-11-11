@@ -49,7 +49,7 @@ fun podiumOrder(top: List<StudentStat>): List<Ranked> =
 fun runnersUp(top: List<StudentStat>): List<Ranked> =
     top.drop(3).mapIndexed { i, student -> Ranked(i + 4, student) }
 
-private val Gold = Color(0xFFE8B964)
+private val Gold = Color(0xFFF4C06A)
 private val Silver = Color(0xFFC9D3E0)
 private val Bronze = Color(0xFFCD8B5A)
 private val White = Color(0xFFFFFFFF)

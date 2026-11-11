@@ -5,7 +5,7 @@ import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import com.karvo.domain.Season
 import com.karvo.ui.components.PaidBadge
-import com.karvo.ui.components.PartlyPaidColor
+import com.karvo.ui.components.partlyPaidColor
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -148,7 +148,7 @@ fun OverviewScreen(
                                 earningsLabel(state.unpaid.earningsCents, state.revealed),
                             ),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = PartlyPaidColor,
+                            color = partlyPaidColor(),
                             modifier = Modifier.padding(top = 4.dp),
                         )
                     }

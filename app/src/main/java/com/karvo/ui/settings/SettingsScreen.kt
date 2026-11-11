@@ -481,7 +481,7 @@ private fun languageLabel(choice: LanguageChoice): String = when (choice) {
 @Composable
 private fun ThemeSwatch(choice: ThemeChoice) {
     val (fill, border) = when (choice) {
-        ThemeChoice.ALPINE_NIGHT -> Color(0xFF0B1220) to Color(0xFF7CC4FA)
+        ThemeChoice.ALPINE_NIGHT -> Color(0xFF080C1C) to Color(0xFF8CCBFF)
         ThemeChoice.CLASSIC -> Color(0xFF1565C0) to Color(0xFF1565C0)
     }
     Box(Modifier.size(20.dp).clip(CircleShape).background(fill).border(2.dp, border, CircleShape))
