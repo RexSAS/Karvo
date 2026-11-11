@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import com.karvo.ui.theme.AlpineTile
+import com.karvo.ui.components.EmptyState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -103,11 +104,7 @@ fun BackupsScreen(
             }
             if (state.loaded && state.backups.isEmpty()) {
                 item {
-                    Text(
-                        stringResource(R.string.no_backups),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
-                    )
+                    EmptyState(stringResource(R.string.no_backups), Modifier.padding(top = 24.dp).fillMaxWidth())
                 }
             }
             items(state.backups, key = { it.fileName }) { backup ->

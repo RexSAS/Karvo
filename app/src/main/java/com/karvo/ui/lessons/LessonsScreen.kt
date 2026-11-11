@@ -59,12 +59,12 @@ import com.karvo.ui.theme.ScreenHeader
 import com.karvo.ui.theme.groupedShape
 import com.karvo.ui.theme.tileColor
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.karvo.data.Lesson
 import com.karvo.domain.monthTitle
+import com.karvo.ui.components.EmptyState
 import com.karvo.ui.components.LessonRow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -116,13 +116,7 @@ fun LessonsScreen(
         } else if (groups.isEmpty()) {
             Column(Modifier.fillMaxSize().padding(padding)) {
               notesCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-              Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                Text(
-                    stringResource(R.string.no_lessons_hint),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                )
-              }
+              EmptyState(stringResource(R.string.no_lessons_hint), Modifier.fillMaxSize().padding(32.dp))
             }
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 96.dp)) {

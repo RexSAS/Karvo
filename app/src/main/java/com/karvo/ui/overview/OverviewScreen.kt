@@ -5,6 +5,7 @@ import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import com.karvo.domain.Season
 import com.karvo.ui.components.PaidBadge
+import com.karvo.ui.components.EmptyState
 import com.karvo.ui.components.partlyPaidColor
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,7 +47,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
 import com.karvo.domain.dayTitle
 import com.karvo.ui.theme.GlassPanel
 import com.karvo.ui.theme.HorizonLine
@@ -177,12 +177,7 @@ fun OverviewScreen(
             val stats = state.stats
             if (stats == null) {
                 item(key = "empty") {
-                    Text(
-                        stringResource(R.string.no_lessons),
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(top = 64.dp),
-                    )
+                    EmptyState(stringResource(R.string.no_lessons), Modifier.fillMaxWidth().padding(top = 32.dp))
                 }
                 return@LazyColumn
             }

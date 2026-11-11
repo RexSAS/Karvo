@@ -11,6 +11,15 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +30,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import com.karvo.R
+import com.karvo.ui.theme.reducedMotion
 
 /** Kevin, the Karvo penguin, coming out of the powder snow. His drawing is made by docs/mascot/kevin.mjs. */
 enum class KevinPose(@DrawableRes val head: Int) {
@@ -44,7 +54,9 @@ private const val SNOW_LINE = (474f + 44f) / HEIGHT
  */
 @Composable
 fun Kevin(pose: KevinPose, modifier: Modifier = Modifier) {
-    val rise = remember { Animatable(1f) }
+    // With animations off he is up from the first frame (no frame without a head).
+    val still = reducedMotion()
+    val rise = remember { Animatable(if (still) 0f else 1f) }
     LaunchedEffect(Unit) { rise.animateTo(0f, tween(800, easing = CubicBezierEasing(.2f, .9f, .3f, 1f))) }
     val loop = rememberInfiniteTransition(label = "kevin")
     val bob = loop.animateFloat(
@@ -71,6 +83,21 @@ fun Kevin(pose: KevinPose, modifier: Modifier = Modifier) {
         Image(painterResource(R.drawable.kevin_front), contentDescription = null, modifier = layer)
         if (pose == KevinPose.Sleepy) {
             Image(painterResource(R.drawable.kevin_zzz), contentDescription = null, modifier = layer.graphicsLayer { alpha = breath.value })
+        }
+    }
+}
+
+/**
+ * An empty page: Kevin asleep in the snow, and one line that says what is missing.
+ * On a page with a fixed height he shrinks when there is little room (a phone on its side); in a list he has his full size.
+ */
+@Composable
+fun EmptyState(text: String, modifier: Modifier = Modifier) {
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+        val shrink = constraints.hasBoundedHeight
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Kevin(KevinPose.Sleepy, (if (shrink) Modifier.weight(1f, fill = false) else Modifier).widthIn(max = 200.dp))
+            Text(text, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
         }
     }
 }
