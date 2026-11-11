@@ -67,17 +67,6 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             if (keystorePropsFile.exists()) signingConfig = signingConfigs.getByName("release")
         }
-        // A build to try a new look NEXT TO the real Karvo: its own id (com.karvo.preview), name ("Karvo Preview") and
-        // icon (src/preview/res), so it never installs over the real app or touches its lessons. Built like a release
-        // (same speed), signed with the debug key, and it never offers updates.
-        //   ./gradlew :app:assembleGithubPreview   ->  app/build/outputs/apk/github/preview/
-        create("preview") {
-            initWith(getByName("release"))
-            applicationIdSuffix = ".preview"
-            signingConfig = signingConfigs.getByName("debug")
-            matchingFallbacks += "release"
-            buildConfigField("boolean", "UPDATER", "false")
-        }
     }
 
     compileOptions {
@@ -92,11 +81,6 @@ android {
     testOptions { unitTests.isIncludeAndroidResources = true }
     // MigrationTestHelper (Robolectric) reads the exported Room schemas from the debug assets; release builds don't ship them.
     sourceSets["debug"].assets.srcDir("$projectDir/schemas")
-}
-
-// The preview build is the same code as release: no need to run the unit tests a third time.
-androidComponents {
-    beforeVariants(selector().withBuildType("preview")) { (it as com.android.build.api.variant.HasUnitTestBuilder).enableUnitTest = false }
 }
 
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }

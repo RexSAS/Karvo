@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- The preview build installs next to the real Karvo; its name says which one it is. -->
-<resources>
-    <string name="app_name" translatable="false">Karvo Preview</string>
-</resources>
