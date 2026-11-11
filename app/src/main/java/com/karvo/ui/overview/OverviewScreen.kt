@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,6 +50,9 @@ import androidx.compose.ui.text.style.TextAlign
 import com.karvo.domain.dayTitle
 import com.karvo.ui.theme.GlassPanel
 import com.karvo.ui.theme.HorizonLine
+import com.karvo.ui.theme.KarvoMotion
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import com.karvo.ui.theme.bigDuration
 import com.karvo.ui.theme.rowNumber
 import com.karvo.ui.theme.ScreenHeader
@@ -98,6 +102,11 @@ fun OverviewScreen(
     ) { padding ->
         // Still loading: show nothing rather than flashing 0m / — €.
         if (state.loading) return@Scaffold
+        // A glint runs along the horizon line each time the earnings come out.
+        val glint = remember { Animatable(1f) }
+        LaunchedEffect(state.revealed) {
+            if (state.revealed) { glint.snapTo(0f); glint.animateTo(1f, tween(KarvoMotion.Long, easing = KarvoMotion.Ease)) }
+        }
         val totalPanel: @Composable () -> Unit = {
             GlassPanel(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
                 Column(Modifier.padding(start = 18.dp, end = 8.dp, top = 16.dp, bottom = if (state.stats != null) 28.dp else 16.dp)) {
@@ -111,7 +120,7 @@ fun OverviewScreen(
                         style = if (isAlpineNight()) MaterialTheme.typography.displayLarge else MaterialTheme.typography.displaySmall,
                         maxLines = 1,
                     )
-                    HorizonLine(Modifier.padding(end = 10.dp, top = 2.dp, bottom = 6.dp))
+                    HorizonLine(Modifier.padding(end = 10.dp, top = 2.dp, bottom = 6.dp), glint = { glint.value })
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             earningsLabel(state.totalEarningsCents, state.revealed),

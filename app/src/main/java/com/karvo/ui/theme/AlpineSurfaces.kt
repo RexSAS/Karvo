@@ -33,6 +33,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -120,11 +122,24 @@ fun GlassPanel(modifier: Modifier = Modifier, content: @Composable ColumnScope.(
     if (isAlpineNight()) Column(modifier, content = content) else AlpineTile(modifier, content = content)
 }
 
-/** The thin gold line under the season total: the horizon at first light. Alpine Night only. */
+/**
+ * The thin gold line under the season total: the horizon at first light. Alpine Night only.
+ * [glint] from 0 to 1 sends a bright spot along it once (when the earnings come out); 1 is at rest.
+ */
 @Composable
-fun HorizonLine(modifier: Modifier = Modifier) {
+fun HorizonLine(modifier: Modifier = Modifier, glint: () -> Float = { 1f }) {
     if (!isAlpineNight()) return
-    Box(modifier.fillMaxWidth().height(1.dp).background(Brush.horizontalGradient(listOf(AlpineNight.Gold, AlpineNight.Gold.copy(alpha = 0f)))))
+    Box(modifier.fillMaxWidth().height(2.dp).drawBehind {
+        val y = size.height / 2
+        drawLine(Brush.horizontalGradient(listOf(AlpineNight.Gold, AlpineNight.Gold.copy(alpha = 0f))), Offset(0f, y), Offset(size.width, y), 1.dp.toPx())
+        val g = glint()
+        if (g > 0f && g < 1f) {
+            val x = g * size.width
+            val half = 40.dp.toPx()
+            drawLine(Brush.horizontalGradient(listOf(Color.Transparent, Color(0xFFFFF0CF), Color.Transparent), startX = x - half, endX = x + half),
+                Offset(x - half, y), Offset(x + half, y), 2.dp.toPx(), alpha = 1f - g)
+        }
+    })
 }
 
 /** Left-aligned screen title with an optional subtitle and trailing decoration; replaces the centred top bar. */

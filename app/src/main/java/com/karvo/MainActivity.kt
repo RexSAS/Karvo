@@ -10,6 +10,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,14 +43,18 @@ class MainActivity : AppCompatActivity() {
         splash.setKeepOnScreenCondition {
             shouldKeepSplash(startTheme != null, SystemClock.elapsedRealtime() - startedAt, minShowMs)
         }
-        splash.setOnExitAnimationListener(::animateSplashExit)
+        var splashLeaving by mutableStateOf(false)
+        splash.setOnExitAnimationListener { provider ->
+            splashLeaving = true // the first screen rises in while the splash fades
+            animateSplashExit(provider)
+        }
 
         setContent {
             val theme by settings.theme.collectAsStateWithLifecycle(initialValue = startTheme ?: ThemeChoice.ALPINE_NIGHT)
             LaunchedEffect(theme) {
                 if (theme == ThemeChoice.ALPINE_NIGHT) enableAlpineBars() else enableEdgeToEdge()
             }
-            KarvoTheme(theme) { KarvoNavHost() }
+            KarvoTheme(theme) { KarvoNavHost(splashLeaving) }
         }
     }
 

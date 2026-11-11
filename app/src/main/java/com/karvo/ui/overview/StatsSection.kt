@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.karvo.ui.theme.AlpineTile
+import com.karvo.ui.theme.KarvoMotion
 import com.karvo.ui.theme.TileShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -169,7 +170,7 @@ private fun BusiestDaysCard(stats: OverviewStats, locale: Locale) {
 private fun animatedFraction(target: Float): Float {
     var started by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { started = true }
-    val value by animateFloatAsState(if (started) target else 0f, tween(600), label = "bar")
+    val value by animateFloatAsState(if (started) target else 0f, tween(KarvoMotion.Long, easing = KarvoMotion.Ease), label = "bar")
     return value
 }
 

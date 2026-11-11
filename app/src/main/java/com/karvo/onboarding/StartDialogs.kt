@@ -1,7 +1,6 @@
 package com.karvo.onboarding
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,15 +30,14 @@ import com.karvo.BuildConfig
 import com.karvo.R
 import com.karvo.ui.components.Kevin
 import com.karvo.ui.components.KevinPose
+import com.karvo.ui.theme.KarvoMotion
 import kotlinx.coroutines.delay
-
-private val Ease = CubicBezierEasing(.2f, .8f, .2f, 1f)
 
 /** Fades and slides its content up after [delayMs]: the staggered entrance of the start screens. */
 @Composable
 private fun Entrance(delayMs: Int, content: @Composable () -> Unit) {
     val p = remember { Animatable(0f) }
-    LaunchedEffect(Unit) { delay(delayMs.toLong()); p.animateTo(1f, tween(450, easing = Ease)) }
+    LaunchedEffect(Unit) { delay(delayMs.toLong()); p.animateTo(1f, tween(KarvoMotion.Medium, easing = KarvoMotion.Ease)) }
     androidx.compose.foundation.layout.Box(Modifier.graphicsLayer { alpha = p.value; translationY = (1 - p.value) * 14.dp.toPx() }) { content() }
 }
 

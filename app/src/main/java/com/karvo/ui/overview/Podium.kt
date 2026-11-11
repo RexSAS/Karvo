@@ -2,6 +2,7 @@ package com.karvo.ui.overview
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import com.karvo.ui.theme.KarvoMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -87,7 +88,7 @@ private fun PodiumPlace(place: Ranked, revealed: Boolean, rateSet: Boolean, modi
     val color = medalColor(place.rank)
     var raised by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { raised = true }
-    val height by animateDpAsState(if (raised) blockHeight(place.rank) else 0.dp, tween(600), label = "podium")
+    val height by animateDpAsState(if (raised) blockHeight(place.rank) else 0.dp, tween(KarvoMotion.Long, easing = KarvoMotion.Ease), label = "podium")
 
     Column(modifier.padding(horizontal = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(

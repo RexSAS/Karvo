@@ -7,6 +7,11 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.graphicsLayer
+import com.karvo.ui.theme.KarvoMotion
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -139,9 +144,10 @@ private const val PAGE_LESSONS = 0
 private const val PAGE_OVERVIEW = 1
 private const val PAGE_SETTINGS = 2
 
+/** [splashLeaving] turns true when the splash starts to fade: the first screen then rises into place. */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun KarvoNavHost() {
+fun KarvoNavHost(splashLeaving: Boolean = false) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -150,6 +156,18 @@ fun KarvoNavHost() {
     val pagerState = rememberPagerState { tabs.size }
     val pagerScope = rememberCoroutineScope()
     val goToPage: (Int) -> Unit = { page -> pagerScope.launch { pagerState.animateScrollToPage(page) } }
+
+    // The pages rise in as the splash leaves, the tab bar a moment later. At rest (and if no splash ever leaves) both are in place.
+    val arrive = remember { Animatable(1f) }
+    val arriveBar = remember { Animatable(1f) }
+    LaunchedEffect(splashLeaving) {
+        if (!splashLeaving) return@LaunchedEffect
+        arrive.snapTo(0f); arriveBar.snapTo(0f)
+        launch { arrive.animateTo(1f, tween(KarvoMotion.Long, easing = KarvoMotion.Ease)) }
+        delay(120)
+        arriveBar.animateTo(1f, tween(KarvoMotion.Long, easing = KarvoMotion.Ease))
+    }
+    fun Modifier.arriving(progress: Animatable<Float, *>) = graphicsLayer { alpha = progress.value; translationY = (1f - progress.value) * 24.dp.toPx() }
 
     // Outside the NavHost, so this ViewModel is scoped to the activity and the update flow survives navigation.
     val updateViewModel: UpdateViewModel? =
@@ -202,7 +220,7 @@ fun KarvoNavHost() {
             SnackbarHost(snackbarHostState, if (showBar) Modifier else Modifier.navigationBarsPadding())
         },
         bottomBar = {
-            if (showBar) TabBar(selected = pagerState.targetPage, onSelect = goToPage)
+            if (showBar) TabBar(selected = pagerState.targetPage, onSelect = goToPage, modifier = Modifier.arriving(arriveBar))
         },
     ) { padding ->
         // Every navigating callback is wrapped in dropUnlessResumed so double taps and taps during a
@@ -215,9 +233,9 @@ fun KarvoNavHost() {
             composable(ROUTE_HOME) { entry ->
                 // Back on Overview or Settings returns to Lessons; on Lessons it leaves the app as before.
                 BackHandler(enabled = pagerState.currentPage != PAGE_LESSONS) { goToPage(PAGE_LESSONS) }
-                // The sky stays still while the pages slide over it.
-                AlpineBackdrop(BackdropFigure.None) {
-                    HorizontalPager(pagerState, Modifier.padding(padding), beyondViewportPageCount = 1) { page ->
+                // The sky stays still while the pages slide over it; the ranges drift a little with them.
+                AlpineBackdrop(BackdropFigure.None, drift = { pagerState.currentPage + pagerState.currentPageOffsetFraction }) {
+                    HorizontalPager(pagerState, Modifier.padding(padding).arriving(arrive), beyondViewportPageCount = 1) { page ->
                         val isCurrent = pagerState.settledPage == page
                         when (page) {
                             PAGE_LESSONS -> LessonsScreen(
@@ -357,14 +375,14 @@ fun KarvoNavHost() {
  * selectable tab, like Material's navigation bar did.
  */
 @Composable
-private fun TabBar(selected: Int, onSelect: (Int) -> Unit) {
+private fun TabBar(selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     val night = isAlpineNight()
     val shape = CircleShape
     // The ground the bar stands on: the foot of the near ridge (the page colour in Classic). It starts a little above
     // the bar, so the pages end softly instead of at a hard line.
     val ground = if (night) AlpineNight.Ground else MaterialTheme.colorScheme.background
     Row(
-        Modifier
+        modifier
             .drawBehind {
                 val rise = 28.dp.toPx()
                 drawRect(Brush.verticalGradient(listOf(ground.copy(alpha = 0f), ground), startY = -rise, endY = rise / 2),

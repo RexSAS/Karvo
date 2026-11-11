@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -55,14 +56,17 @@ private val RidgeBand = 270.dp
 
 private fun DrawScope.at(point: Pair<Float, Float>) = Offset(point.first * size.width, size.height - point.second.dp.toPx())
 
-private fun DrawScope.ridge(points: List<Pair<Float, Float>>, brush: Brush) {
+/** One range, moved [shift] pixels to the left. It is drawn a fifth wider on each side, so moving it never opens a gap. */
+private fun DrawScope.ridge(points: List<Pair<Float, Float>>, brush: Brush, shift: Float = 0f) {
     val path = Path().apply {
-        moveTo(0f, size.height)
+        moveTo(-size.width * .2f, size.height)
+        lineTo(-size.width * .2f, at(points.first()).y)
         points.forEach { at(it).let { p -> lineTo(p.x, p.y) } }
-        lineTo(size.width, size.height)
+        lineTo(size.width * 1.2f, at(points.last()).y)
+        lineTo(size.width * 1.2f, size.height)
         close()
     }
-    drawPath(path, brush)
+    translate(left = -shift) { drawPath(path, brush) }
 }
 
 /** A ridge's own light: [top] at its highest summit, [bottom] at the bottom edge. */
@@ -90,35 +94,46 @@ private fun DrawScope.nightSky() {
     }
 }
 
-/** Three ranges for Alpine Night, lighter the farther away; the far summits catch the alpenglow. */
-private fun DrawScope.nightRidges() {
-    ridge(FarRidge, ridgeLight(FarRidge, Color(0xFF5D62AC), Color(0xFF2C3478)))
-    Alpenglow.forEach { glint ->
-        drawPath(Path().apply { at(glint[0]).let { moveTo(it.x, it.y) }; glint.drop(1).forEach { p -> at(p).let { lineTo(it.x, it.y) } }; close() },
-            Color(0xFFF6B58E), alpha = .62f)
+/** How far each range moves per page swiped, in dp: the nearer, the more (parallax). */
+private const val FarDrift = 6f
+private const val MidDrift = 12f
+private const val NearDrift = 20f
+
+/** Three ranges for Alpine Night, lighter the farther away; the far summits catch the alpenglow. [drift] is in pages. */
+private fun DrawScope.nightRidges(drift: Float) {
+    val far = (drift * FarDrift).dp.toPx()
+    ridge(FarRidge, ridgeLight(FarRidge, Color(0xFF5D62AC), Color(0xFF2C3478)), far)
+    translate(left = -far) {
+        Alpenglow.forEach { glint ->
+            drawPath(Path().apply { at(glint[0]).let { moveTo(it.x, it.y) }; glint.drop(1).forEach { p -> at(p).let { lineTo(it.x, it.y) } }; close() },
+                Color(0xFFF6B58E), alpha = .62f)
+        }
     }
-    ridge(MidRidge, ridgeLight(MidRidge, Color(0xFF2B3579), Color(0xFF161E52)))
-    ridge(NearRidge, ridgeLight(NearRidge, Color(0xFF151D4C), AlpineNight.Ground))
+    ridge(MidRidge, ridgeLight(MidRidge, Color(0xFF2B3579), Color(0xFF161E52)), (drift * MidDrift).dp.toPx())
+    ridge(NearRidge, ridgeLight(NearRidge, Color(0xFF151D4C), AlpineNight.Ground), (drift * NearDrift).dp.toPx())
 }
 
 /**
  * The scene behind a screen. Alpine Night: the sky at first light over three ranges. Classic: two
  * faint ridges in the theme colour. Both can add a faint winter-sports [figure]. Purely decorative (hidden from
  * accessibility); [content] is drawn on top and should use transparent containers to let it show.
+ * [drift] is how many pages the content has been swiped: the ranges slide a little with it, the near one most.
  */
 @Composable
-fun AlpineBackdrop(figure: BackdropFigure, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun AlpineBackdrop(figure: BackdropFigure, modifier: Modifier = Modifier, drift: () -> Float = { 0f }, content: @Composable () -> Unit) {
     val tint = MaterialTheme.colorScheme.primary
     val night = isAlpineNight()
+    val still = reducedMotion()
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Box(Modifier.fillMaxSize().clearAndSetSemantics {}) {
             if (night) Canvas(Modifier.fillMaxSize()) { nightSky() }
             Canvas(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(RidgeBand)) {
+                val pages = if (still) 0f else drift()
                 if (night) {
-                    nightRidges()
+                    nightRidges(pages)
                 } else {
-                    ridge(MidRidge, SolidColor(tint.copy(alpha = 0.05f)))
-                    ridge(NearRidge, SolidColor(tint.copy(alpha = 0.09f)))
+                    ridge(MidRidge, SolidColor(tint.copy(alpha = 0.05f)), (pages * MidDrift).dp.toPx())
+                    ridge(NearRidge, SolidColor(tint.copy(alpha = 0.09f)), (pages * NearDrift).dp.toPx())
                 }
             }
             Figure(figure, if (night) AlpineNight.Glacier else tint)
