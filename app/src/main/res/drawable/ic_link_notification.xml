@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Notification icon: the Karvo mountains as a white silhouette. -->
+<!-- Notification icon: the carved peak as a white silhouette. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp" android:height="24dp" android:viewportWidth="72" android:viewportHeight="54">
-    <path android:fillColor="#FFFFFFFF" android:pathData="M18,14 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 Z" />
-    <path android:fillColor="#FFFFFFFF" android:pathData="M34,4 L62,50 L6,50 Z" />
-    <path android:fillColor="#FFFFFFFF" android:pathData="M52,22 L66,50 L46,50 Z" />
+    android:width="24dp" android:height="24dp" android:viewportWidth="60" android:viewportHeight="60">
+    <group android:translateX="-24" android:translateY="-21.5">
+        <path android:fillColor="#FFFFFFFF" android:pathData="M27.3,41 a6.2,6.2 0 1,0 12.4,0 a6.2,6.2 0 1,0 -12.4,0 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M25,75 L53,28 C61.5,39 62.5,47.5 55,54.5 C48,61 49.5,68 57,75 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M56.6,33.6 L83,75 L63.5,75 C55.5,68.5 54,62.5 60.5,56.5 C68,49.5 66,41.5 56.6,33.6 Z" />
+    </group>
 </vector>
