@@ -11,7 +11,8 @@ import androidx.core.splashscreen.SplashScreenViewProvider
 const val SPLASH_MAX_WAIT_MS = 1_500L
 
 /** Length of the animated splash logo (values-v31/themes.xml, drawable/splash_logo_animated.xml); older Android shows a still logo. */
-const val SPLASH_ANIMATION_MS = 900L
+// 1000 ms of animation, then the finished logo stays a moment before the exit.
+const val SPLASH_ANIMATION_MS = 1_400L
 
 /**
  * The splash stays until its animation has played ([minShowMs]) and the theme is known (so the first frame has
@@ -30,7 +31,7 @@ fun animateSplashExit(provider: SplashScreenViewProvider) {
         animators += ObjectAnimator.ofFloat(icon, View.SCALE_Y, 1f, 1.14f)
     }
     AnimatorSet().apply {
-        duration = 400
+        duration = 600
         interpolator = DecelerateInterpolator(1.5f)
         playTogether(animators.toList())
         doOnEnd { provider.remove() }

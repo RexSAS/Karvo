@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Splash logo (Android 12+), "sunrise on the summit", 900 ms: a dark peak appears, first light runs down its two
+<!-- Splash logo (Android 12+), "sunrise on the summit", 1000 ms (the most Android allows): a dark peak appears, first light runs down its two
      faces from the summit while a gold spark follows the carve, then the sun rises.
      At rest this is the finished logo; every animation first jumps to its hidden start. So a phone that does not
      play it ("Remove animations" ends it at once) still shows the logo, never an empty splash.
@@ -80,25 +80,25 @@
     </aapt:attr>
     <target android:name="ghost_lit">
         <aapt:attr name="android:animation">
-            <objectAnimator android:duration="120" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1" />
+            <objectAnimator android:duration="133" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1" />
         </aapt:attr>
     </target>
     <target android:name="ghost_shade">
         <aapt:attr name="android:animation">
-            <objectAnimator android:duration="120" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1" />
+            <objectAnimator android:duration="133" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1" />
         </aapt:attr>
     </target>
     <target android:name="reveal">
         <aapt:attr name="android:animation">
             <set android:ordering="sequentially">
                 <objectAnimator
-                    android:duration="80"
+                    android:duration="89"
                     android:propertyName="pathData"
                     android:valueFrom="M0,26 L108,26 L108,26 L0,26 Z"
                     android:valueTo="M0,26 L108,26 L108,26 L0,26 Z"
                     android:valueType="pathType" />
                 <objectAnimator
-                    android:duration="540"
+                    android:duration="600"
                     android:interpolator="@android:interpolator/fast_out_slow_in"
                     android:propertyName="pathData"
                     android:valueFrom="M0,26 L108,26 L108,26 L0,26 Z"
@@ -111,18 +111,18 @@
         <aapt:attr name="android:animation">
             <set>
                 <set android:ordering="sequentially">
-                    <objectAnimator android:duration="80" android:propertyName="trimPathEnd" android:valueFrom="0" android:valueTo="0" />
+                    <objectAnimator android:duration="89" android:propertyName="trimPathEnd" android:valueFrom="0" android:valueTo="0" />
                     <objectAnimator
-                        android:duration="420"
+                        android:duration="467"
                         android:interpolator="@android:interpolator/fast_out_slow_in"
                         android:propertyName="trimPathEnd"
                         android:valueFrom="0"
                         android:valueTo="1" />
                 </set>
                 <set android:ordering="sequentially">
-                    <objectAnimator android:duration="220" android:propertyName="trimPathStart" android:valueFrom="0" android:valueTo="0" />
+                    <objectAnimator android:duration="244" android:propertyName="trimPathStart" android:valueFrom="0" android:valueTo="0" />
                     <objectAnimator
-                        android:duration="400"
+                        android:duration="444"
                         android:interpolator="@android:interpolator/fast_out_slow_in"
                         android:propertyName="trimPathStart"
                         android:valueFrom="0"
@@ -134,9 +134,9 @@
     <target android:name="sun">
         <aapt:attr name="android:animation">
             <set android:ordering="sequentially">
-                <objectAnimator android:duration="560" android:propertyName="translateY" android:valueFrom="11" android:valueTo="11" />
+                <objectAnimator android:duration="622" android:propertyName="translateY" android:valueFrom="11" android:valueTo="11" />
                 <objectAnimator
-                    android:duration="340"
+                    android:duration="378"
                     android:interpolator="@android:interpolator/overshoot"
                     android:propertyName="translateY"
                     android:valueFrom="11"
@@ -147,8 +147,8 @@
     <target android:name="sun_disc">
         <aapt:attr name="android:animation">
             <set android:ordering="sequentially">
-                <objectAnimator android:duration="560" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="0" />
-                <objectAnimator android:duration="140" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1" />
+                <objectAnimator android:duration="622" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="0" />
+                <objectAnimator android:duration="156" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1" />
             </set>
         </aapt:attr>
     </target>
