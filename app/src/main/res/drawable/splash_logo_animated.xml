@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Splash logo (Android 12+): the peaks rise from the ground, then a gold sun appears. ~800 ms in total. -->
+<!-- Splash logo (Android 12+), "sunrise on the summit", 900 ms: a dark peak appears, first light runs down its two
+     faces from the summit while a gold spark follows the carve, then the sun rises.
+     At rest this is the finished logo; every animation first jumps to its hidden start. So a phone that does not
+     play it ("Remove animations" ends it at once) still shows the logo, never an empty splash.
+     The same mark as ic_launcher_foreground: inside the 160dp circle of the 240dp splash icon. -->
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt">
     <aapt:attr name="android:drawable">
@@ -9,74 +13,142 @@
             android:viewportWidth="108"
             android:viewportHeight="108">
             <group
-                android:name="sun"
-                android:pivotX="38"
-                android:pivotY="40"
-                android:scaleX="0"
-                android:scaleY="0">
-                <path
-                    android:fillColor="#E8B964"
-                    android:pathData="M33,40 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 Z" />
-            </group>
-            <group
-                android:name="small_peak"
-                android:pivotX="72"
-                android:pivotY="76"
-                android:scaleY="0">
-                <path
-                    android:fillColor="#E3F2FD"
-                    android:pathData="M72,48 L86,76 L58,76 Z" />
-            </group>
-            <group
-                android:name="main_peak"
                 android:pivotX="54"
-                android:pivotY="76"
-                android:scaleY="0">
+                android:pivotY="54"
+                android:scaleX="0.86"
+                android:scaleY="0.86"
+                android:translateY="1.5">
+                <!-- The peak before sunrise -->
                 <path
-                    android:fillColor="#FFFFFF"
-                    android:pathData="M54,30 L82,76 L26,76 Z" />
+                    android:name="ghost_lit"
+                    android:fillColor="#1C2658"
+                    android:pathData="M25,75 L53,28 C61.5,39 62.5,47.5 55,54.5 C48,61 49.5,68 57,75 Z" />
+                <path
+                    android:name="ghost_shade"
+                    android:fillColor="#151D48"
+                    android:pathData="M56.6,33.6 L83,75 L63.5,75 C55.5,68.5 54,62.5 60.5,56.5 C68,49.5 66,41.5 56.6,33.6 Z" />
+                <!-- The two faces in first light, uncovered from the summit down -->
+                <group>
+                    <clip-path
+                        android:name="reveal"
+                        android:pathData="M0,26 L108,26 L108,77 L0,77 Z" />
+                    <path android:pathData="M25,75 L53,28 C61.5,39 62.5,47.5 55,54.5 C48,61 49.5,68 57,75 Z">
+                        <aapt:attr name="android:fillColor">
+                            <gradient
+                                android:endX="0"
+                                android:endY="75"
+                                android:startX="0"
+                                android:startY="28"
+                                android:type="linear">
+                                <item android:color="#FFFFE7BF" android:offset="0" />
+                                <item android:color="#FFFFFFFF" android:offset="0.3" />
+                                <item android:color="#FFDCE6F8" android:offset="1" />
+                            </gradient>
+                        </aapt:attr>
+                    </path>
+                    <path android:pathData="M56.6,33.6 L83,75 L63.5,75 C55.5,68.5 54,62.5 60.5,56.5 C68,49.5 66,41.5 56.6,33.6 Z">
+                        <aapt:attr name="android:fillColor">
+                            <gradient
+                                android:endX="0"
+                                android:endY="75"
+                                android:startX="0"
+                                android:startY="33.6"
+                                android:type="linear">
+                                <item android:color="#FFA9D6FF" android:offset="0" />
+                                <item android:color="#FF5B8DDC" android:offset="1" />
+                            </gradient>
+                        </aapt:attr>
+                    </path>
+                </group>
+                <!-- The gold spark that runs down the carve (nothing of it is left at the end) -->
+                <path
+                    android:name="spark"
+                    android:pathData="M54.8,30 C63.5,40.5 64.5,48 57.7,55.5 C51,62.5 52,68.5 60.2,75"
+                    android:strokeColor="#F4C06A"
+                    android:strokeLineCap="round"
+                    android:strokeWidth="1.8"
+                    android:trimPathEnd="1"
+                    android:trimPathStart="1" />
+                <group android:name="sun">
+                    <path
+                        android:name="sun_disc"
+                        android:fillColor="#F4C06A"
+                        android:pathData="M27.3,41 a6.2,6.2 0 1,0 12.4,0 a6.2,6.2 0 1,0 -12.4,0 Z" />
+                </group>
             </group>
         </vector>
     </aapt:attr>
-    <target android:name="main_peak">
+    <target android:name="ghost_lit">
         <aapt:attr name="android:animation">
-            <objectAnimator
-                android:duration="350"
-                android:interpolator="@android:interpolator/decelerate_cubic"
-                android:propertyName="scaleY"
-                android:startOffset="100"
-                android:valueFrom="0"
-                android:valueTo="1" />
+            <objectAnimator android:duration="120" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1" />
         </aapt:attr>
     </target>
-    <target android:name="small_peak">
+    <target android:name="ghost_shade">
         <aapt:attr name="android:animation">
-            <objectAnimator
-                android:duration="300"
-                android:interpolator="@android:interpolator/decelerate_cubic"
-                android:propertyName="scaleY"
-                android:startOffset="300"
-                android:valueFrom="0"
-                android:valueTo="1" />
+            <objectAnimator android:duration="120" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1" />
+        </aapt:attr>
+    </target>
+    <target android:name="reveal">
+        <aapt:attr name="android:animation">
+            <set android:ordering="sequentially">
+                <objectAnimator
+                    android:duration="80"
+                    android:propertyName="pathData"
+                    android:valueFrom="M0,26 L108,26 L108,26 L0,26 Z"
+                    android:valueTo="M0,26 L108,26 L108,26 L0,26 Z"
+                    android:valueType="pathType" />
+                <objectAnimator
+                    android:duration="540"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="pathData"
+                    android:valueFrom="M0,26 L108,26 L108,26 L0,26 Z"
+                    android:valueTo="M0,26 L108,26 L108,77 L0,77 Z"
+                    android:valueType="pathType" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="spark">
+        <aapt:attr name="android:animation">
+            <set>
+                <set android:ordering="sequentially">
+                    <objectAnimator android:duration="80" android:propertyName="trimPathEnd" android:valueFrom="0" android:valueTo="0" />
+                    <objectAnimator
+                        android:duration="420"
+                        android:interpolator="@android:interpolator/fast_out_slow_in"
+                        android:propertyName="trimPathEnd"
+                        android:valueFrom="0"
+                        android:valueTo="1" />
+                </set>
+                <set android:ordering="sequentially">
+                    <objectAnimator android:duration="220" android:propertyName="trimPathStart" android:valueFrom="0" android:valueTo="0" />
+                    <objectAnimator
+                        android:duration="400"
+                        android:interpolator="@android:interpolator/fast_out_slow_in"
+                        android:propertyName="trimPathStart"
+                        android:valueFrom="0"
+                        android:valueTo="1" />
+                </set>
+            </set>
         </aapt:attr>
     </target>
     <target android:name="sun">
         <aapt:attr name="android:animation">
-            <set>
+            <set android:ordering="sequentially">
+                <objectAnimator android:duration="560" android:propertyName="translateY" android:valueFrom="11" android:valueTo="11" />
                 <objectAnimator
-                    android:duration="250"
+                    android:duration="340"
                     android:interpolator="@android:interpolator/overshoot"
-                    android:propertyName="scaleX"
-                    android:startOffset="550"
-                    android:valueFrom="0"
-                    android:valueTo="1" />
-                <objectAnimator
-                    android:duration="250"
-                    android:interpolator="@android:interpolator/overshoot"
-                    android:propertyName="scaleY"
-                    android:startOffset="550"
-                    android:valueFrom="0"
-                    android:valueTo="1" />
+                    android:propertyName="translateY"
+                    android:valueFrom="11"
+                    android:valueTo="0" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="sun_disc">
+        <aapt:attr name="android:animation">
+            <set android:ordering="sequentially">
+                <objectAnimator android:duration="560" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="0" />
+                <objectAnimator android:duration="140" android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1" />
             </set>
         </aapt:attr>
     </target>
