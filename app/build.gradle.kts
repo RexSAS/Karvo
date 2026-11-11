@@ -94,6 +94,11 @@ android {
     sourceSets["debug"].assets.srcDir("$projectDir/schemas")
 }
 
+// The preview build is the same code as release: no need to run the unit tests a third time.
+androidComponents {
+    beforeVariants(selector().withBuildType("preview")) { (it as com.android.build.api.variant.HasUnitTestBuilder).enableUnitTest = false }
+}
+
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
 dependencies {
