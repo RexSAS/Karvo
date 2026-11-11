@@ -5,6 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 
-/** Accent gold; on light surfaces it darkens to keep text at 4.5:1. */
+/** Accent gold (the summit gold); on light surfaces it darkens to keep text at 4.5:1. */
 @Composable
-fun accentGold(): Color = if (MaterialTheme.colorScheme.surface.luminance() > 0.5f) Color(0xFF946B00) else Color(0xFFFFC107)
+fun accentGold(): Color = if (MaterialTheme.colorScheme.surface.luminance() > 0.5f) Color(0xFF946B00) else Color(0xFFF4C06A)

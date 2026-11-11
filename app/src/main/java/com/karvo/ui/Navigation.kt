@@ -6,7 +6,35 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.graphicsLayer
+import com.karvo.ui.theme.KarvoMotion
+import kotlinx.coroutines.delay
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -18,10 +46,6 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -120,9 +144,10 @@ private const val PAGE_LESSONS = 0
 private const val PAGE_OVERVIEW = 1
 private const val PAGE_SETTINGS = 2
 
+/** [splashLeaving] turns true when the splash starts to fade: the first screen then rises into place. */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun KarvoNavHost() {
+fun KarvoNavHost(splashLeaving: Boolean = false) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -131,6 +156,18 @@ fun KarvoNavHost() {
     val pagerState = rememberPagerState { tabs.size }
     val pagerScope = rememberCoroutineScope()
     val goToPage: (Int) -> Unit = { page -> pagerScope.launch { pagerState.animateScrollToPage(page) } }
+
+    // The pages rise in as the splash leaves, the tab bar a moment later. At rest (and if no splash ever leaves) both are in place.
+    val arrive = remember { Animatable(1f) }
+    val arriveBar = remember { Animatable(1f) }
+    LaunchedEffect(splashLeaving) {
+        if (!splashLeaving) return@LaunchedEffect
+        arrive.snapTo(0f); arriveBar.snapTo(0f)
+        launch { arrive.animateTo(1f, tween(KarvoMotion.Long, easing = KarvoMotion.Ease)) }
+        delay(120)
+        arriveBar.animateTo(1f, tween(KarvoMotion.Long, easing = KarvoMotion.Ease))
+    }
+    fun Modifier.arriving(progress: Animatable<Float, *>) = graphicsLayer { alpha = progress.value; translationY = (1f - progress.value) * 24.dp.toPx() }
 
     // Outside the NavHost, so this ViewModel is scoped to the activity and the update flow survives navigation.
     val updateViewModel: UpdateViewModel? =
@@ -183,21 +220,7 @@ fun KarvoNavHost() {
             SnackbarHost(snackbarHostState, if (showBar) Modifier else Modifier.navigationBarsPadding())
         },
         bottomBar = {
-            if (showBar) {
-                NavigationBar(containerColor = if (isAlpineNight()) AlpineNight.NavBar else NavigationBarDefaults.containerColor) {
-                    tabs.forEachIndexed { page, tab ->
-                        NavigationBarItem(
-                            selected = pagerState.targetPage == page,
-                            onClick = { goToPage(page) },
-                            icon = { Icon(tab.icon, contentDescription = null) },
-                            label = { Text(stringResource(tab.labelRes)) },
-                            colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isAlpineNight()) 0.16f else 0.24f),
-                            ),
-                        )
-                    }
-                }
-            }
+            if (showBar) TabBar(selected = pagerState.targetPage, onSelect = goToPage, modifier = Modifier.arriving(arriveBar))
         },
     ) { padding ->
         // Every navigating callback is wrapped in dropUnlessResumed so double taps and taps during a
@@ -205,13 +228,14 @@ fun KarvoNavHost() {
         // Shared elements let a moment's photo and Share button fly between the day page and the viewer.
         SharedTransitionLayout {
         CompositionLocalProvider(LocalSharedTransition provides this) {
-        NavHost(navController, startDestination = ROUTE_HOME, modifier = Modifier.padding(padding)) {
+        // The NavHost fills the screen, so the backdrop continues behind the floating tab bar; the pages stop above it.
+        NavHost(navController, startDestination = ROUTE_HOME) {
             composable(ROUTE_HOME) { entry ->
                 // Back on Overview or Settings returns to Lessons; on Lessons it leaves the app as before.
                 BackHandler(enabled = pagerState.currentPage != PAGE_LESSONS) { goToPage(PAGE_LESSONS) }
-                // The sky stays still while the pages slide over it.
-                AlpineBackdrop(BackdropFigure.None) {
-                    HorizontalPager(pagerState, beyondViewportPageCount = 1) { page ->
+                // The sky stays still while the pages slide over it; the ranges drift a little with them.
+                AlpineBackdrop(BackdropFigure.None, drift = { pagerState.currentPage + pagerState.currentPageOffsetFraction }) {
+                    HorizontalPager(pagerState, Modifier.padding(padding).arriving(arrive), beyondViewportPageCount = 1) { page ->
                         val isCurrent = pagerState.settledPage == page
                         when (page) {
                             PAGE_LESSONS -> LessonsScreen(
@@ -343,6 +367,63 @@ fun KarvoNavHost() {
     if (currentRoute != ROUTE_HOME) tour.stop()
     TourOverlay(tour) { page -> goToPage(page) }
     }
+    }
+}
+
+/**
+ * The tab bar: a pill that floats over the backdrop. Each tab is a full-height touch target (64dp) and reads as a
+ * selectable tab, like Material's navigation bar did.
+ */
+@Composable
+private fun TabBar(selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
+    val night = isAlpineNight()
+    val shape = CircleShape
+    // The ground the bar stands on: the foot of the near ridge (the page colour in Classic). It starts a little above
+    // the bar, so the pages end softly instead of at a hard line.
+    val ground = if (night) AlpineNight.Ground else MaterialTheme.colorScheme.background
+    Row(
+        modifier
+            .drawBehind {
+                val rise = 28.dp.toPx()
+                drawRect(Brush.verticalGradient(listOf(ground.copy(alpha = 0f), ground), startY = -rise, endY = rise / 2),
+                    topLeft = Offset(0f, -rise), size = Size(size.width, size.height + rise))
+            }
+            .navigationBarsPadding()
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)
+            .fillMaxWidth()
+            .height(64.dp)
+            .shadow(12.dp, shape)
+            .clip(shape)
+            .background(if (night) AlpineNight.NavBar else MaterialTheme.colorScheme.surfaceContainer)
+            .then(if (night) Modifier.border(1.dp, Color.White.copy(alpha = 0.10f), shape) else Modifier)
+            .selectableGroup(),
+    ) {
+        tabs.forEachIndexed { page, tab ->
+            val on = selected == page
+            // Alpine Night marks the selected tab in glacier blue. Classic uses Material's own pair (on a plain dark
+            // theme the primary blue is too dim for small text).
+            val active = if (night) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            val tint by animateColorAsState(if (on) active else MaterialTheme.colorScheme.onSurfaceVariant, label = "tab")
+            Column(
+                Modifier.weight(1f).fillMaxHeight().selectable(selected = on, role = Role.Tab, onClick = { onSelect(page) }),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Box(
+                    Modifier.size(width = 56.dp, height = 28.dp)
+                        .background(
+                            when {
+                                !on -> Color.Transparent
+                                night -> MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                                else -> MaterialTheme.colorScheme.secondaryContainer
+                            },
+                            CircleShape,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) { Icon(tab.icon, contentDescription = null, tint = tint, modifier = Modifier.size(22.dp)) }
+                Text(stringResource(tab.labelRes), style = MaterialTheme.typography.labelMedium, color = tint, maxLines = 1)
+            }
+        }
     }
 }
 

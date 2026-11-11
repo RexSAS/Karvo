@@ -1,15 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher foreground: the carved peak in first light, kept inside the 66dp safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Main peak, kept inside the 66dp safe zone (21..87) -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,30 L82,76 L26,76 Z" />
-    <!-- Secondary peak -->
-    <path
-        android:fillColor="#E3F2FD"
-        android:pathData="M72,48 L86,76 L58,76 Z" />
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.86"
+        android:scaleY="0.86"
+        android:translateY="1.5">
+        <path
+            android:fillColor="#F4C06A"
+            android:pathData="M27.3,41 a6.2,6.2 0 1,0 12.4,0 a6.2,6.2 0 1,0 -12.4,0 Z" />
+        <!-- Sunlit face -->
+        <path android:pathData="M25,75 L53,28 C61.5,39 62.5,47.5 55,54.5 C48,61 49.5,68 57,75 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:endX="0"
+                    android:endY="75"
+                    android:startX="0"
+                    android:startY="28"
+                    android:type="linear">
+                    <item android:color="#FFFFE7BF" android:offset="0" />
+                    <item android:color="#FFFFFFFF" android:offset="0.3" />
+                    <item android:color="#FFDCE6F8" android:offset="1" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <!-- Shaded face -->
+        <path android:pathData="M56.6,33.6 L83,75 L63.5,75 C55.5,68.5 54,62.5 60.5,56.5 C68,49.5 66,41.5 56.6,33.6 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:endX="0"
+                    android:endY="75"
+                    android:startX="0"
+                    android:startY="33.6"
+                    android:type="linear">
+                    <item android:color="#FFA9D6FF" android:offset="0" />
+                    <item android:color="#FF5B8DDC" android:offset="1" />
+                </gradient>
+            </aapt:attr>
+        </path>
+    </group>
 </vector>

@@ -27,6 +27,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.semantics.semantics
+import com.karvo.ui.theme.isAlpineNight
+import com.karvo.ui.theme.rowNumber
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -55,12 +60,12 @@ import com.karvo.ui.theme.ScreenHeader
 import com.karvo.ui.theme.groupedShape
 import com.karvo.ui.theme.tileColor
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.karvo.data.Lesson
 import com.karvo.domain.monthTitle
+import com.karvo.ui.components.EmptyState
 import com.karvo.ui.components.LessonRow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -112,26 +117,37 @@ fun LessonsScreen(
         } else if (groups.isEmpty()) {
             Column(Modifier.fillMaxSize().padding(padding)) {
               notesCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-              Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                Text(
-                    stringResource(R.string.no_lessons_hint),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                )
-              }
+              EmptyState(stringResource(R.string.no_lessons_hint), Modifier.fillMaxSize().padding(32.dp))
             }
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 96.dp)) {
                 item(key = "notes") { notesCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
                 groups.forEach { group ->
                     item(key = "header-${group.month}") {
-                        Text(
-                            monthTitle(group.month).uppercase() + "  ·  " + formatDuration(group.totalMinutes) +
-                                (momentCounts[group.month]?.let { "  ·  📷 $it" } ?: ""),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(start = 20.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
-                        )
+                        // The month on the left; its moments (if any) and its hours on the right. Read as one line.
+                        Row(
+                            Modifier.padding(start = 20.dp, end = 24.dp, top = 20.dp, bottom = 8.dp).semantics(mergeDescendants = true) {},
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(monthTitle(group.month), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                            momentCounts[group.month]?.let { count ->
+                                Icon(
+                                    Icons.Filled.PhotoCamera,
+                                    contentDescription = stringResource(R.string.moments),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                                Text("$count", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(end = 8.dp))
+                            }
+                            Text(
+                                formatDuration(group.totalMinutes),
+                                style = MaterialTheme.typography.rowNumber,
+                                // Glacier blue in Alpine Night; Classic's primary can be too dim on a dark page.
+                                color = if (isAlpineNight()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                     itemsIndexed(group.lessons, key = { _, lesson -> lesson.id }) { index, lesson ->
                         SwipeToDeleteRow(

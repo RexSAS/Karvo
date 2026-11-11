@@ -90,6 +90,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.karvo.BuildConfig
 import com.karvo.ui.theme.ScreenHeader
+import com.karvo.ui.theme.AlpineTile
 import com.karvo.ui.theme.alpineFieldColors
 import com.karvo.domain.csvFileBytes
 import kotlinx.coroutines.CancellationException
@@ -237,148 +238,150 @@ fun SettingsScreen(
                     },
             )
 
-            ListItem(
-                colors = transparentRow(),
-                headlineContent = { Text(stringResource(R.string.time_zone)) },
-                supportingContent = { Text(state.timeZoneId) },
-                modifier = Modifier.clickable { showZonePicker = true },
-            )
-
-            ListItem(
-                colors = transparentRow(),
-                headlineContent = { Text(stringResource(R.string.season_start)) },
-                supportingContent = { Text(monthName(state.seasonStartMonth)) },
-                modifier = Modifier.clickable { showSeasonPicker = true },
-            )
-
-            ListItem(
-                colors = transparentRow(),
-                leadingContent = { Icon(Icons.Filled.Fingerprint, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.biometric_reveal)) },
-                supportingContent = {
-                    Text(stringResource(if (state.biometricAvailable) R.string.biometric_reveal_hint else R.string.biometric_unavailable))
-                },
-                trailingContent = {
-                    Switch(
-                        checked = state.biometricReveal && state.biometricAvailable,
-                        onCheckedChange = { viewModel.onBiometricRevealChange(it, biometricPromptTitle) },
-                        enabled = state.biometricAvailable,
-                    )
-                },
-            )
-
-            ListItem(
-                colors = transparentRow(),
-                headlineContent = { Text(stringResource(R.string.theme)) },
-                supportingContent = { Text(themeLabel(state.theme)) },
-                modifier = Modifier.clickable { showThemePicker = true },
-            )
-
-            ListItem(
-                colors = transparentRow(),
-                headlineContent = { Text(stringResource(R.string.language)) },
-                supportingContent = { Text(languageLabel(state.language)) },
-                modifier = Modifier.clickable { showLanguagePicker = true },
-            )
-
-            ListItem(
-                colors = transparentRow(),
-                leadingContent = { Icon(Icons.Filled.School, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.tour_again)) },
-                modifier = Modifier.clickable(onClick = onShowTour),
-            )
-
-            if (onCheckForUpdates != null) {
+            AlpineTile(Modifier.fillMaxWidth()) {
                 ListItem(
                     colors = transparentRow(),
-                    leadingContent = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
-                    headlineContent = { Text(stringResource(R.string.check_for_updates)) },
-                    supportingContent = { Text(stringResource(R.string.version, BuildConfig.VERSION_NAME)) },
-                    modifier = Modifier.clickable(onClick = onCheckForUpdates),
+                    headlineContent = { Text(stringResource(R.string.time_zone)) },
+                    supportingContent = { Text(state.timeZoneId) },
+                    modifier = Modifier.clickable { showZonePicker = true },
+                )
+                ListItem(
+                    colors = transparentRow(),
+                    headlineContent = { Text(stringResource(R.string.season_start)) },
+                    supportingContent = { Text(monthName(state.seasonStartMonth)) },
+                    modifier = Modifier.clickable { showSeasonPicker = true },
+                )
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.Fingerprint, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.biometric_reveal)) },
+                    supportingContent = {
+                        Text(stringResource(if (state.biometricAvailable) R.string.biometric_reveal_hint else R.string.biometric_unavailable))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = state.biometricReveal && state.biometricAvailable,
+                            onCheckedChange = { viewModel.onBiometricRevealChange(it, biometricPromptTitle) },
+                            enabled = state.biometricAvailable,
+                        )
+                    },
                 )
             }
 
-            ListItem(
-                colors = transparentRow(),
-                leadingContent = { Icon(Icons.Filled.Computer, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.linked_pcs)) },
-                supportingContent = { Text(stringResource(R.string.link_a_pc)) },
-                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                modifier = Modifier.tourTarget(TourTarget.LinkedPcs).clickable(onClick = onOpenLinkedPcs),
-            )
+            AlpineTile(Modifier.fillMaxWidth()) {
+                ListItem(
+                    colors = transparentRow(),
+                    headlineContent = { Text(stringResource(R.string.theme)) },
+                    supportingContent = { Text(themeLabel(state.theme)) },
+                    modifier = Modifier.clickable { showThemePicker = true },
+                )
+                ListItem(
+                    colors = transparentRow(),
+                    headlineContent = { Text(stringResource(R.string.language)) },
+                    supportingContent = { Text(languageLabel(state.language)) },
+                    modifier = Modifier.clickable { showLanguagePicker = true },
+                )
+            }
 
-            ListItem(
-                colors = transparentRow(),
-                leadingContent = { Icon(Icons.Filled.Restore, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.backups)) },
-                supportingContent = {
-                    Text(stringResource(R.string.backups_hint))
-                },
-                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                modifier = Modifier.tourTarget(TourTarget.Backups).clickable(onClick = onOpenBackups),
-            )
+            AlpineTile(Modifier.fillMaxWidth()) {
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.School, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.tour_again)) },
+                    modifier = Modifier.clickable(onClick = onShowTour),
+                )
+                if (onCheckForUpdates != null) {
+                    ListItem(
+                        colors = transparentRow(),
+                        leadingContent = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
+                        headlineContent = { Text(stringResource(R.string.check_for_updates)) },
+                        supportingContent = { Text(stringResource(R.string.version, BuildConfig.VERSION_NAME)) },
+                        modifier = Modifier.clickable(onClick = onCheckForUpdates),
+                    )
+                }
+            }
 
-            // A navigation-style row, not a filled button, so it doesn't read as "Save".
-            ListItem(
-                colors = transparentRow(),
-                leadingContent = { Icon(Icons.Filled.FileDownload, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.export_csv)) },
-                supportingContent = { Text(stringResource(R.string.export_csv_hint)) },
-                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                modifier = Modifier.clickable {
-                    scope.launch {
-                        val fileName = try {
-                            viewModel.exportFileName()
-                        } catch (e: CancellationException) {
-                            throw e
-                        } catch (e: Exception) {
-                            showMessage(failureMessage(e))
-                            return@launch
+            AlpineTile(Modifier.fillMaxWidth()) {
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.Computer, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.linked_pcs)) },
+                    supportingContent = { Text(stringResource(R.string.link_a_pc)) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.tourTarget(TourTarget.LinkedPcs).clickable(onClick = onOpenLinkedPcs),
+                )
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.Restore, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.backups)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.backups_hint))
+                    },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.tourTarget(TourTarget.Backups).clickable(onClick = onOpenBackups),
+                )
+                // A navigation-style row, not a filled button, so it doesn't read as "Save".
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.FileDownload, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.export_csv)) },
+                    supportingContent = { Text(stringResource(R.string.export_csv_hint)) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.clickable {
+                        scope.launch {
+                            val fileName = try {
+                                viewModel.exportFileName()
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                showMessage(failureMessage(e))
+                                return@launch
+                            }
+                            exportLauncher.launch(fileName)
                         }
-                        exportLauncher.launch(fileName)
-                    }
-                },
-            )
+                    },
+                )
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.FileUpload, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.import_csv)) },
+                    supportingContent = { Text(stringResource(R.string.import_csv_hint)) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.clickable {
+                        // Some file managers label CSV files as plain text or as a generic binary type.
+                        importLauncher.launch(arrayOf("text/*", "text/comma-separated-values", "application/octet-stream"))
+                    },
+                )
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.restore_moments)) },
+                    supportingContent = { Text(stringResource(R.string.restore_moments_hint)) },
+                    trailingContent = {
+                        if (restoringMoments) CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+                        else Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+                    },
+                    modifier = Modifier.clickable(enabled = !restoringMoments) { showRestoreConsent = true },
+                )
+            }
 
-            ListItem(
-                colors = transparentRow(),
-                leadingContent = { Icon(Icons.Filled.FileUpload, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.import_csv)) },
-                supportingContent = { Text(stringResource(R.string.import_csv_hint)) },
-                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                modifier = Modifier.clickable {
-                    // Some file managers label CSV files as plain text or as a generic binary type.
-                    importLauncher.launch(arrayOf("text/*", "text/comma-separated-values", "application/octet-stream"))
-                },
-            )
-
-            ListItem(
-                colors = transparentRow(),
-                leadingContent = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.restore_moments)) },
-                supportingContent = { Text(stringResource(R.string.restore_moments_hint)) },
-                trailingContent = {
-                    if (restoringMoments) CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
-                    else Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
-                },
-                modifier = Modifier.clickable(enabled = !restoringMoments) { showRestoreConsent = true },
-            )
-
-            ListItem(
-                colors = transparentRow(),
-                leadingContent = { Icon(Icons.Filled.PrivacyTip, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.privacy_policy)) },
-                supportingContent = { Text(stringResource(R.string.privacy_policy_hint)) },
-                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                modifier = Modifier.clickable {
-                    // The browser does the fetching, so this works in the Play build too (it has no internet permission).
-                    try {
-                        uriHandler.openUri(PRIVACY_POLICY_URL)
-                    } catch (_: Exception) {
-                        scope.launch { showMessage(context.getString(R.string.no_browser)) }
-                    }
-                },
-            )
+            AlpineTile(Modifier.fillMaxWidth()) {
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.PrivacyTip, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.privacy_policy)) },
+                    supportingContent = { Text(stringResource(R.string.privacy_policy_hint)) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.clickable {
+                        // The browser does the fetching, so this works in the Play build too (it has no internet permission).
+                        try {
+                            uriHandler.openUri(PRIVACY_POLICY_URL)
+                        } catch (_: Exception) {
+                            scope.launch { showMessage(context.getString(R.string.no_browser)) }
+                        }
+                    },
+                )
+            }
 
             Text(
                 stringResource(R.string.version, BuildConfig.VERSION_NAME),
@@ -481,7 +484,7 @@ private fun languageLabel(choice: LanguageChoice): String = when (choice) {
 @Composable
 private fun ThemeSwatch(choice: ThemeChoice) {
     val (fill, border) = when (choice) {
-        ThemeChoice.ALPINE_NIGHT -> Color(0xFF0B1220) to Color(0xFF7CC4FA)
+        ThemeChoice.ALPINE_NIGHT -> Color(0xFF080C1C) to Color(0xFF8CCBFF)
         ThemeChoice.CLASSIC -> Color(0xFF1565C0) to Color(0xFF1565C0)
     }
     Box(Modifier.size(20.dp).clip(CircleShape).background(fill).border(2.dp, border, CircleShape))

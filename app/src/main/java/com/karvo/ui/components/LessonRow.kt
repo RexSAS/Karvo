@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.karvo.R
 import com.karvo.data.Lesson
 import com.karvo.domain.formatDuration
+import com.karvo.ui.theme.rowNumber
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -46,7 +47,7 @@ fun LessonRow(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            Text(formatDuration(lesson.durationMinutes.toLong()), style = MaterialTheme.typography.titleMedium)
+            Text(formatDuration(lesson.durationMinutes.toLong()), style = MaterialTheme.typography.rowNumber)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -56,7 +57,7 @@ fun LessonRow(
                 modifier = Modifier.weight(1f),
             )
             if (showNotPaid) {
-                Text(stringResource(R.string.not_paid), style = MaterialTheme.typography.labelMedium, color = PartlyPaidColor)
+                Text(stringResource(R.string.not_paid), style = MaterialTheme.typography.labelMedium, color = partlyPaidColor())
             }
         }
         lesson.notes?.let {

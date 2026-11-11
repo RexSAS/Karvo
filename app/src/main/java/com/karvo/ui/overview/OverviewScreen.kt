@@ -5,7 +5,8 @@ import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import com.karvo.domain.Season
 import com.karvo.ui.components.PaidBadge
-import com.karvo.ui.components.PartlyPaidColor
+import com.karvo.ui.components.EmptyState
+import com.karvo.ui.components.partlyPaidColor
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,10 +47,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
 import com.karvo.domain.dayTitle
-import com.karvo.ui.theme.AlpineNight
 import com.karvo.ui.theme.GlassPanel
+import com.karvo.ui.theme.HorizonLine
+import com.karvo.ui.theme.KarvoMotion
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import com.karvo.ui.theme.bigDuration
+import com.karvo.ui.theme.rowNumber
 import com.karvo.ui.theme.ScreenHeader
 import com.karvo.ui.theme.groupedShape
 import com.karvo.ui.theme.isAlpineNight
@@ -86,7 +92,8 @@ fun OverviewScreen(
                     Icon(
                         painterResource(R.drawable.ic_emblem),
                         contentDescription = null,
-                        tint = if (isAlpineNight()) AlpineNight.Gold else MaterialTheme.colorScheme.tertiary,
+                        // Alpine Night shows the logo in its own colours; Classic tints it with the theme.
+                        tint = if (isAlpineNight()) Color.Unspecified else MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(width = 58.dp, height = 45.dp),
                     )
                 },
@@ -95,6 +102,11 @@ fun OverviewScreen(
     ) { padding ->
         // Still loading: show nothing rather than flashing 0m / — €.
         if (state.loading) return@Scaffold
+        // A glint runs along the horizon line each time the earnings come out.
+        val glint = remember { Animatable(1f) }
+        LaunchedEffect(state.revealed) {
+            if (state.revealed) { glint.snapTo(0f); glint.animateTo(1f, tween(KarvoMotion.Long, easing = KarvoMotion.Ease)) }
+        }
         val totalPanel: @Composable () -> Unit = {
             GlassPanel(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
                 Column(Modifier.padding(start = 18.dp, end = 8.dp, top = 16.dp, bottom = if (state.stats != null) 28.dp else 16.dp)) {
@@ -103,11 +115,16 @@ fun OverviewScreen(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Text(formatDuration(state.totalMinutes), style = MaterialTheme.typography.displaySmall)
+                    Text(
+                        bigDuration(formatDuration(state.totalMinutes), MaterialTheme.colorScheme.onSurfaceVariant),
+                        style = if (isAlpineNight()) MaterialTheme.typography.displayLarge else MaterialTheme.typography.displaySmall,
+                        maxLines = 1,
+                    )
+                    HorizonLine(Modifier.padding(end = 10.dp, top = 2.dp, bottom = 6.dp), glint = { glint.value })
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             earningsLabel(state.totalEarningsCents, state.revealed),
-                            style = MaterialTheme.typography.titleLarge,
+                            style = if (isAlpineNight()) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.weight(1f).clickable(onClick = { if (!state.rateSet) onOpenSettings() }),
                         )
@@ -148,7 +165,7 @@ fun OverviewScreen(
                                 earningsLabel(state.unpaid.earningsCents, state.revealed),
                             ),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = PartlyPaidColor,
+                            color = partlyPaidColor(),
                             modifier = Modifier.padding(top = 4.dp),
                         )
                     }
@@ -160,12 +177,7 @@ fun OverviewScreen(
             val stats = state.stats
             if (stats == null) {
                 item(key = "empty") {
-                    Text(
-                        stringResource(R.string.no_lessons),
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(top = 64.dp),
-                    )
+                    EmptyState(stringResource(R.string.no_lessons), Modifier.fillMaxWidth().padding(top = 32.dp))
                 }
                 return@LazyColumn
             }
@@ -198,7 +210,7 @@ fun OverviewScreen(
                             Text(monthTitle(row.summary.month), style = MaterialTheme.typography.titleMedium)
                             PaidBadge(row.summary.paidStatus)
                         }
-                        Text(formatDuration(row.summary.totalMinutes), style = MaterialTheme.typography.titleMedium)
+                        Text(formatDuration(row.summary.totalMinutes), style = MaterialTheme.typography.rowNumber)
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         val n = row.summary.lessonCount

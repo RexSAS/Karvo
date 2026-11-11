@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Kevin, the Karvo penguin: the snow in front of him. One of the layers ui/components/Kevin.kt stacks.
+     Made by docs/mascot/kevin.mjs: change him there, not here. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="150dp"
+    android:height="145dp"
+    android:viewportWidth="600"
+    android:viewportHeight="580">
+    <group android:translateX="28" android:translateY="44">
+        <path android:pathData="M-8,474 C6,446 34,430 66,432 C84,414 120,410 146,424 C172,408 214,408 238,424 C262,408 304,408 328,422 C354,408 394,408 418,424 C444,412 482,414 500,432 C528,432 548,450 552,474 C504,524 40,524 -8,474 Z" android:strokeColor="#0A1024" android:strokeWidth="3" android:strokeLineCap="round" android:strokeLineJoin="round">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="0" android:startY="408" android:endX="0" android:endY="512">
+                    <item android:offset="0" android:color="#FFFFFFFF" />
+                    <item android:offset="0.55" android:color="#FFEEF4FF" />
+                    <item android:offset="1" android:color="#FFBFD1F0" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M55,426 a15,15 0 1,0 30,0 a15,15 0 1,0 -30,0 Z" android:fillColor="#FFFFFF" />
+        <path android:pathData="M106,414 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0 Z" android:fillColor="#FFFFFF" />
+        <path android:pathData="M419,412 a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0 Z" android:fillColor="#FFFFFF" />
+        <path android:pathData="M459,424 a15,15 0 1,0 30,0 a15,15 0 1,0 -30,0 Z" android:fillColor="#FFFFFF" />
+        <path android:pathData="M237,414 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 Z" android:fillColor="#FFFFFF" />
+        <path android:pathData="M36,392 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z" android:fillColor="#FFFFFF" android:fillAlpha="0.8" />
+        <path android:pathData="M501.5,386 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0 Z" android:fillColor="#FFFFFF" android:fillAlpha="0.8" />
+        <path android:pathData="M17,420 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 Z" android:fillColor="#FFFFFF" android:fillAlpha="0.8" />
+    </group>
+</vector>

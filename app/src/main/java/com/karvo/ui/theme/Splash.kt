@@ -3,14 +3,16 @@ package com.karvo.ui.theme
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreenViewProvider
 
 /** Upper bound on how long the splash waits for the theme setting, so a slow disk never blocks the app. */
 const val SPLASH_MAX_WAIT_MS = 1_500L
 
-/** Length of the animated splash logo (values-v31/themes.xml); older Android shows a still logo. */
-const val SPLASH_ANIMATION_MS = 800L
+/** Length of the animated splash logo (values-v31/themes.xml, drawable/splash_logo_animated.xml); older Android shows a still logo. */
+// 1000 ms of animation, then the finished logo stays a moment before the exit.
+const val SPLASH_ANIMATION_MS = 1_400L
 
 /**
  * The splash stays until its animation has played ([minShowMs]) and the theme is known (so the first frame has
@@ -25,11 +27,12 @@ fun animateSplashExit(provider: SplashScreenViewProvider) {
     val icon: View? = runCatching { provider.iconView }.getOrNull()
     val animators = mutableListOf(ObjectAnimator.ofFloat(splash, View.ALPHA, 1f, 0f))
     if (icon != null) {
-        animators += ObjectAnimator.ofFloat(icon, View.SCALE_X, 1f, 1.15f)
-        animators += ObjectAnimator.ofFloat(icon, View.SCALE_Y, 1f, 1.15f)
+        animators += ObjectAnimator.ofFloat(icon, View.SCALE_X, 1f, 1.14f)
+        animators += ObjectAnimator.ofFloat(icon, View.SCALE_Y, 1f, 1.14f)
     }
     AnimatorSet().apply {
-        duration = 300
+        duration = 600
+        interpolator = DecelerateInterpolator(1.5f)
         playTogether(animators.toList())
         doOnEnd { provider.remove() }
         start()

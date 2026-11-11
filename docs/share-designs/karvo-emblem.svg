@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Karvo emblem: outlined peaks with a snow line and a filled sun. White; recolour with a Color Overlay in Photoshop. -->
+<!-- Karvo emblem, "the carved peak": a summit split by one ski carve, with the sun. White (the shaded face is lighter);
+     recolour with a Color Overlay in Photoshop. Same drawing as app/src/main/res/drawable/ic_emblem.xml. -->
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="560" viewBox="0 0 72 56">
-  <path d="M6,50 L34,4 L48.8,28.4 L52,22 L66,50 Z" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linejoin="round"/>
-  <path d="M25.5,18 L30,20.5 L34,16 L38.5,20 L41.5,17.5" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="16" cy="14" r="5" fill="#FFFFFF"/>
+  <g transform="translate(-26.64 -31.74) scale(1.16)" fill="#FFFFFF">
+    <circle cx="33.5" cy="41" r="6.2"/>
+    <path d="M25,75 L53,28 C61.5,39 62.5,47.5 55,54.5 C48,61 49.5,68 57,75 Z"/>
+    <path d="M56.6,33.6 L83,75 L63.5,75 C55.5,68.5 54,62.5 60.5,56.5 C68,49.5 66,41.5 56.6,33.6 Z" opacity=".6"/>
+  </g>
 </svg>

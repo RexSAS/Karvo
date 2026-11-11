@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Kevin, the Karvo penguin: the snow behind him. One of the layers ui/components/Kevin.kt stacks.
+     Made by docs/mascot/kevin.mjs: change him there, not here. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="150dp"
+    android:height="145dp"
+    android:viewportWidth="600"
+    android:viewportHeight="580">
+    <group android:translateX="28" android:translateY="44">
+        <path android:pathData="M10,500 a262,20 0 1,0 524,0 a262,20 0 1,0 -524,0 Z" android:fillColor="#000000" android:fillAlpha="0.22" />
+        <path android:pathData="M-4,470 C20,432 70,402 130,398 C170,380 230,378 270,388 C320,376 380,378 420,394 C480,398 526,430 548,470 C500,512 40,512 -4,470 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="0" android:startY="378" android:endX="0" android:endY="502">
+                    <item android:offset="0" android:color="#FFDCE7FA" />
+                    <item android:offset="1" android:color="#FFA9BFE6" />
+                </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+</vector>

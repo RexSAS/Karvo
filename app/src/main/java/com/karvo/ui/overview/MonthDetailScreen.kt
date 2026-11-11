@@ -24,7 +24,7 @@ import androidx.compose.foundation.clickable
 import com.karvo.domain.PaidStatus
 import com.karvo.domain.pickerMillisToLocalDate
 import com.karvo.domain.toPickerMillis
-import com.karvo.ui.components.PartlyPaidColor
+import com.karvo.ui.components.partlyPaidColor
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import com.karvo.ui.theme.AlpineTile
@@ -173,7 +173,7 @@ private fun PaidRow(state: MonthDetailUiState, onToggle: () -> Unit) {
                     state.paidStatus == PaidStatus.PARTLY_PAID -> Text(
                         stringResource(R.string.partly_paid) + (date?.let { " · " + stringResource(R.string.paid_on, it) } ?: ""),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = PartlyPaidColor,
+                        color = partlyPaidColor(),
                     )
                     date != null -> Text(
                         stringResource(R.string.paid_on, date),

@@ -8,10 +8,10 @@ import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Shader
-import android.graphics.Typeface
 import android.net.Uri
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.content.res.ResourcesCompat
 import com.karvo.R
 import java.io.File
 import kotlin.math.roundToInt
@@ -77,9 +77,9 @@ private fun banner(context: Context, photo: Bitmap, date: String, story: Boolean
         drawRect(0f, fadeTop, w, h, fade)
         val base = if (story) h * 0.84f else h - 6 * u
         emblem(context, WHITE, 6 * u, base - 6 * u, 7 * u)
-        val name = text(5.5f * u, WHITE, bold = true, spacing = 0.25f)
+        val name = text(context, 5.5f * u, WHITE, weight = 600, spacing = 0.22f)
         outlinedText("KARVO", 6 * u + 7 * u * EMBLEM_ASPECT + 2.5f * u, base - 0.6f * u, name, 0.35f * u)
-        outlinedText(date, w - 6 * u, base - 0.6f * u, text(3.4f * u, 0xD9FFFFFF.toInt()).apply { textAlign = Paint.Align.RIGHT }, 0.3f * u)
+        outlinedText(date, w - 6 * u, base - 0.6f * u, text(context, 3.6f * u, 0xD9FFFFFF.toInt()).apply { textAlign = Paint.Align.RIGHT }, 0.3f * u)
     }
 }
 
@@ -113,7 +113,7 @@ private fun frame(context: Context, photo: Bitmap, date: String): Bitmap {
         template.date?.let { box ->
             save()
             rotate(template.tilt, box.cx, box.cy)
-            val paint = text(box.height * 0.8f, NIGHT).apply { textAlign = Paint.Align.CENTER }
+            val paint = text(context, box.height * 0.8f, NIGHT, weight = 500).apply { textAlign = Paint.Align.CENTER }
             // A long date shrinks to fit the box.
             paint.measureText(date).let { if (it > box.width) paint.textSize *= box.width / it }
             drawText(date, box.cx, box.cy - (paint.ascent() + paint.descent()) / 2, paint)
@@ -193,11 +193,13 @@ private fun Canvas.outlinedText(text: String, x: Float, y: Float, paint: Paint, 
     drawText(text, x, y, paint)
 }
 
-private fun text(size: Float, color: Int, bold: Boolean = false, spacing: Float = 0f) = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+/** Text in Jost, the app's display font (one variable file), at [weight]. */
+private fun text(context: Context, size: Float, color: Int, weight: Int = 400, spacing: Float = 0f) = Paint(Paint.ANTI_ALIAS_FLAG).apply {
     textSize = size
     this.color = color
     letterSpacing = spacing
-    if (bold) typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+    typeface = ResourcesCompat.getFont(context, R.font.jost)
+    fontVariationSettings = "'wght' $weight"
 }
 
 /** The Karvo emblem in [color], [height] tall, with its top-left corner at [x], [y]. */
