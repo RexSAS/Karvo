@@ -82,7 +82,12 @@ fun SummaryTiles(stats: OverviewStats, modifier: Modifier = Modifier) {
 private fun SummaryCard(value: String, label: String, modifier: Modifier) {
     AlpineTile(modifier.fillMaxHeight(), shape = TileShape) {
         Column(Modifier.padding(12.dp)) {
-            Text(value, style = MaterialTheme.typography.headlineMedium, maxLines = 1)
+            // Narrow phones: shrink until it fits on one line ("1h 42m" used to break and show only "1h").
+            val base = MaterialTheme.typography.headlineMedium
+            var style by remember(value, base) { mutableStateOf(base) }
+            Text(value, style = style, maxLines = 1, softWrap = false, onTextLayout = {
+                if (it.didOverflowWidth && style.fontSize > base.fontSize * 0.5f) style = style.copy(fontSize = style.fontSize * 0.9f)
+            })
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
