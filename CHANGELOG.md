@@ -2,6 +2,11 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.3.1] — 2026-11-12
+
+### Fixed
+- On smaller phones the Overview tiles cut the average lesson to the hours ("1h" instead of "1h 42m"). The numbers now shrink to fit.
+
 ## [3.3] — 2026-11-11
 
 ### Changed

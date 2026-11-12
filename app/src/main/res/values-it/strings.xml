@@ -317,6 +317,7 @@
         <item>Un nuovo look: il cielo all\'alba sopra le montagne, un nuovo logo e una nuova icona.</item>
         <item>Ecco Kevin, il pinguino di Karvo. Dorme nella neve dove non c\'è ancora niente.</item>
         <item>Numeri più chiari, una barra delle schede più pulita, e le foto si condividono con il nuovo logo.</item>
+        <item>Sui telefoni più piccoli la lezione media in Panoramica si vede di nuovo per intero (mostrava solo le ore).</item>
     </string-array>
     <string name="play_update_ready_title">Aggiornamento pronto</string>
     <string name="play_update_ready_text">La nuova versione di Karvo è scaricata. Riavviare ora per usarla? Le tue lezioni restano come sono.</string>
