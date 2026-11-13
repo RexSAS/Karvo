@@ -1,5 +1,9 @@
 package com.karvo.ui.edit
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.runtime.LaunchedEffect
 import com.karvo.ui.theme.underBars
 import com.karvo.ui.theme.headerFade
 import androidx.compose.ui.res.stringResource
@@ -61,7 +65,7 @@ import java.util.Locale
 
 private val QUICK_PICKS = listOf(60 to "1h", 90 to "1h 30m", 120 to "2h", 180 to "3h")
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
     val vm: EditLessonViewModel = viewModel(factory = EditLessonViewModel.factory(lessonId))
@@ -69,6 +73,9 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
     var showDatePicker by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var studentMenuOpen by remember { mutableStateOf(false) }
+    // The suggestions go away with the keyboard (closed with back, or by tapping elsewhere); typing opens them again.
+    val keyboardUp = WindowInsets.isImeVisible
+    LaunchedEffect(keyboardUp) { if (!keyboardUp) studentMenuOpen = false }
 
     val durationErrors = if (state.durationTouched) {
         state.errors.filter { it != LessonError.StudentBlank }
