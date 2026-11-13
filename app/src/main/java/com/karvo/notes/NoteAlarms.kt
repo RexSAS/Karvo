@@ -2,7 +2,9 @@ package com.karvo.notes
 
 import java.time.Clock
 import com.karvo.domain.seasonStartDays
-import androidx.core.graphics.drawable.toBitmap
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import kotlin.math.roundToInt
 import android.Manifest
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -117,13 +119,31 @@ class NoteAlarms(
             nm.createNotificationChannel(NotificationChannel(SEASON_CHANNEL, app.getString(R.string.season_channel), NotificationManager.IMPORTANCE_DEFAULT))
         val open = PendingIntent.getActivity(app, 1, Intent(app, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
         val text = app.getString(R.string.season_start_text)
-        val kevin = ContextCompat.getDrawable(app, R.drawable.kevin_head_idle)?.toBitmap(240, 232)
+        val kevin = kevinIcon()
         NotificationManagerCompat.from(app).notify(SEASON_NOTIFICATION_ID, NotificationCompat.Builder(app, SEASON_CHANNEL)
             .setSmallIcon(R.drawable.ic_link_notification)
             .setLargeIcon(kevin)
             .setContentTitle(app.getString(R.string.season_start_title))
             .setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setContentIntent(open).setAutoCancel(true).build())
+    }
+
+    /**
+     * Kevin with snow on his beanie, coming out of his snow mound, cropped tight so he fills the notification's picture.
+     * The photobomb layers, drawn without a photo: the lens keeps its own blue.
+     */
+    private fun kevinIcon(size: Int = 256): Bitmap {
+        // In his drawables' 600 x 580 viewport: the beanie's snow starts near y 50 and the snow under him shows down to
+        // about y 548; his head spans x 88..528. Fit that height, centred on his head; the mound's far sides run off.
+        val scale = size / 498f
+        val left = (size / 2f - 308 * scale).roundToInt()
+        val top = (-50 * scale).roundToInt()
+        return Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888).also { bitmap ->
+            val canvas = Canvas(bitmap)
+            for (id in listOf(R.drawable.kevin_photobomb_under, R.drawable.kevin_photobomb_over)) {
+                ContextCompat.getDrawable(app, id)!!.apply { setBounds(left, top, left + (600 * scale).roundToInt(), top + (580 * scale).roundToInt()) }.draw(canvas)
+            }
+        }
     }
 
     private companion object {
