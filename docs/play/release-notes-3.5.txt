@@ -1,0 +1,16 @@
+<en-US>
+• Overview opens on this season: tap the season next to the title for a past one, or everything
+• Tap a student on the podium for all their hours and lessons
+• Swipe right to go back
+• Season start: a "Season is starting!" note from Kevin and a look back at last season
+• Photobomb: share a photo with Kevin in the corner
+• A cleaner logo and smoother lists
+</en-US>
+<it-IT>
+• La Panoramica si apre su questa stagione: tocca la stagione accanto al titolo per una passata, o tutto
+• Tocca un allievo sul podio per tutte le sue ore e lezioni
+• Scorri a destra per tornare indietro
+• Inizio stagione: un "La stagione sta iniziando!" da Kevin e uno sguardo alla stagione scorsa
+• Photobomb: condividi una foto con Kevin nell'angolo
+• Un logo più pulito e liste più morbide
+</it-IT>
