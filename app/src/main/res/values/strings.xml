@@ -317,10 +317,10 @@
     <string name="tour_pc_body">Open karvo.rxsas.it on your computer and link it here by scanning the code.</string>
     <string name="whats_new_title">What\'s new in %1$s</string>
     <string-array name="whats_new_items">
+        <item>New way to share a photo: Photobomb. Kevin pops up in the corner of your story, with your photo in his goggles.</item>
         <item>A new look: the sky at first light over the mountains, a new logo and a new app icon.</item>
         <item>Meet Kevin, the Karvo penguin. He sleeps in the snow where there is nothing yet.</item>
         <item>Clearer numbers, a calmer tab bar, and your photos share with the new logo.</item>
-        <item>On smaller phones the average lesson on Overview shows in full again (it showed only the hours).</item>
     </string-array>
     <string name="play_update_ready_title">Update ready</string>
     <string name="play_update_ready_text">The new version of Karvo is downloaded. Restart now to use it? Your lessons stay as they are.</string>

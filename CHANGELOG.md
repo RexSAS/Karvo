@@ -2,6 +2,11 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.4] — 2026-11-13
+
+### Added
+- **Photobomb**, a new way to share a moment, and the first one in the share picker: your photo fills an Instagram-story-sized picture, Kevin pops up in the bottom-right corner with your photo reflected in his goggles, and **KARVO** with the day sits bottom-left in navy with a white border. Share it as a story or to any app, like Frame and Banner.
+
 ## [3.3.1] — 2026-11-12
 
 ### Fixed
