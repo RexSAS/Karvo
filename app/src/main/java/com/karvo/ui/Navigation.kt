@@ -1,5 +1,7 @@
 package com.karvo.ui
 
+import com.karvo.domain.studentKey
+import com.karvo.ui.overview.StudentScreen
 import com.karvo.ui.components.swipeBack
 import com.karvo.ui.link.LinkedPcsScreen
 import android.net.Uri
@@ -124,12 +126,15 @@ const val ROUTE_CAMERA = "camera"
 const val ROUTE_MOMENTS = "moments"
 const val ROUTE_MOMENT = "moment/{date}/{index}"
 const val ROUTE_DAY = "day/{date}"
+const val ROUTE_STUDENT = "student/{key}"
 fun dayRoute(date: LocalDate): String = "day/$date"
 fun momentRoute(date: LocalDate, index: Int): String = "moment/$date/$index"
 
 fun editRoute(id: Long? = null): String = "edit?id=${id ?: -1L}"
 
 fun monthRoute(m: YearMonth): String = "month/${m.year}/${m.monthValue}"
+
+fun studentRoute(name: String): String = "student/${Uri.encode(studentKey(name))}"
 
 fun restoreRoute(fileName: String): String = "restore/${Uri.encode(fileName)}"
 
@@ -253,6 +258,7 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
                             PAGE_OVERVIEW -> OverviewScreen(
                                 onOpenMonth = { month -> dropUnlessResumedNow(entry) { navController.navigate(monthRoute(month)) } },
                                 onOpenSettings = { goToPage(PAGE_SETTINGS) },
+                                onOpenStudent = { name -> dropUnlessResumedNow(entry) { navController.navigate(studentRoute(name)) } },
                                 isCurrentPage = isCurrent,
                             )
                             else -> Box {
@@ -349,6 +355,17 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
                 val goBack = dropUnlessResumed { navController.navigateUp() }
                 AlpineBackdrop(BackdropFigure.None, Modifier.swipeBack(goBack)) {
                     EditLessonScreen(lessonId = id.takeIf { it != -1L }, onDone = goBack)
+                }
+            }
+            composable(ROUTE_STUDENT, arguments = listOf(navArgument("key") { type = NavType.StringType })) { entry ->
+                val key = entry.arguments?.getString("key") ?: return@composable
+                val goBack = dropUnlessResumed { navController.navigateUp() }
+                AlpineBackdrop(BackdropFigure.None, Modifier.swipeBack(goBack)) {
+                    StudentScreen(
+                        studentKey = key,
+                        onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
+                        onBack = goBack,
+                    )
                 }
             }
             composable(

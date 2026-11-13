@@ -64,9 +64,12 @@
     <string name="stats_last_six_months">Last 6 months</string>
     <string name="stats_six_month_earnings">6-month earnings</string>
     <string name="stats_top_students">Top students</string>
+    <string name="student_first_last">First lesson %1$s · last %2$s</string>
+    <string name="student_this_season">This season %1$s</string>
+    <string name="student_last_season">Last season</string>
+    <string name="student_no_lessons">No lessons with this student any more.</string>
     <string name="stats_busiest_days">Busiest days</string>
     <string name="a11y_last_six_months">Hours in the last 6 months: %1$s</string>
-    <string name="a11y_top_students">Top students: %1$s</string>
     <string name="a11y_busiest_days">Lessons per weekday: %1$s</string>
 
     <!-- Settings -->

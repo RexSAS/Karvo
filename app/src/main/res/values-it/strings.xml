@@ -62,9 +62,12 @@
     <string name="stats_last_six_months">Ultimi 6 mesi</string>
     <string name="stats_six_month_earnings">Guadagni 6 mesi</string>
     <string name="stats_top_students">Classifica allievi</string>
+    <string name="student_first_last">Prima lezione %1$s · ultima %2$s</string>
+    <string name="student_this_season">Questa stagione %1$s</string>
+    <string name="student_last_season">Stagione scorsa</string>
+    <string name="student_no_lessons">Non ci sono più lezioni con questo allievo.</string>
     <string name="stats_busiest_days">Giorni più intensi</string>
     <string name="a11y_last_six_months">Ore negli ultimi 6 mesi: %1$s</string>
-    <string name="a11y_top_students">Classifica allievi: %1$s</string>
     <string name="a11y_busiest_days">Lezioni per giorno della settimana: %1$s</string>
 
     <!-- Settings -->

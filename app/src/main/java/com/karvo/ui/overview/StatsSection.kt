@@ -58,11 +58,11 @@ private val StubHeight = 2.dp
 
 /** Charts below the headline tiles. Money respects [revealed]; chart descriptions never contain money. */
 @Composable
-fun StatsSection(stats: OverviewStats, revealed: Boolean, rateSet: Boolean, modifier: Modifier = Modifier) {
+fun StatsSection(stats: OverviewStats, revealed: Boolean, rateSet: Boolean, onOpenStudent: (String) -> Unit, modifier: Modifier = Modifier) {
     val locale = ConfigurationCompat.getLocales(LocalConfiguration.current)[0] ?: Locale.getDefault()
     Column(modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         LastSixMonthsCard(stats, revealed, locale)
-        TopStudentsCard(stats, revealed, rateSet)
+        TopStudentsCard(stats, revealed, rateSet, onOpenStudent)
         BusiestDaysCard(stats, locale)
     }
 }
@@ -94,8 +94,9 @@ private fun SummaryCard(value: String, label: String, modifier: Modifier) {
 }
 
 @Composable
-private fun StatsCard(title: String, description: String, content: @Composable () -> Unit) {
-    AlpineTile(Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = description }) {
+internal fun StatsCard(title: String, description: String?, content: @Composable () -> Unit) {
+    // Read as one [description] (no money in it); a null description lets the content speak for itself.
+    AlpineTile(Modifier.fillMaxWidth().then(if (description != null) Modifier.clearAndSetSemantics { contentDescription = description } else Modifier)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             content()
@@ -135,14 +136,10 @@ private fun LastSixMonthsCard(stats: OverviewStats, revealed: Boolean, locale: L
 }
 
 @Composable
-private fun TopStudentsCard(stats: OverviewStats, revealed: Boolean, rateSet: Boolean) {
-    val top = stats.topStudents
-    val description = stringResource(
-        R.string.a11y_top_students,
-        top.mapIndexed { i, it -> "${i + 1}. ${it.name} ${formatDuration(it.minutes)}" }.joinToString(),
-    )
-    StatsCard(stringResource(R.string.stats_top_students), description) {
-        TopStudentsPodium(top, revealed, rateSet)
+private fun TopStudentsCard(stats: OverviewStats, revealed: Boolean, rateSet: Boolean, onOpenStudent: (String) -> Unit) {
+    // Each student is read (and opened) on their own, so no description for the whole card.
+    StatsCard(stringResource(R.string.stats_top_students), description = null) {
+        TopStudentsPodium(stats.topStudents, revealed, rateSet, onOpenStudent)
     }
 }
 
@@ -184,7 +181,7 @@ private fun animatedFraction(target: Float): Float {
  * Labels sit in equal columns above and below, so each one lines up with its summit.
  */
 @Composable
-private fun RidgeChart(fractions: List<Float>, topLabels: List<String>, bottomLabels: List<String>, modifier: Modifier = Modifier) {
+internal fun RidgeChart(fractions: List<Float>, topLabels: List<String>, bottomLabels: List<String>, modifier: Modifier = Modifier) {
     val grow = animatedFraction(1f)
     val line = MaterialTheme.colorScheme.primary
     val newest = MaterialTheme.colorScheme.tertiary

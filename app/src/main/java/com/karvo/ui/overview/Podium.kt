@@ -1,5 +1,11 @@
 package com.karvo.ui.overview
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.foundation.clickable
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import com.karvo.ui.theme.KarvoMotion
@@ -68,17 +74,17 @@ private fun blockHeight(rank: Int): Dp = when (rank) {
     else -> 56.dp
 }
 
-/** Podium for the top 3 plus compact rows for 4th and 5th. Money shows only when [revealed]. */
+/** Podium for the top 3 plus compact rows for 4th and 5th; tap one to open them. Money shows only when [revealed]. */
 @Composable
-fun TopStudentsPodium(top: List<StudentStat>, revealed: Boolean, rateSet: Boolean) {
+fun TopStudentsPodium(top: List<StudentStat>, revealed: Boolean, rateSet: Boolean, onOpen: (String) -> Unit = {}) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-            podiumOrder(top).forEach { PodiumPlace(it, revealed, rateSet, Modifier.weight(1f)) }
+            podiumOrder(top).forEach { PodiumPlace(it, revealed, rateSet, Modifier.weight(1f).openStudent(it) { onOpen(it.student.name) }) }
         }
         val rest = runnersUp(top)
         if (rest.isNotEmpty()) {
             HorizontalDivider(Modifier.padding(top = 0.dp), color = MaterialTheme.colorScheme.outlineVariant)
-            rest.forEach { RunnerUpRow(it, revealed, rateSet) }
+            rest.forEach { RunnerUpRow(it, revealed, rateSet, Modifier.openStudent(it) { onOpen(it.student.name) }) }
         }
     }
 }
@@ -134,8 +140,8 @@ private fun PodiumPlace(place: Ranked, revealed: Boolean, rateSet: Boolean, modi
 }
 
 @Composable
-private fun RunnerUpRow(place: Ranked, revealed: Boolean, rateSet: Boolean) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun RunnerUpRow(place: Ranked, revealed: Boolean, rateSet: Boolean, modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(Icons.Filled.MilitaryTech, contentDescription = null, tint = White, modifier = Modifier.size(24.dp))
         Text(
             place.rank.toString(),
@@ -162,4 +168,17 @@ private fun RunnerUpRow(place: Ranked, revealed: Boolean, rateSet: Boolean) {
             }
         }
     }
+}
+
+/**
+ * Taps open the student. A screen reader hears their place, name and hours (never money) as one button.
+ */
+@Composable
+private fun Modifier.openStudent(place: Ranked, onClick: () -> Unit): Modifier {
+    val label = "${place.rank}. ${place.student.name} ${formatDuration(place.student.minutes)}"
+    return clearAndSetSemantics {
+        contentDescription = label
+        role = Role.Button
+        onClick { onClick(); true }
+    }.clickable(onClick = onClick)
 }

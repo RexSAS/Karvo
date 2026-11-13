@@ -70,6 +70,7 @@ import java.time.YearMonth
 fun OverviewScreen(
     onOpenMonth: (YearMonth) -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenStudent: (String) -> Unit,
     /** False while another pager page is on screen: earnings hide as soon as the user swipes away. */
     isCurrentPage: Boolean = true,
     viewModel: OverviewViewModel = viewModel(factory = OverviewViewModel.Factory),
@@ -190,7 +191,7 @@ fun OverviewScreen(
                 // Overlaps the bottom of the glass panel.
                 SummaryTiles(stats, Modifier.padding(horizontal = 16.dp).offset(y = (-18).dp))
             }
-            item(key = "stats") { StatsSection(stats, state.revealed, state.rateSet) }
+            item(key = "stats") { StatsSection(stats, state.revealed, state.rateSet, onOpenStudent) }
             state.seasons?.let { seasons ->
                 item(key = "seasons") { SeasonsSection(seasons, state.revealed, Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
             }
