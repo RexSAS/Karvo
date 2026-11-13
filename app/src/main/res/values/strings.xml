@@ -320,6 +320,20 @@
     <string name="tour_backups_body">Karvo keeps up to 3 backups here. Export a CSV to keep a copy somewhere else too.</string>
     <string name="tour_pc_title">Use Karvo on your PC</string>
     <string name="tour_pc_body">Open karvo.rxsas.it on your computer and link it here by scanning the code.</string>
+    <string name="season_channel">Season start</string>
+    <string name="season_start_title">Season is starting!</string>
+    <string name="season_start_text">The %1$s season begins today. Enjoy the slopes!</string>
+    <string name="season_welcome_title">Welcome to the %1$s season!</string>
+    <string name="season_welcome_body">Have a great season. Karvo is ready for your first lesson.</string>
+    <string name="season_welcome_last">Last season, %1$s: %2$s · %3$s · %4$s</string>
+    <plurals name="student_count">
+        <item quantity="one">%d student</item>
+        <item quantity="other">%d students</item>
+    </plurals>
+    <plurals name="season_welcome_unpaid">
+        <item quantity="one">%1$d month of %2$s is still to be paid.</item>
+        <item quantity="other">%1$d months of %2$s are still to be paid.</item>
+    </plurals>
     <string name="whats_new_title">What\'s new in %1$s</string>
     <string-array name="whats_new_items">
         <item>New way to share a photo: Photobomb. Kevin pops up in the corner of your story, with your photo in his goggles.</item>

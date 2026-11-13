@@ -1,5 +1,10 @@
 package com.karvo.ui
 
+import com.karvo.domain.SeasonWelcome
+import com.karvo.domain.seasonWelcome
+import com.karvo.domain.seasonOf
+import com.karvo.onboarding.SeasonWelcomeDialog
+import java.time.ZoneId
 import com.karvo.domain.studentKey
 import com.karvo.ui.overview.StudentScreen
 import com.karvo.ui.components.swipeBack
@@ -205,18 +210,26 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
     // First launch: welcome (+ quick tour); after an update: what's new. Decided once, then the version is remembered.
     val tour = remember { TourState() }
     var start by remember { mutableStateOf(StartScreen.None) }
+    // The new-season card, shown once a season (after Welcome / What's new, if those are due too).
+    var seasonCard by remember { mutableStateOf<SeasonWelcome?>(null) }
     LaunchedEffect(Unit) {
         val container = (context.applicationContext as KarvoApp).container
         val settings = container.settingsRepository
-        val screen = startScreen(settings.lastSeenVersion.first(), BuildConfig.VERSION_NAME, lessonRepository.allLessons().isNotEmpty())
+        val all = lessonRepository.allLessons()
+        val screen = startScreen(settings.lastSeenVersion.first(), BuildConfig.VERSION_NAME, all.isNotEmpty())
         settings.setLastSeenVersion(BuildConfig.VERSION_NAME)
+        val today = LocalDate.now(runCatching { ZoneId.of(settings.timeZoneId.first()) }.getOrDefault(ZoneId.systemDefault()))
+        val startMonth = settings.seasonStartMonth.first()
+        val card = seasonWelcome(all, today, startMonth, settings.welcomedSeason.first(), settings.hourlyRateCents.first())
+        settings.setWelcomedSeason(seasonOf(today, startMonth).startYear)
         if (screen != StartScreen.None) kotlinx.coroutines.delay(700) // after the splash, so its animations are seen
         start = screen
+        seasonCard = card
     }
     when (start) {
         StartScreen.Welcome -> WelcomeDialog(onTour = { start = StartScreen.None; tour.start() }, onSkip = { start = StartScreen.None })
         StartScreen.WhatsNew -> WhatsNewDialog(onDismiss = { start = StartScreen.None })
-        StartScreen.None -> {}
+        StartScreen.None -> seasonCard?.let { SeasonWelcomeDialog(it, onDismiss = { seasonCard = null }) }
     }
 
     CompositionLocalProvider(LocalTour provides tour) {

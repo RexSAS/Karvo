@@ -49,6 +49,9 @@ class FakeSettingsRepository(
     val lastSeen = MutableStateFlow<String?>(null)
     override val lastSeenVersion: Flow<String?> = lastSeen
     override suspend fun setLastSeenVersion(version: String) { lastSeen.value = version }
+    val welcomed = MutableStateFlow<Int?>(null)
+    override val welcomedSeason: Flow<Int?> = welcomed
+    override suspend fun setWelcomedSeason(startYear: Int) { welcomed.value = startYear }
 
     private val biometricValue = MutableStateFlow(true)
     override val biometricReveal: Flow<Boolean> = biometricValue

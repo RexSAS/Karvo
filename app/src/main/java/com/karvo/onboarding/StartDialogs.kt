@@ -1,5 +1,10 @@
 package com.karvo.onboarding
 
+import com.karvo.domain.SeasonWelcome
+import com.karvo.domain.Season
+import com.karvo.domain.formatDuration
+import com.karvo.ui.components.partlyPaidColor
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -73,6 +78,44 @@ fun WhatsNewDialog(onDismiss: () -> Unit) {
                     Entrance(150 + i * 90) { Text("•  $item", style = MaterialTheme.typography.bodyMedium) }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) }
+                }
+            }
+        }
+    }
+}
+
+/** The first time Karvo opens in a new season: Kevin, a welcome, last season in one line, and its months still unpaid. */
+@Composable
+fun SeasonWelcomeDialog(card: SeasonWelcome, onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
+            Column(Modifier.padding(24.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Kevin(KevinPose.Idle, Modifier.size(width = 150.dp, height = 145.dp))
+                Entrance(500) { Text(stringResource(R.string.season_welcome_title, card.season.label()), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center) }
+                Entrance(580) { Text(stringResource(R.string.season_welcome_body), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                card.last?.let { last ->
+                    Entrance(660) {
+                        Text(
+                            stringResource(
+                                R.string.season_welcome_last, last.season.label(), formatDuration(last.minutes),
+                                pluralStringResource(R.plurals.lesson_count, last.lessonCount, last.lessonCount),
+                                pluralStringResource(R.plurals.student_count, card.lastStudents, card.lastStudents),
+                            ),
+                            style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+                if (card.lastUnpaidMonths > 0) {
+                    Entrance(740) {
+                        Text(
+                            pluralStringResource(R.plurals.season_welcome_unpaid, card.lastUnpaidMonths, card.lastUnpaidMonths, Season(card.season.startYear - 1, card.season.startMonth).label()),
+                            style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = partlyPaidColor(),
+                        )
+                    }
+                }
+                Row(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) }
                 }
             }

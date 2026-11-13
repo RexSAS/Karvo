@@ -40,6 +40,9 @@ interface SettingsRepository {
     /** The app version last opened (null until 3.2 stores it): drives Welcome / What's new. */
     val lastSeenVersion: Flow<String?>
     suspend fun setLastSeenVersion(version: String)
+    /** Start year of the last season the new-season card was shown for (or skipped in); null until first stored. */
+    val welcomedSeason: Flow<Int?>
+    suspend fun setWelcomedSeason(startYear: Int)
 
     val biometricReveal: Flow<Boolean>
     suspend fun setBiometricReveal(on: Boolean)
@@ -85,6 +88,9 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
     private val lastSeenKey = stringPreferencesKey("last_seen_version")
     override val lastSeenVersion: Flow<String?> = store.data.map { it[lastSeenKey] }
     override suspend fun setLastSeenVersion(version: String) { store.edit { it[lastSeenKey] = version } }
+    private val welcomedSeasonKey = intPreferencesKey("welcomed_season")
+    override val welcomedSeason: Flow<Int?> = store.data.map { it[welcomedSeasonKey] }
+    override suspend fun setWelcomedSeason(startYear: Int) { store.edit { it[welcomedSeasonKey] = startYear } }
 
     override val biometricReveal: Flow<Boolean> = store.data.map { it[biometricKey] ?: true }
 
