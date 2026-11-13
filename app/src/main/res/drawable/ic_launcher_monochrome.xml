@@ -20,6 +20,6 @@
         <path
             android:fillAlpha="0.6"
             android:fillColor="#FFFFFF"
-            android:pathData="M56.6,33.6 L83,75 L63.5,75 C55.5,68.5 54,62.5 60.5,56.5 C68,49.5 66,41.5 56.6,33.6 Z" />
+            android:pathData="M65.07,46.88 L83,75 L63.5,75 C55.5,68.5 54,62.5 60.5,56.5 C63.77,53.45 65.23,50.21 65.07,46.88 Z" />
     </group>
 </vector>
