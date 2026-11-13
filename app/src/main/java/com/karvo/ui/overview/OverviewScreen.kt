@@ -105,16 +105,17 @@ fun OverviewScreen(
             ScreenHeader(
                 title = stringResource(R.string.overview),
                 subtitle = dayTitle(LocalDate.now()),
-                afterTitle = {
+                // The season pill right after the title; the logo in the corner.
+                afterTitle = { if (!state.loading && state.seasons != null) ScopePicker(state, viewModel::show) },
+                trailing = {
                     Icon(
                         painterResource(R.drawable.ic_emblem),
                         contentDescription = null,
                         // Alpine Night shows the logo in its own colours; Classic tints it with the theme.
                         tint = if (isAlpineNight()) Color.Unspecified else MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(width = 36.dp, height = 28.dp),
+                        modifier = Modifier.size(width = 58.dp, height = 45.dp),
                     )
                 },
-                trailing = { if (!state.loading && state.seasons != null) ScopePicker(state, viewModel::show) },
             )
         },
     ) { padding ->
