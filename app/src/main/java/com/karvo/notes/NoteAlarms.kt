@@ -135,14 +135,16 @@ class NoteAlarms(
     private fun kevinIcon(size: Int = 256): Bitmap {
         // In his drawables' 600 x 580 viewport: the beanie's snow starts near y 50 and the snow under him shows down to
         // about y 548; his head spans x 88..528. Fit that height, centred on his head; the mound's far sides run off.
-        val scale = size / 498f
-        val left = (size / 2f - 308 * scale).roundToInt()
-        val top = (-50 * scale).roundToInt()
-        return Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888).also { bitmap ->
-            val canvas = Canvas(bitmap)
-            for (id in listOf(R.drawable.kevin_photobomb_under, R.drawable.kevin_photobomb_over)) {
-                ContextCompat.getDrawable(app, id)!!.apply { setBounds(left, top, left + (600 * scale).roundToInt(), top + (580 * scale).roundToInt()) }.draw(canvas)
-            }
+        val scale = size / 455f
+        return Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888).also { drawKevin(Canvas(it), size / 2f - 308 * scale, -50 * scale, scale) }
+    }
+
+    /** Kevin's photobomb layers (snow, head, snow in front) without a photo, his viewport's top-left at [x], [y]. */
+    private fun drawKevin(canvas: Canvas, x: Float, y: Float, scale: Float) {
+        for (id in listOf(R.drawable.kevin_photobomb_under, R.drawable.kevin_photobomb_over)) {
+            ContextCompat.getDrawable(app, id)!!.apply {
+                setBounds(x.roundToInt(), y.roundToInt(), (x + 600 * scale).roundToInt(), (y + 580 * scale).roundToInt())
+            }.draw(canvas)
         }
     }
 
