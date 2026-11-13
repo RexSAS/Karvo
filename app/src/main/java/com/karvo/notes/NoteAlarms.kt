@@ -1,7 +1,6 @@
 package com.karvo.notes
 
 import java.time.Clock
-import com.karvo.domain.seasonOf
 import com.karvo.domain.seasonStartDays
 import androidx.core.graphics.drawable.toBitmap
 import android.Manifest
@@ -101,7 +100,7 @@ class NoteAlarms(
             .setContentIntent(open).setAutoCancel(true).build())
     }
 
-    /** On a season's first day: "Season is starting! The 2026/27 season begins today. Enjoy the slopes!", with Kevin. */
+    /** On a season's first day: "Season is starting! Enjoy the slopes!", with Kevin. */
     suspend fun notifySeasonStart() {
         val today = LocalDate.now(clock.withZone(zoneOf(settings.timeZoneId.first())))
         val startMonth = settings.seasonStartMonth.first()
@@ -112,7 +111,7 @@ class NoteAlarms(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm.getNotificationChannel(SEASON_CHANNEL) == null)
             nm.createNotificationChannel(NotificationChannel(SEASON_CHANNEL, app.getString(R.string.season_channel), NotificationManager.IMPORTANCE_DEFAULT))
         val open = PendingIntent.getActivity(app, 1, Intent(app, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
-        val text = app.getString(R.string.season_start_text, seasonOf(today, startMonth).label())
+        val text = app.getString(R.string.season_start_text)
         val kevin = ContextCompat.getDrawable(app, R.drawable.kevin_head_idle)?.toBitmap(240, 232)
         NotificationManagerCompat.from(app).notify(SEASON_NOTIFICATION_ID, NotificationCompat.Builder(app, SEASON_CHANNEL)
             .setSmallIcon(R.drawable.ic_link_notification)

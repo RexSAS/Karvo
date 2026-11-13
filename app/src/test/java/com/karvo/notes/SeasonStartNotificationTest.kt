@@ -39,7 +39,7 @@ class SeasonStartNotificationTest {
         assertEquals(1, posted.size)
         val n = shadowOf(posted.single())
         assertEquals("Season is starting!", n.contentTitle)
-        assertEquals("The 2026/27 season begins today. Enjoy the slopes!", n.contentText)
+        assertEquals("Enjoy the slopes!", n.contentText)
     }
 
     @Test fun any_other_day_stays_quiet() = runTest {

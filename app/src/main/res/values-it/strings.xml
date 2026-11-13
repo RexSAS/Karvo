@@ -320,7 +320,7 @@
     <string name="tour_pc_body">Apri karvo.rxsas.it sul computer e collegalo da qui scansionando il codice.</string>
     <string name="season_channel">Inizio stagione</string>
     <string name="season_start_title">La stagione sta iniziando!</string>
-    <string name="season_start_text">Oggi inizia la stagione %1$s. Goditi le piste!</string>
+    <string name="season_start_text">Goditi le piste!</string>
     <string name="season_welcome_title">Benvenuto nella stagione %1$s!</string>
     <string name="season_welcome_body">Buona stagione! Karvo è pronto per la tua prima lezione.</string>
     <string name="season_welcome_last">La scorsa stagione, %1$s: %2$s · %3$s · %4$s</string>
