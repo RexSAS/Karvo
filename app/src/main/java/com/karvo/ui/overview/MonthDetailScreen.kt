@@ -1,5 +1,7 @@
 package com.karvo.ui.overview
 
+import com.karvo.ui.theme.underBars
+import com.karvo.ui.theme.headerFade
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import androidx.compose.foundation.layout.Column
@@ -74,6 +76,7 @@ fun MonthDetailScreen(
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
+                modifier = Modifier.headerFade(), // lists scroll away under it
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
                 title = { Text(monthTitle(month)) },
                 navigationIcon = {
@@ -84,40 +87,43 @@ fun MonthDetailScreen(
             )
         },
     ) { padding ->
-        Column(Modifier.padding(padding).fillMaxSize()) {
-            AlpineTile(Modifier.fillMaxWidth().padding(16.dp)) {
-                Column(Modifier.padding(16.dp)) {
-                    Text(stringResource(R.string.total_hours), style = MaterialTheme.typography.labelLarge)
-                    Text(formatDuration(state.totalMinutes), style = MaterialTheme.typography.headlineMedium)
-                    Text(stringResource(R.string.earnings), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 12.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            earningsLabel(state.earningsCents, state.revealed),
-                            style = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier.weight(1f),
-                        )
-                        IconButton(onClick = { viewModel.toggleReveal(promptTitle) }) {
-                            Icon(
-                                if (state.revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = stringResource(if (state.revealed) R.string.hide_earnings else R.string.show_earnings),
+        // One list: the summary, the paid row and the lessons scroll together, under the header.
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = underBars(padding, extra = 16.dp)) {
+            item(key = "summary") {
+                AlpineTile(Modifier.fillMaxWidth().padding(16.dp)) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(stringResource(R.string.total_hours), style = MaterialTheme.typography.labelLarge)
+                        Text(formatDuration(state.totalMinutes), style = MaterialTheme.typography.headlineMedium)
+                        Text(stringResource(R.string.earnings), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 12.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                earningsLabel(state.earningsCents, state.revealed),
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier.weight(1f),
                             )
+                            IconButton(onClick = { viewModel.toggleReveal(promptTitle) }) {
+                                Icon(
+                                    if (state.revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                    contentDescription = stringResource(if (state.revealed) R.string.hide_earnings else R.string.show_earnings),
+                                )
+                            }
                         }
                     }
                 }
             }
-            PaidRow(
-                state = state,
-                onToggle = { if (state.paidStatus == PaidStatus.PAID) showUnpaidConfirm = true else showPaidPicker = true },
-            )
-            LazyColumn(Modifier.fillMaxSize()) {
-                items(state.lessons, key = { it.id }) { lesson ->
-                    LessonRow(
-                        lesson,
-                        onClick = { onEdit(lesson.id) },
-                        showNotPaid = state.paidStatus == PaidStatus.PARTLY_PAID && lesson.paidOn == null,
-                    )
-                    HorizontalDivider()
-                }
+            item(key = "paid") {
+                PaidRow(
+                    state = state,
+                    onToggle = { if (state.paidStatus == PaidStatus.PAID) showUnpaidConfirm = true else showPaidPicker = true },
+                )
+            }
+            items(state.lessons, key = { it.id }) { lesson ->
+                LessonRow(
+                    lesson,
+                    onClick = { onEdit(lesson.id) },
+                    showNotPaid = state.paidStatus == PaidStatus.PARTLY_PAID && lesson.paidOn == null,
+                )
+                HorizontalDivider()
             }
         }
     }

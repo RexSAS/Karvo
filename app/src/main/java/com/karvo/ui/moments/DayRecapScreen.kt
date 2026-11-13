@@ -1,5 +1,7 @@
 package com.karvo.ui.moments
 
+import com.karvo.ui.theme.underBars
+import com.karvo.ui.theme.headerFade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -94,6 +96,7 @@ fun DayRecapScreen(
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
+                modifier = Modifier.headerFade(), // lists scroll away under it
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
                 title = { Text(dayTitle(dayAt(days.currentPage))) },
                 navigationIcon = {
@@ -102,12 +105,12 @@ fun DayRecapScreen(
             )
         },
     ) { padding ->
-        HorizontalPager(days, Modifier.padding(padding).fillMaxSize(), key = { it }) { page ->
+        HorizontalPager(days, Modifier.fillMaxSize(), key = { it }) { page ->
             val day = dayAt(page)
             val moments = allMoments?.let { momentsOn(day, it, zone) }
             val lessons = remember(allLessons, day) { allLessons.filter { it.date == day } }
             val isToday = day == LocalDate.now(zone)
-            LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
+            LazyColumn(Modifier.fillMaxSize(), contentPadding = underBars(padding, extra = 24.dp)) {
                 item(key = "events") {
                     val repo = container.eventRepository
                     com.karvo.ui.events.DayEventsSection(

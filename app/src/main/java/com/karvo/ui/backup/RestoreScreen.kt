@@ -1,5 +1,7 @@
 package com.karvo.ui.backup
 
+import com.karvo.ui.theme.underBars
+import com.karvo.ui.theme.headerFade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,6 +64,7 @@ fun RestoreScreen(
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
+                modifier = Modifier.headerFade(), // lists scroll away under it
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(if (state.step == 1) R.string.restore_title else R.string.restore_last_check_title)) },
                 navigationIcon = {
@@ -97,7 +100,7 @@ fun RestoreScreen(
         },
     ) { padding ->
         Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(underBars(padding)).padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Icon(

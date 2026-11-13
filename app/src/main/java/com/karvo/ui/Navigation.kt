@@ -1,5 +1,6 @@
 package com.karvo.ui
 
+import com.karvo.ui.components.swipeBack
 import com.karvo.ui.link.LinkedPcsScreen
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -10,6 +11,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.graphicsLayer
+import com.karvo.ui.theme.LocalTabBarSpace
 import com.karvo.ui.theme.KarvoMotion
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.background
@@ -228,14 +230,16 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
         // Shared elements let a moment's photo and Share button fly between the day page and the viewer.
         SharedTransitionLayout {
         CompositionLocalProvider(LocalSharedTransition provides this) {
-        // The NavHost fills the screen, so the backdrop continues behind the floating tab bar; the pages stop above it.
+        // The NavHost fills the screen, so the backdrop continues behind the floating tab bar, and so do the pages' lists.
         NavHost(navController, startDestination = ROUTE_HOME) {
             composable(ROUTE_HOME) { entry ->
                 // Back on Overview or Settings returns to Lessons; on Lessons it leaves the app as before.
                 BackHandler(enabled = pagerState.currentPage != PAGE_LESSONS) { goToPage(PAGE_LESSONS) }
                 // The sky stays still while the pages slide over it; the ranges drift a little with them.
                 AlpineBackdrop(BackdropFigure.None, drift = { pagerState.currentPage + pagerState.currentPageOffsetFraction }) {
-                    HorizontalPager(pagerState, Modifier.padding(padding).arriving(arrive), beyondViewportPageCount = 1) { page ->
+                    // The pages reach the bottom of the screen and scroll on under the tab bar; they end its height up.
+                    CompositionLocalProvider(LocalTabBarSpace provides padding.calculateBottomPadding()) {
+                    HorizontalPager(pagerState, Modifier.arriving(arrive), beyondViewportPageCount = 1) { page ->
                         val isCurrent = pagerState.settledPage == page
                         when (page) {
                             PAGE_LESSONS -> LessonsScreen(
@@ -262,6 +266,7 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
                                 )
                             }
                         }
+                    }
                     }
                 }
             }
@@ -307,14 +312,16 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
                 }
             }
             composable(ROUTE_LINKED_PCS) {
-                AlpineBackdrop(BackdropFigure.None) {
-                    LinkedPcsScreen(onBack = dropUnlessResumed { navController.navigateUp() }, showMessage = showMessage)
+                val goBack = dropUnlessResumed { navController.navigateUp() }
+                AlpineBackdrop(BackdropFigure.None, Modifier.swipeBack(goBack)) {
+                    LinkedPcsScreen(onBack = goBack, showMessage = showMessage)
                 }
             }
             composable(ROUTE_BACKUPS) { entry ->
-                AlpineBackdrop(BackdropFigure.None) {
+                val goBack = dropUnlessResumed { navController.navigateUp() }
+                AlpineBackdrop(BackdropFigure.None, Modifier.swipeBack(goBack)) {
                     BackupsScreen(
-                        onBack = dropUnlessResumed { navController.navigateUp() },
+                        onBack = goBack,
                         onRestore = { fileName -> dropUnlessResumedNow(entry) { navController.navigate(restoreRoute(fileName)) } },
                         showMessage = showMessage,
                     )
@@ -322,10 +329,11 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
             }
             composable(ROUTE_RESTORE, arguments = listOf(navArgument("fileName") { type = NavType.StringType })) { entry ->
                 val fileName = entry.arguments?.getString("fileName") ?: return@composable
-                AlpineBackdrop(BackdropFigure.None) {
+                val goBack = dropUnlessResumed { navController.navigateUp() }
+                AlpineBackdrop(BackdropFigure.None, Modifier.swipeBack(goBack)) {
                     RestoreScreen(
                         fileName = fileName,
-                        onBack = dropUnlessResumed { navController.navigateUp() },
+                        onBack = goBack,
                         onRestored = { count ->
                             navController.popBackStack(ROUTE_BACKUPS, inclusive = false)
                             showMessage(context.resources.getQuantityString(R.plurals.restored_lessons, count, count))
@@ -338,8 +346,9 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
                 arguments = listOf(navArgument("id") { type = NavType.LongType; defaultValue = -1L }),
             ) { entry ->
                 val id = entry.arguments?.getLong("id") ?: -1L
-                AlpineBackdrop(BackdropFigure.None) {
-                    EditLessonScreen(lessonId = id.takeIf { it != -1L }, onDone = dropUnlessResumed { navController.navigateUp() })
+                val goBack = dropUnlessResumed { navController.navigateUp() }
+                AlpineBackdrop(BackdropFigure.None, Modifier.swipeBack(goBack)) {
+                    EditLessonScreen(lessonId = id.takeIf { it != -1L }, onDone = goBack)
                 }
             }
             composable(
@@ -351,11 +360,12 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
             ) { entry ->
                 val year = entry.arguments?.getInt("year") ?: return@composable
                 val month = entry.arguments?.getInt("month") ?: return@composable
-                AlpineBackdrop(BackdropFigure.None) {
+                val goBack = dropUnlessResumed { navController.navigateUp() }
+                AlpineBackdrop(BackdropFigure.None, Modifier.swipeBack(goBack)) {
                     MonthDetailScreen(
                         month = YearMonth.of(year, month),
                         onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
-                        onBack = dropUnlessResumed { navController.navigateUp() },
+                        onBack = goBack,
                     )
                 }
             }

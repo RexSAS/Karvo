@@ -1,5 +1,7 @@
 package com.karvo.ui.link
 
+import com.karvo.ui.theme.underBars
+import com.karvo.ui.theme.headerFade
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -109,6 +111,7 @@ fun LinkedPcsScreen(
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
+                modifier = Modifier.headerFade(), // lists scroll away under it
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.linked_pcs)) },
                 navigationIcon = {
@@ -118,8 +121,8 @@ fun LinkedPcsScreen(
         },
     ) { padding ->
         LazyColumn(
-            Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            Modifier.fillMaxSize(),
+            contentPadding = underBars(padding, around = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item {

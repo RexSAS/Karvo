@@ -1,5 +1,7 @@
 package com.karvo.ui.edit
 
+import com.karvo.ui.theme.underBars
+import com.karvo.ui.theme.headerFade
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import com.karvo.ui.messageRes
@@ -79,6 +81,7 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             TopAppBar(
+                modifier = Modifier.headerFade(), // lists scroll away under it
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(if (state.isNew) R.string.new_lesson else R.string.edit_lesson)) },
                 navigationIcon = {
@@ -98,9 +101,9 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
     ) { padding ->
         Column(
             modifier = Modifier
-                .padding(padding)
                 .imePadding()
                 .verticalScroll(rememberScrollState())
+                .padding(underBars(padding))
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {

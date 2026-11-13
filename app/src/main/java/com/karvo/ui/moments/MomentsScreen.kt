@@ -1,5 +1,6 @@
 package com.karvo.ui.moments
 
+import com.karvo.ui.theme.headerFade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -98,6 +99,7 @@ fun MomentsScreen(onBack: () -> Unit, onOpenCamera: () -> Unit, onOpenDay: (Loca
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
+                modifier = Modifier.headerFade(), // lists scroll away under it
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.calendar)) },
                 navigationIcon = {

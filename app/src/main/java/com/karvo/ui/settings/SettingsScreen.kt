@@ -1,5 +1,8 @@
 package com.karvo.ui.settings
 
+import androidx.compose.foundation.layout.WindowInsets
+import com.karvo.ui.theme.underBars
+import com.karvo.ui.theme.LocalTabBarSpace
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import android.net.Uri
@@ -200,16 +203,18 @@ fun SettingsScreen(
         }
     }
 
+    val tabBar = LocalTabBarSpace.current
     Scaffold(
         containerColor = Color.Transparent, // the alpine backdrop shows through
+        contentWindowInsets = WindowInsets(0), // the header pads itself; the page runs under the tab bar
         topBar = { ScreenHeader(title = stringResource(R.string.settings)) },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState, Modifier.padding(bottom = tabBar)) },
     ) { padding ->
         Column(
             modifier = Modifier
-                .padding(padding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .padding(underBars(padding, bottomBar = tabBar))
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {

@@ -1,5 +1,8 @@
 package com.karvo.ui.lessons
 
+import androidx.compose.foundation.layout.WindowInsets
+import com.karvo.ui.theme.underBars
+import com.karvo.ui.theme.LocalTabBarSpace
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import androidx.compose.foundation.background
@@ -92,8 +95,10 @@ fun LessonsScreen(
         onDeleted(lesson)
     }
 
+    val tabBar = LocalTabBarSpace.current
     Scaffold(
         containerColor = Color.Transparent, // the alpine backdrop shows through
+        contentWindowInsets = WindowInsets(0), // the header pads itself; the list runs under the tab bar
         topBar = {
             val total = groupsOrNull.orEmpty().sumOf { it.lessons.size }
             ScreenHeader(
@@ -105,7 +110,7 @@ fun LessonsScreen(
             )
         },
         floatingActionButton = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.padding(bottom = tabBar), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 SmallFloatingActionButton(onClick = onOpenCamera, modifier = Modifier.tourTarget(TourTarget.Camera)) { Icon(Icons.Filled.PhotoCamera, stringResource(R.string.take_moment)) }
                 Box(Modifier.tourTarget(TourTarget.AddLesson)) { AddButton(onClick = onAdd, contentDescription = stringResource(R.string.add_lesson)) }
             }
@@ -115,12 +120,13 @@ fun LessonsScreen(
         if (groups == null) {
             // Still loading: show nothing rather than flashing the empty state.
         } else if (groups.isEmpty()) {
-            Column(Modifier.fillMaxSize().padding(padding)) {
+            Column(Modifier.fillMaxSize().padding(padding).padding(bottom = tabBar)) {
               notesCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
               EmptyState(stringResource(R.string.no_lessons_hint), Modifier.fillMaxSize().padding(32.dp))
             }
         } else {
-            LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 96.dp)) {
+            // Under the header and the tab bar; the end stays clear of the add buttons.
+            LazyColumn(Modifier.fillMaxSize(), contentPadding = underBars(padding, extra = 96.dp, bottomBar = tabBar)) {
                 item(key = "notes") { notesCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
                 groups.forEach { group ->
                     item(key = "header-${group.month}") {

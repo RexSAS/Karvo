@@ -1,5 +1,8 @@
 package com.karvo.ui.overview
 
+import androidx.compose.foundation.layout.WindowInsets
+import com.karvo.ui.theme.underBars
+import com.karvo.ui.theme.LocalTabBarSpace
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
@@ -82,8 +85,10 @@ fun OverviewScreen(
         else -> onOpenSettings
     }
 
+    val tabBar = LocalTabBarSpace.current
     Scaffold(
         containerColor = Color.Transparent, // the alpine backdrop shows through
+        contentWindowInsets = WindowInsets(0), // the header pads itself; the list runs under the tab bar
         topBar = {
             ScreenHeader(
                 title = stringResource(R.string.overview),
@@ -172,7 +177,7 @@ fun OverviewScreen(
                 }
             }
         }
-        LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = underBars(padding, extra = 24.dp, bottomBar = tabBar)) {
             item(key = "total") { totalPanel() }
             val stats = state.stats
             if (stats == null) {

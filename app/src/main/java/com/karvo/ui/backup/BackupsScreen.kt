@@ -1,5 +1,7 @@
 package com.karvo.ui.backup
 
+import com.karvo.ui.theme.underBars
+import com.karvo.ui.theme.headerFade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -69,6 +71,7 @@ fun BackupsScreen(
         containerColor = Color.Transparent, // the alpine backdrop shows through
         topBar = {
             CenterAlignedTopAppBar(
+                modifier = Modifier.headerFade(), // lists scroll away under it
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.backups)) },
                 navigationIcon = {
@@ -80,8 +83,8 @@ fun BackupsScreen(
         },
     ) { padding ->
         LazyColumn(
-            Modifier.padding(padding).fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+            Modifier.fillMaxSize(),
+            contentPadding = underBars(padding, around = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {

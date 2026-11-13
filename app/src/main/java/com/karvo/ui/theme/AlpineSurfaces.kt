@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,15 +36,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.karvo.data.ThemeChoice
 
 /** The theme in use, so components can switch between the Alpine Night look and plain Material (Classic). */
 val LocalThemeChoice = staticCompositionLocalOf { ThemeChoice.ALPINE_NIGHT }
+
+/** Height of the floating tab bar on the three main pages: their lists scroll on under it and end this far up. */
+val LocalTabBarSpace = staticCompositionLocalOf { 0.dp }
+
+/**
+ * Behind a screen's header: the top of the sky (the page colour in Classic), solid behind the title and fading out a
+ * little below it, so lists scroll away under the header instead of being cut by a straight line.
+ */
+@Composable
+fun Modifier.headerFade(): Modifier {
+    val sky = if (isAlpineNight()) AlpineNight.SkyTop else MaterialTheme.colorScheme.background
+    return drawBehind {
+        val fall = 20.dp.toPx()
+        drawRect(Brush.verticalGradient(0f to sky, 0.7f to sky, 1f to sky.copy(alpha = 0f), startY = 0f, endY = size.height + fall),
+            size = Size(size.width, size.height + fall))
+    }
+}
+
+/**
+ * Padding for a list that scrolls under its header and the bars below it: the Scaffold's [padding], plus [around] on
+ * every side, [extra] more at the bottom and the tab bar's [bottomBar].
+ */
+fun underBars(padding: PaddingValues, extra: Dp = 0.dp, bottomBar: Dp = 0.dp, around: Dp = 0.dp) = PaddingValues(
+    start = around, end = around,
+    top = padding.calculateTopPadding() + around,
+    bottom = padding.calculateBottomPadding() + bottomBar + around + extra,
+)
 
 @Composable
 @ReadOnlyComposable
@@ -149,6 +179,7 @@ fun ScreenHeader(title: String, subtitle: String? = null, trailing: (@Composable
     Row(
         Modifier
             .fillMaxWidth()
+            .headerFade()
             .windowInsetsPadding(TopAppBarDefaults.windowInsets)
             .padding(start = 20.dp, end = 16.dp, top = 12.dp, bottom = 8.dp),
         verticalAlignment = Alignment.Bottom,
