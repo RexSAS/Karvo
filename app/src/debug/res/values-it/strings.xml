@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds are the test app, next to the real one. -->
+<resources>
+    <string name="app_name">Karvo Test</string>
+</resources>

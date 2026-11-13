@@ -62,6 +62,10 @@ android {
     }
 
     buildTypes {
+        // Debug builds are "Karvo Test" (com.karvo.test): they install next to the real app and never touch its lessons.
+        debug {
+            applicationIdSuffix = ".test"
+        }
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

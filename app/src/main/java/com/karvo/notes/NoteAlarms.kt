@@ -106,6 +106,11 @@ class NoteAlarms(
         val startMonth = settings.seasonStartMonth.first()
         if (today !in seasonStartDays(today, startMonth) || lastSeasonNotified == today) return
         lastSeasonNotified = today
+        postSeasonStart()
+    }
+
+    /** The notification itself, whatever the date (the test app can post it on demand). */
+    fun postSeasonStart() {
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(app, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
         val nm = app.getSystemService(NotificationManager::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm.getNotificationChannel(SEASON_CHANNEL) == null)
