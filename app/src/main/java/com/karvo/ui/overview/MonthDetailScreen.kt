@@ -1,5 +1,9 @@
 package com.karvo.ui.overview
 
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.draw.clip
+import com.karvo.ui.theme.groupedShape
+import com.karvo.ui.theme.tileColor
 import com.karvo.ui.theme.underBars
 import com.karvo.ui.theme.headerFade
 import androidx.compose.ui.res.stringResource
@@ -117,13 +121,18 @@ fun MonthDetailScreen(
                     onToggle = { if (state.paidStatus == PaidStatus.PAID) showUnpaidConfirm = true else showPaidPicker = true },
                 )
             }
-            items(state.lessons, key = { it.id }) { lesson ->
+            // Grouped in one rounded card, as on the Lessons page.
+            itemsIndexed(state.lessons, key = { _, lesson -> lesson.id }) { index, lesson ->
                 LessonRow(
                     lesson,
                     onClick = { onEdit(lesson.id) },
+                    modifier = Modifier.padding(horizontal = 16.dp).clip(groupedShape(index, state.lessons.size)),
+                    containerColor = tileColor(),
                     showNotPaid = state.paidStatus == PaidStatus.PARTLY_PAID && lesson.paidOn == null,
                 )
-                HorizontalDivider()
+                if (index < state.lessons.lastIndex) {
+                    HorizontalDivider(Modifier.padding(horizontal = 32.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                }
             }
         }
     }

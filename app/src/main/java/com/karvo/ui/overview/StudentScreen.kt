@@ -1,5 +1,9 @@
 package com.karvo.ui.overview
 
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.draw.clip
+import com.karvo.ui.theme.groupedShape
+import com.karvo.ui.theme.tileColor
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -101,9 +105,17 @@ fun StudentScreen(
                         )
                     }
                 }
-                items(month.lessons, key = { it.id }) { lesson ->
-                    LessonRow(lesson, onClick = { onEdit(lesson.id) })
-                    HorizontalDivider()
+                // Grouped in a rounded card per month, as on the Lessons page.
+                itemsIndexed(month.lessons, key = { _, lesson -> lesson.id }) { index, lesson ->
+                    LessonRow(
+                        lesson,
+                        onClick = { onEdit(lesson.id) },
+                        modifier = Modifier.padding(horizontal = 16.dp).clip(groupedShape(index, month.lessons.size)),
+                        containerColor = tileColor(),
+                    )
+                    if (index < month.lessons.lastIndex) {
+                        HorizontalDivider(Modifier.padding(horizontal = 32.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    }
                 }
             }
         }
