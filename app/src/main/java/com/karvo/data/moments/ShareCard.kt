@@ -19,11 +19,10 @@ import kotlin.math.roundToInt
 
 /**
  * The Karvo designs a photo can be shared in, so every shared moment carries the app's name, in the picker's order:
- * [Frame] is the designer's PNG (res/drawable-nodpi/share_frame.png), 9:16 and first because it's story-sized;
- * [Banner] is drawn in code and fits any photo; [Photobomb] is the photo as a full story with Kevin popping up in the
- * corner, the photo reflected in his goggles.
+ * [Photobomb] first, the photo as a full story with Kevin popping up in the corner, the photo reflected in his goggles;
+ * [Frame], the designer's PNG (res/drawable-nodpi/share_frame.png), also 9:16; [Banner], drawn in code, fits any photo.
  */
-enum class ShareStyle { Frame, Banner, Photobomb }
+enum class ShareStyle { Photobomb, Frame, Banner }
 
 private const val NIGHT = 0xFF0A1229.toInt()
 private const val WHITE = 0xFFFFFFFF.toInt()
