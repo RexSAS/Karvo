@@ -20,8 +20,8 @@ import kotlin.math.roundToInt
 /**
  * The Karvo designs a photo can be shared in, so every shared moment carries the app's name, in the picker's order:
  * [Frame] is the designer's PNG (res/drawable-nodpi/share_frame.png), 9:16 and first because it's story-sized;
- * [Banner] is drawn in code and fits any photo; [Photobomb] is a story with Kevin popping up in the corner, the shared
- * photo reflected in his goggles.
+ * [Banner] is drawn in code and fits any photo; [Photobomb] is the photo as a full story with Kevin popping up in the
+ * corner, the photo reflected in his goggles.
  */
 enum class ShareStyle { Frame, Banner, Photobomb }
 
@@ -49,7 +49,7 @@ fun renderShareCard(context: Context, photo: Bitmap, style: ShareStyle, date: St
     return when (style) {
         ShareStyle.Frame -> frame(context, source, date)
         ShareStyle.Banner -> if (story) banner(context, storySized(source), date, story = true) else banner(context, source, date)
-        ShareStyle.Photobomb -> photobomb(context, source)
+        ShareStyle.Photobomb -> photobomb(context, source, date)
     }
 }
 
@@ -121,29 +121,25 @@ private fun frame(context: Context, photo: Bitmap, date: String): Bitmap {
     }
 }
 
-// Photobomb, as the owner laid it out in the share editor, in story pixels: the photo, Kevin (his box is the editor's,
-// 640 x 660 of his drawing units from -48, -104) and KARVO.
-private val PHOTOBOMB_PHOTO = RectF(0f, 285f, 1080f, 1635f)
+// Photobomb, as the owner laid it out in the share editor, in story pixels: Kevin (his box is the editor's, 640 x 660 of
+// his drawing units from -48, -104), KARVO, and the day under it.
 private const val PHOTOBOMB_KEVIN_LEFT = 365f
 private const val PHOTOBOMB_KEVIN_TOP = 1088f
 private const val PHOTOBOMB_KEVIN_WIDTH = 940f
 private const val PHOTOBOMB_TEXT_LEFT = 43f
 private const val PHOTOBOMB_TEXT_TOP = 1630f
 private const val PHOTOBOMB_TEXT_SIZE = 110f
+private const val PHOTOBOMB_DATE_SIZE = 54f
 private const val PHOTOBOMB_TEXT_COLOR = 0xFF1F2760.toInt()
 
 /**
- * A story: the photo over a blurred copy of itself, Kevin popping up in the bottom-right corner with the same photo
- * reflected in his goggles, and KARVO under the photo.
+ * A story: the photo full screen, Kevin popping up in the bottom-right corner with the same photo reflected in his
+ * goggles, and KARVO with the day under it, navy with a white border so they read on any photo.
  */
-private fun photobomb(context: Context, photo: Bitmap): Bitmap = draw(STORY_WIDTH, STORY_HEIGHT) {
+private fun photobomb(context: Context, photo: Bitmap, date: String): Bitmap = draw(STORY_WIDTH, STORY_HEIGHT) {
     val smooth = Paint(Paint.FILTER_BITMAP_FLAG)
-    blurredBackground(photo, STORY_WIDTH.toFloat(), STORY_HEIGHT.toFloat())
-    drawColor(0x4D000000)
-    save()
-    clipRect(PHOTOBOMB_PHOTO)
-    drawBitmap(photo, null, cover(photo, PHOTOBOMB_PHOTO), smooth)
-    restore()
+    val story = RectF(0f, 0f, STORY_WIDTH.toFloat(), STORY_HEIGHT.toFloat())
+    drawBitmap(photo, null, cover(photo, story), smooth)
 
     // Kevin's drawables have a 600 x 580 viewport that starts 20, 60 units into the editor's box.
     val k = PHOTOBOMB_KEVIN_WIDTH / 640f
@@ -166,10 +162,15 @@ private fun photobomb(context: Context, photo: Bitmap): Bitmap = draw(STORY_WIDT
     restore()
     layer(R.drawable.kevin_photobomb_over)
 
-    // KARVO with its box's top at PHOTOBOMB_TEXT_TOP, the letters centred in a box as tall as the text size (as in the editor).
+    // KARVO with its box's top at PHOTOBOMB_TEXT_TOP, the letters centred in a box as tall as the text size (as in the editor),
+    // then the day just under it, smaller.
     val name = text(context, PHOTOBOMB_TEXT_SIZE, PHOTOBOMB_TEXT_COLOR, weight = 500, spacing = 0.18f)
     val m = name.fontMetrics
-    drawText("KARVO", PHOTOBOMB_TEXT_LEFT, PHOTOBOMB_TEXT_TOP + (PHOTOBOMB_TEXT_SIZE - (m.descent - m.ascent)) / 2 - m.ascent, name)
+    outlinedText("KARVO", PHOTOBOMB_TEXT_LEFT, PHOTOBOMB_TEXT_TOP + (PHOTOBOMB_TEXT_SIZE - (m.descent - m.ascent)) / 2 - m.ascent, name, 6f, WHITE)
+    val day = text(context, PHOTOBOMB_DATE_SIZE, PHOTOBOMB_TEXT_COLOR, weight = 500, spacing = 0.04f)
+    val dayTop = PHOTOBOMB_TEXT_TOP + PHOTOBOMB_TEXT_SIZE + 8f
+    val dm = day.fontMetrics
+    outlinedText(date, PHOTOBOMB_TEXT_LEFT + 4f, dayTop + (PHOTOBOMB_DATE_SIZE - (dm.descent - dm.ascent)) / 2 - dm.ascent, day, 4f, WHITE)
 }
 
 /** A small copy of [photo], blurred and stretched back up with smoothing to cover [w] x [h]. */
@@ -239,13 +240,13 @@ private fun cover(bitmap: Bitmap, target: RectF): RectF {
 private fun draw(width: Int, height: Int, block: Canvas.() -> Unit): Bitmap =
     Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { Canvas(it).block() }
 
-/** [text] drawn with [paint], inside a black outline [outline] pixels wide, so it reads on any photo. */
-private fun Canvas.outlinedText(text: String, x: Float, y: Float, paint: Paint, outline: Float) {
+/** [text] drawn with [paint], inside an outline [outline] pixels wide (black unless [color]), so it reads on any photo. */
+private fun Canvas.outlinedText(text: String, x: Float, y: Float, paint: Paint, outline: Float, color: Int = BLACK) {
     val stroke = Paint(paint).apply {
         style = Paint.Style.STROKE
         strokeWidth = outline * 2 // half of it is hidden under the letters
         strokeJoin = Paint.Join.ROUND
-        color = BLACK
+        this.color = color
     }
     drawText(text, x, y, stroke)
     drawText(text, x, y, paint)

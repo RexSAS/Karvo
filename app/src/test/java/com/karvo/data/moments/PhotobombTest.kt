@@ -36,10 +36,10 @@ class PhotobombTest {
         assertTrue("a green photo makes the lens green: ${Integer.toHexString(green)}", Color.green(green) > Color.red(green) + 80)
     }
 
-    @Test fun the_photo_sits_where_the_editor_put_it() {
+    @Test fun the_photo_fills_the_whole_story() {
         val card = card(Color.RED)
-        // Middle of the photo area is the photo; above it is the dimmed, blurred copy (darker).
-        assertEquals(Color.RED, card.getPixel(200, 900))
-        assertTrue(Color.red(card.getPixel(200, 100)) < 230)
+        assertEquals(Color.RED, card.getPixel(5, 5))
+        assertEquals(Color.RED, card.getPixel(1075, 5))
+        assertEquals(Color.RED, card.getPixel(540, 900))
     }
 }
