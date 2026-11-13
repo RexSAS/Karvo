@@ -295,6 +295,7 @@ private val ShareStyle.label
     get() = when (this) {
         ShareStyle.Banner -> R.string.share_style_banner
         ShareStyle.Frame -> R.string.share_style_frame
+        ShareStyle.Photobomb -> R.string.share_style_photobomb
     }
 
 private fun Context.momentStore() = (applicationContext as KarvoApp).container.momentStore

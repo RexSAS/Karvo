@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Made by docs/mascot/kevin.mjs: change Kevin there, not here. Used by the Photobomb share design. -->
+<resources>
+    <!-- His goggle lens, in his drawing units (the drawable's viewport, before its shift of 28, 44). -->
+    <string name="kevin_lens_path" translatable="false">M74,236 C80,226 96,221 120,220 L330,221 C356,221 378,226 390,236 C399,246 401,266 400,284 C399,304 396,320 388,328 C378,338 362,344 340,345 L286,345 C262,345 250,338 238,328 C230,321 222,320 212,322 C196,325 180,330 160,336 C136,343 108,342 88,334 C72,327 62,312 60,292 C58,270 62,250 74,236 Z</string>
+    <!-- His tilt in the photobomb pose: degrees, around 270, 430. -->
+    <string name="kevin_photobomb_tilt" translatable="false">-2,270,430</string>
+</resources>

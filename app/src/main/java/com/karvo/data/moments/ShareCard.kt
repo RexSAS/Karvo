@@ -12,6 +12,7 @@ import android.net.Uri
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.PathParser
 import com.karvo.R
 import java.io.File
 import kotlin.math.roundToInt
@@ -19,9 +20,10 @@ import kotlin.math.roundToInt
 /**
  * The Karvo designs a photo can be shared in, so every shared moment carries the app's name, in the picker's order:
  * [Frame] is the designer's PNG (res/drawable-nodpi/share_frame.png), 9:16 and first because it's story-sized;
- * [Banner] is drawn in code and fits any photo.
+ * [Banner] is drawn in code and fits any photo; [Photobomb] is a story with Kevin popping up in the corner, the shared
+ * photo reflected in his goggles.
  */
-enum class ShareStyle { Frame, Banner }
+enum class ShareStyle { Frame, Banner, Photobomb }
 
 private const val NIGHT = 0xFF0A1229.toInt()
 private const val WHITE = 0xFFFFFFFF.toInt()
@@ -47,6 +49,7 @@ fun renderShareCard(context: Context, photo: Bitmap, style: ShareStyle, date: St
     return when (style) {
         ShareStyle.Frame -> frame(context, source, date)
         ShareStyle.Banner -> if (story) banner(context, storySized(source), date, story = true) else banner(context, source, date)
+        ShareStyle.Photobomb -> photobomb(context, source)
     }
 }
 
@@ -90,11 +93,7 @@ private fun frame(context: Context, photo: Bitmap, date: String): Bitmap {
     val h = template.height.toFloat()
     val smooth = Paint(Paint.FILTER_BITMAP_FLAG)
     return draw(template.width, template.height) {
-        // Blurred background: a small copy of the photo, blurred, stretched back up with smoothing, and dimmed.
-        val scale = BLUR_PX.toFloat() / maxOf(photo.width, photo.height)
-        val small = Bitmap.createScaledBitmap(photo, (photo.width * scale).roundToInt().coerceAtLeast(1), (photo.height * scale).roundToInt().coerceAtLeast(1), true)
-        val soft = blurred(small, BLUR_RADIUS)
-        drawBitmap(soft, null, cover(soft, RectF(0f, 0f, w, h)), smooth)
+        blurredBackground(photo, w, h)
         drawColor(0x40000000)
         // The sharp photo, turned with the frame and filling its window.
         val window = template.window
@@ -120,6 +119,65 @@ private fun frame(context: Context, photo: Bitmap, date: String): Bitmap {
             restore()
         }
     }
+}
+
+// Photobomb, as the owner laid it out in the share editor, in story pixels: the photo, Kevin (his box is the editor's,
+// 640 x 660 of his drawing units from -48, -104) and KARVO.
+private val PHOTOBOMB_PHOTO = RectF(0f, 285f, 1080f, 1635f)
+private const val PHOTOBOMB_KEVIN_LEFT = 365f
+private const val PHOTOBOMB_KEVIN_TOP = 1088f
+private const val PHOTOBOMB_KEVIN_WIDTH = 940f
+private const val PHOTOBOMB_TEXT_LEFT = 43f
+private const val PHOTOBOMB_TEXT_TOP = 1630f
+private const val PHOTOBOMB_TEXT_SIZE = 110f
+private const val PHOTOBOMB_TEXT_COLOR = 0xFF1F2760.toInt()
+
+/**
+ * A story: the photo over a blurred copy of itself, Kevin popping up in the bottom-right corner with the same photo
+ * reflected in his goggles, and KARVO under the photo.
+ */
+private fun photobomb(context: Context, photo: Bitmap): Bitmap = draw(STORY_WIDTH, STORY_HEIGHT) {
+    val smooth = Paint(Paint.FILTER_BITMAP_FLAG)
+    blurredBackground(photo, STORY_WIDTH.toFloat(), STORY_HEIGHT.toFloat())
+    drawColor(0x4D000000)
+    save()
+    clipRect(PHOTOBOMB_PHOTO)
+    drawBitmap(photo, null, cover(photo, PHOTOBOMB_PHOTO), smooth)
+    restore()
+
+    // Kevin's drawables have a 600 x 580 viewport that starts 20, 60 units into the editor's box.
+    val k = PHOTOBOMB_KEVIN_WIDTH / 640f
+    val left = PHOTOBOMB_KEVIN_LEFT + 20 * k
+    val top = PHOTOBOMB_KEVIN_TOP + 60 * k
+    fun layer(id: Int) = ContextCompat.getDrawable(context, id)!!.run {
+        setBounds(left.roundToInt(), top.roundToInt(), (left + 600 * k).roundToInt(), (top + 580 * k).roundToInt())
+        draw(this@draw)
+    }
+    layer(R.drawable.kevin_photobomb_under)
+    // The photo in his lens, in his drawing units: the viewport is his drawing shifted by 28, 44, then turned like his head.
+    val (tilt, pivotX, pivotY) = context.getString(R.string.kevin_photobomb_tilt).split(',').map { it.trim().toFloat() }
+    save()
+    translate(left, top)
+    scale(k, k)
+    translate(28f, 44f)
+    rotate(tilt, pivotX, pivotY)
+    clipPath(PathParser.createPathFromPathData(context.getString(R.string.kevin_lens_path)))
+    drawBitmap(photo, null, cover(photo, RectF(60f, 200f, 405f, 360f)), Paint(smooth).apply { alpha = 217 })
+    restore()
+    layer(R.drawable.kevin_photobomb_over)
+
+    // KARVO with its box's top at PHOTOBOMB_TEXT_TOP, the letters centred in a box as tall as the text size (as in the editor).
+    val name = text(context, PHOTOBOMB_TEXT_SIZE, PHOTOBOMB_TEXT_COLOR, weight = 500, spacing = 0.18f)
+    val m = name.fontMetrics
+    drawText("KARVO", PHOTOBOMB_TEXT_LEFT, PHOTOBOMB_TEXT_TOP + (PHOTOBOMB_TEXT_SIZE - (m.descent - m.ascent)) / 2 - m.ascent, name)
+}
+
+/** A small copy of [photo], blurred and stretched back up with smoothing to cover [w] x [h]. */
+private fun Canvas.blurredBackground(photo: Bitmap, w: Float, h: Float) {
+    val scale = BLUR_PX.toFloat() / maxOf(photo.width, photo.height)
+    val small = Bitmap.createScaledBitmap(photo, (photo.width * scale).roundToInt().coerceAtLeast(1), (photo.height * scale).roundToInt().coerceAtLeast(1), true)
+    val soft = blurred(small, BLUR_RADIUS)
+    drawBitmap(soft, null, cover(soft, RectF(0f, 0f, w, h)), Paint(Paint.FILTER_BITMAP_FLAG))
 }
 
 private class FrameTemplate(val image: Bitmap, val width: Int, val height: Int, val tilt: Float, val window: TiltedBox, val date: TiltedBox?)

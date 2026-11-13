@@ -103,7 +103,13 @@ const ink = (w = LINE) => ({ stroke: INK, sw: w, round: true });
 /** Kevin in four layers, back to front: the snow behind him, his head, the snow in front, and the z's of his sleep. */
 function kevin(pose) {
   const sleepy = pose === 'sleepy';
-  const lensArt = sleepy
+  // Photobomb (a share design): snow on his beanie, and the shared photo in his goggles. The app draws the photo
+  // between the layers under and over the lens, so here the lens only gets a light tint and two reflection bars.
+  const photobomb = pose === 'photobomb';
+  const lensArt = photobomb
+    ? [P('M60,214 L404,214 L404,350 L60,350 Z', { fill: '#7FBDF8', op: .25 }),
+      P('M92,304 L166,230', { stroke: '#FFFFFF', sw: 17, round: true, op: .92 }), P('M126,314 L172,270', { stroke: '#FFFFFF', sw: 13, round: true, op: .8 })]
+    : sleepy
     ? [P('M318,256 a22,22 0 1,0 20,34 a17,17 0 1,1 -20,-34 Z', { fill: '#F8CD7E' }), // the moon in the dark lens
       P(circle(150, 262, 2.6), { fill: '#FFFFFF', op: .8 }), P(circle(214, 300, 2), { fill: '#FFFFFF', op: .6 }), P(circle(262, 250, 2.2), { fill: '#FFFFFF', op: .7 })]
     : [P('M196,352 L262,286 L288,312 L322,270 L404,352 Z', { fill: '#FFFFFF', op: .34 }), // summits and the sun, mirrored in the lens
@@ -123,6 +129,7 @@ function kevin(pose) {
     P(G.head, ink()),
     P(G.beak, { fill: 'beak' }), P(G.jaw, { fill: '#C8721C', op: .85 }), P(G.beak, ink()),
     P(G.lens, { fill: sleepy ? 'night' : 'lens' }),
+    photobomb && { split: true }, // the photo goes here
     Gp({ clip: G.lens }, [...lensArt, P('M60,214 L404,214 L404,246 Q240,232 60,250 Z', { fill: INK, op: .22 })]),
     P(G.lens, { stroke: INK, sw: 13, round: true }),
     P('M96,226 C110,222 124,220 140,220 L300,221', { stroke: '#5F78C0', sw: 3, round: true, op: .8 }),
@@ -136,7 +143,7 @@ function kevin(pose) {
       P('M60,0 H500 V200 H60 Z', { fill: 'dome' }), P(G.domeShade, { fill: '#3A1C00', op: .16 }),
     ]),
     P(G.dome, ink()),
-    sleepy && [P(G.snowCap, { fill: '#FFFFFF', ...ink(THIN) }), P('M190,70 C210,80 250,82 276,70 C300,80 340,84 372,70', { stroke: '#BFD1F0', sw: 5, round: true })],
+    (sleepy || photobomb) && [P(G.snowCap, { fill: '#FFFFFF', ...ink(THIN) }), P('M190,70 C210,80 250,82 276,70 C300,80 340,84 372,70', { stroke: '#BFD1F0', sw: 5, round: true })],
   ].filter(Boolean).flat();
   const puff = (x, y, r, op) => P(circle(x, y, r), { fill: '#FFFFFF', op });
   return {
@@ -228,4 +235,22 @@ const k = kevin('sleepy');
 drawable('back', 'the snow behind him', k.back);
 drawable('front', 'the snow in front of him', k.front);
 drawable('zzz', "the z's of his sleep", k.zzz);
+// Photobomb: his head in two layers around the lens (the app draws the shared photo between them, clipped to the lens),
+// with the snow behind and in front but no shadow. The lens outline and his tilt go to a values file for that clip.
+{
+  const pb = kevin('photobomb');
+  const [tilted] = pb.head;
+  const at = tilted.kids.findIndex(o => o.split);
+  drawable('photobomb_under', 'photobomb, everything under the shared photo', [P(G.snowBack, { fill: 'snowB' }), Gp({ clip: G.snowClip }, [{ ...tilted, kids: tilted.kids.slice(0, at) }])]);
+  drawable('photobomb_over', 'photobomb, everything over the shared photo', [Gp({ clip: G.snowClip }, [{ ...tilted, kids: tilted.kids.slice(at + 1) }]), ...pb.front]);
+  writeFileSync(join(root, 'app/src/main/res/values/kevin_lens.xml'), `<?xml version="1.0" encoding="utf-8"?>
+<!-- Made by docs/mascot/kevin.mjs: change Kevin there, not here. Used by the Photobomb share design. -->
+<resources>
+    <!-- His goggle lens, in his drawing units (the drawable's viewport, before its shift of ${-VIEW.x}, ${-VIEW.y}). -->
+    <string name="kevin_lens_path" translatable="false">${G.lens}</string>
+    <!-- His tilt in the photobomb pose: degrees, around ${tilted.rot[1]}, ${tilted.rot[2]}. -->
+    <string name="kevin_photobomb_tilt" translatable="false">${tilted.rot.join(',')}</string>
+</resources>
+`);
+}
 console.log(`Kevin: idle and sleepy written${process.argv[2] ? `, web copies in ${process.argv[2]}` : ''}.`);
