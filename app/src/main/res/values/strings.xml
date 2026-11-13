@@ -336,10 +336,11 @@
     </plurals>
     <string name="whats_new_title">What\'s new in %1$s</string>
     <string-array name="whats_new_items">
-        <item>New way to share a photo: Photobomb. Kevin pops up in the corner of your story, with your photo in his goggles.</item>
-        <item>A new look: the sky at first light over the mountains, a new logo and a new app icon.</item>
-        <item>Meet Kevin, the Karvo penguin. He sleeps in the snow where there is nothing yet.</item>
-        <item>Clearer numbers, a calmer tab bar, and your photos share with the new logo.</item>
+        <item>Overview now shows this season. Tap the season next to the title to see a past one, or everything.</item>
+        <item>Tap a student on the podium to see all their hours and lessons.</item>
+        <item>Swipe right to go back, and lists now slide softly under the top and bottom bars.</item>
+        <item>When a new season starts, Karvo says hello, with last season in one line.</item>
+        <item>Share a photo as a Photobomb: Kevin pops up in the corner, with your photo in his goggles.</item>
     </string-array>
     <string name="play_update_ready_title">Update ready</string>
     <string name="play_update_ready_text">The new version of Karvo is downloaded. Restart now to use it? Your lessons stay as they are.</string>

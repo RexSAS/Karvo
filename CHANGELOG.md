@@ -2,6 +2,22 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.5] — 2026-11-13
+
+### Added
+- **Season picker on Overview**: Overview now opens on this season. The pill next to the title switches to any past season or to **Lifetime**; every number, chart and list on the page follows it ("To be paid" always counts everything).
+- **Student page**: tap a student on the podium (or in 4th and 5th place) for their total hours, lessons, average lesson, first and last lesson, earnings behind the eye, their last 6 months, this season against the last, and all their lessons by month.
+- **Swipe right to go back** on the inner pages (month, student, lesson, backups, restore, linked PCs). The day page, the photo viewer and the calendar keep their own sideways swipes.
+- **Season start**: at 07:30 on the season's first day, Kevin says "Season is starting! Enjoy the slopes!". The first time Karvo opens in a new season, a welcome card sums up last season (hours, lessons, students) and says how many of its months are still to be paid.
+
+### Changed
+- Lists scroll on softly under the headers and the tab bar instead of stopping at a straight line.
+- The lessons on the month and student pages sit in rounded cards, as on Lessons.
+- The student suggestions close when the keyboard goes away.
+
+### Fixed
+- The logo had a thin blue sliver outside the summit, on the right; it is gone everywhere (app icon, splash, Play icon, karvo.rxsas.it).
+
 ## [3.4] — 2026-11-13
 
 ### Added

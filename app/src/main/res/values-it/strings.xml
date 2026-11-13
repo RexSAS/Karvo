@@ -334,10 +334,11 @@
     </plurals>
     <string name="whats_new_title">Novità della %1$s</string>
     <string-array name="whats_new_items">
-        <item>Un nuovo modo di condividere una foto: Photobomb. Kevin spunta nell\'angolo della tua storia, con la tua foto nei suoi occhiali.</item>
-        <item>Un nuovo look: il cielo all\'alba sopra le montagne, un nuovo logo e una nuova icona.</item>
-        <item>Ecco Kevin, il pinguino di Karvo. Dorme nella neve dove non c\'è ancora niente.</item>
-        <item>Numeri più chiari, una barra delle schede più pulita, e le foto si condividono con il nuovo logo.</item>
+        <item>La Panoramica ora mostra questa stagione. Tocca la stagione accanto al titolo per vederne una passata, o tutto.</item>
+        <item>Tocca un allievo sul podio per vedere tutte le sue ore e lezioni.</item>
+        <item>Scorri a destra per tornare indietro, e le liste ora scorrono morbide sotto le barre in alto e in basso.</item>
+        <item>Quando inizia una nuova stagione, Karvo ti saluta, con la stagione scorsa in una riga.</item>
+        <item>Condividi una foto come Photobomb: Kevin spunta nell\'angolo, con la tua foto nei suoi occhiali.</item>
     </string-array>
     <string name="play_update_ready_title">Aggiornamento pronto</string>
     <string name="play_update_ready_text">La nuova versione di Karvo è scaricata. Riavviare ora per usarla? Le tue lezioni restano come sono.</string>
