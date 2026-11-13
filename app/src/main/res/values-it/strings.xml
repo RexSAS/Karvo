@@ -63,7 +63,6 @@
     <string name="stats_six_month_earnings">Guadagni 6 mesi</string>
     <string name="stats_top_students">Classifica allievi</string>
     <string name="student_first_last">Prima lezione %1$s · ultima %2$s</string>
-    <string name="student_this_season">Questa stagione %1$s</string>
     <string name="student_last_season">Stagione scorsa</string>
     <string name="student_no_lessons">Non ci sono più lezioni con questo allievo.</string>
     <string name="stats_busiest_days">Giorni più intensi</string>
@@ -184,6 +183,9 @@
     <string name="paid_month_note">%s risulta pagato: questa lezione sarà non pagata.</string>
     <!-- Seasons -->
     <string name="this_season">Questa stagione %s</string>
+    <string name="overview_lifetime">Da sempre</string>
+    <string name="overview_scope_season">Stagione %1$s</string>
+    <string name="overview_scope_a11y">Mostra %1$s. Cambia</string>
     <string name="season_vs_last">%1$s rispetto al %2$s a questa data</string>
     <plurals name="to_be_paid">
         <item quantity="one">Da pagare: %1$d mese · %2$s · %3$s</item>

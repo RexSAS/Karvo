@@ -172,10 +172,13 @@ fun HorizonLine(modifier: Modifier = Modifier, glint: () -> Float = { 1f }) {
     })
 }
 
-/** Left-aligned screen title with an optional subtitle and trailing decoration; replaces the centred top bar. */
+/**
+ * Left-aligned screen title with an optional subtitle, something right after the title ([afterTitle], like the logo)
+ * and a trailing control in the corner; replaces the centred top bar.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScreenHeader(title: String, subtitle: String? = null, trailing: (@Composable () -> Unit)? = null) {
+fun ScreenHeader(title: String, subtitle: String? = null, afterTitle: (@Composable () -> Unit)? = null, trailing: (@Composable () -> Unit)? = null) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -189,7 +192,10 @@ fun ScreenHeader(title: String, subtitle: String? = null, trailing: (@Composable
             if (subtitle != null) {
                 Text(subtitle, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(title, style = MaterialTheme.typography.headlineLarge)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(title, style = MaterialTheme.typography.headlineLarge)
+                afterTitle?.invoke()
+            }
         }
         trailing?.invoke()
     }

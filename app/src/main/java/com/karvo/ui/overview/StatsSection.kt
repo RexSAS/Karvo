@@ -69,10 +69,12 @@ fun StatsSection(stats: OverviewStats, revealed: Boolean, rateSet: Boolean, onOp
 
 /** The three headline numbers; Overview places them overlapping the season total. */
 @Composable
-fun SummaryTiles(stats: OverviewStats, modifier: Modifier = Modifier) {
+fun SummaryTiles(stats: OverviewStats, modifier: Modifier = Modifier, lessonsInScope: Int? = null) {
     // Equal-height cards even when one label wraps.
     Row(modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        SummaryCard(stats.lessonsThisMonth.toString(), stringResource(R.string.stats_lessons_this_month), Modifier.weight(1f))
+        // This season: the lessons of this month. A past season or Lifetime: all of its lessons ([lessonsInScope]).
+        if (lessonsInScope == null) SummaryCard(stats.lessonsThisMonth.toString(), stringResource(R.string.stats_lessons_this_month), Modifier.weight(1f))
+        else SummaryCard(lessonsInScope.toString(), stringResource(R.string.lessons), Modifier.weight(1f))
         SummaryCard(formatDuration(stats.averageLessonMinutes), stringResource(R.string.stats_avg_lesson), Modifier.weight(1f))
         SummaryCard(stats.studentCount.toString(), stringResource(R.string.stats_students), Modifier.weight(1f))
     }

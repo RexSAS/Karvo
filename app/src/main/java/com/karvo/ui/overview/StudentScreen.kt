@@ -179,7 +179,7 @@ private fun LastSixMonths(detail: StudentDetail) {
 private fun Seasons(detail: StudentDetail) {
     AlpineTile(Modifier.fillMaxWidth().padding(16.dp)) {
         Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-            Figure(formatDuration(detail.thisSeasonMinutes), stringResource(R.string.student_this_season, detail.season.label()))
+            Figure(formatDuration(detail.thisSeasonMinutes), stringResource(R.string.this_season, detail.season.label()))
             Figure(formatDuration(detail.lastSeasonMinutes), stringResource(R.string.student_last_season))
         }
     }

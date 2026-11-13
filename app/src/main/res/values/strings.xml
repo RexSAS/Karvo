@@ -65,7 +65,6 @@
     <string name="stats_six_month_earnings">6-month earnings</string>
     <string name="stats_top_students">Top students</string>
     <string name="student_first_last">First lesson %1$s · last %2$s</string>
-    <string name="student_this_season">This season %1$s</string>
     <string name="student_last_season">Last season</string>
     <string name="student_no_lessons">No lessons with this student any more.</string>
     <string name="stats_busiest_days">Busiest days</string>
@@ -186,6 +185,9 @@
     <string name="paid_month_note">%s is marked as paid — this lesson will be unpaid.</string>
     <!-- Seasons -->
     <string name="this_season">This season %s</string>
+    <string name="overview_lifetime">Lifetime</string>
+    <string name="overview_scope_season">Season %1$s</string>
+    <string name="overview_scope_a11y">Showing %1$s. Change</string>
     <string name="season_vs_last">%1$s vs %2$s at this date</string>
     <plurals name="to_be_paid">
         <item quantity="one">To be paid: %1$d month · %2$s · %3$s</item>

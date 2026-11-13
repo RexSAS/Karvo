@@ -1,5 +1,16 @@
 package com.karvo.ui.overview
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.WindowInsets
 import com.karvo.ui.theme.underBars
 import com.karvo.ui.theme.LocalTabBarSpace
@@ -94,15 +105,16 @@ fun OverviewScreen(
             ScreenHeader(
                 title = stringResource(R.string.overview),
                 subtitle = dayTitle(LocalDate.now()),
-                trailing = {
+                afterTitle = {
                     Icon(
                         painterResource(R.drawable.ic_emblem),
                         contentDescription = null,
                         // Alpine Night shows the logo in its own colours; Classic tints it with the theme.
                         tint = if (isAlpineNight()) Color.Unspecified else MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(width = 58.dp, height = 45.dp),
+                        modifier = Modifier.size(width = 36.dp, height = 28.dp),
                     )
                 },
+                trailing = { if (!state.loading && state.seasons != null) ScopePicker(state, viewModel::show) },
             )
         },
     ) { padding ->
@@ -117,7 +129,7 @@ fun OverviewScreen(
             GlassPanel(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
                 Column(Modifier.padding(start = 18.dp, end = 8.dp, top = 16.dp, bottom = if (state.stats != null) 28.dp else 16.dp)) {
                     Text(
-                        stringResource(R.string.total_hours).uppercase(),
+                        (state.scopeSeason?.let { stringResource(R.string.overview_scope_season, it.label()) } ?: stringResource(R.string.total_hours)).uppercase(),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -141,9 +153,10 @@ fun OverviewScreen(
                             )
                         }
                     }
-                    state.seasons?.let { seasons ->
+                    state.seasons?.takeIf { state.scope !is OverviewScope.Past }?.let { seasons ->
                         val current = seasons.current
-                        Text(
+                        // Lifetime: this season as one line. This season: the big number above already is it.
+                        if (state.scope == OverviewScope.Lifetime) Text(
                             stringResource(R.string.this_season, current.season.label()) + " · " +
                                 formatDuration(current.minutes) + " · " + earningsLabel(current.earningsCents, state.revealed),
                             style = MaterialTheme.typography.bodyLarge,
@@ -189,10 +202,14 @@ fun OverviewScreen(
             }
             item(key = "summary") {
                 // Overlaps the bottom of the glass panel.
-                SummaryTiles(stats, Modifier.padding(horizontal = 16.dp).offset(y = (-18).dp))
+                SummaryTiles(
+                    stats, Modifier.padding(horizontal = 16.dp).offset(y = (-18).dp),
+                    lessonsInScope = if (state.scope == OverviewScope.ThisSeason) null else state.months.sumOf { it.summary.lessonCount },
+                )
             }
             item(key = "stats") { StatsSection(stats, state.revealed, state.rateSet, onOpenStudent) }
-            state.seasons?.let { seasons ->
+            // Every season side by side: only for Lifetime (the picker shows one season at a time).
+            state.seasons?.takeIf { state.scope == OverviewScope.Lifetime }?.let { seasons ->
                 item(key = "seasons") { SeasonsSection(seasons, state.revealed, Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
             }
             item(key = "months-header") {
@@ -236,6 +253,44 @@ fun OverviewScreen(
                     HorizontalDivider(Modifier.padding(horizontal = 32.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 }
             }
+        }
+    }
+}
+
+/** The pill in the corner: which season Overview counts (this one, a past one) or Lifetime. */
+@Composable
+private fun ScopePicker(state: OverviewUiState, onChoose: (OverviewScope) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    val lifetime = stringResource(R.string.overview_lifetime)
+    val label = state.scopeSeason?.label() ?: lifetime
+    val describe = stringResource(R.string.overview_scope_a11y, label)
+    Box {
+        Row(
+            Modifier
+                .clip(CircleShape)
+                .background(tileColor())
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                .clickable(onClickLabel = describe) { open = true }
+                .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
+                .semantics { contentDescription = describe },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(label, style = MaterialTheme.typography.titleSmall)
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            val current = state.seasons?.current?.season
+            fun choose(scope: OverviewScope) { open = false; onChoose(scope) }
+            val pick = @Composable { text: String, scope: OverviewScope ->
+                DropdownMenuItem(
+                    text = { Text(text) },
+                    onClick = { choose(scope) },
+                    trailingIcon = { if (state.scope == scope) Icon(Icons.Filled.Check, contentDescription = null) },
+                )
+            }
+            if (current != null) pick(stringResource(R.string.this_season, current.label()), OverviewScope.ThisSeason)
+            state.pastSeasons.forEach { pick(it.label(), OverviewScope.Past(it)) }
+            pick(lifetime, OverviewScope.Lifetime)
         }
     }
 }

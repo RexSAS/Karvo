@@ -5,6 +5,8 @@ import com.karvo.testing.FakeAuthenticator
 import com.karvo.testing.FakeLessonRepository
 import com.karvo.testing.FakeSettingsRepository
 import com.karvo.testing.MainDispatcherRule
+import com.karvo.domain.Season
+import com.karvo.ui.overview.OverviewScope
 import com.karvo.ui.overview.OverviewViewModel
 import java.time.Clock
 import java.time.Instant
@@ -28,7 +30,7 @@ class OverviewViewModelTest {
     @Test fun totalsWithRate() = runTest {
         repo.save(Lesson(date = LocalDate.of(2026, 10, 1), durationMinutes = 90, student = "A"))
         repo.save(Lesson(date = LocalDate.of(2026, 9, 1), durationMinutes = 60, student = "B"))
-        val vm = OverviewViewModel(repo, FakeSettingsRepository(2000))
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(2000)).apply { show(OverviewScope.Lifetime) }
         val s = vm.uiState.first { it.months.size == 2 }
         assertEquals(150, s.totalMinutes); assertEquals(5000L, s.totalEarningsCents)
         assertEquals(3000L, s.months[0].earningsCents); assertTrue(s.rateSet); assertFalse(s.revealed)
@@ -36,14 +38,14 @@ class OverviewViewModelTest {
 
     @Test fun noRateMeansNullEarnings() = runTest {
         repo.save(Lesson(date = LocalDate.of(2026, 10, 1), durationMinutes = 60, student = "A"))
-        val s = OverviewViewModel(repo, FakeSettingsRepository(null)).uiState.first { it.months.isNotEmpty() }
+        val s = OverviewViewModel(repo, FakeSettingsRepository(null)).apply { show(OverviewScope.Lifetime) }.uiState.first { it.months.isNotEmpty() }
         assertNull(s.totalEarningsCents); assertNull(s.months[0].earningsCents); assertFalse(s.rateSet)
     }
 
     @Test fun rateChangeRecalculatesPastMonths() = runTest {
         val settings = FakeSettingsRepository(1000)
         repo.save(Lesson(date = LocalDate.of(2025, 1, 1), durationMinutes = 60, student = "A"))
-        val vm = OverviewViewModel(repo, settings); vm.uiState.first { it.months.isNotEmpty() }
+        val vm = OverviewViewModel(repo, settings).apply { show(OverviewScope.Lifetime) }; vm.uiState.first { it.months.isNotEmpty() }
         settings.setHourlyRateCents(3000)
         assertEquals(3000L, vm.uiState.first { it.totalEarningsCents == 3000L }.months[0].earningsCents)
     }
@@ -89,6 +91,48 @@ class OverviewViewModelTest {
         val stats = vm.uiState.first { it.stats != null }.stats!!
         assertEquals(1, stats.lessonsThisMonth)
         assertEquals(YearMonth.of(2027, 3), stats.lastSixMonths.last().month)
+    }
+
+    // The season picker: this season by default, a past season, or Lifetime. Seasons start in December here.
+    private suspend fun twoSeasons() {
+        repo.save(Lesson(date = LocalDate.of(2027, 2, 1), durationMinutes = 60, student = "A")) // 2026/27
+        repo.save(Lesson(date = LocalDate.of(2026, 2, 1), durationMinutes = 90, student = "B")) // 2025/26
+    }
+
+    @Test fun opensOnThisSeason() = runTest {
+        twoSeasons()
+        val s = OverviewViewModel(repo, FakeSettingsRepository(2000), clock).uiState.first { it.stats != null }
+        assertEquals(OverviewScope.ThisSeason, s.scope)
+        assertEquals("2026/27", s.scopeSeason!!.label())
+        assertEquals(60L, s.totalMinutes)
+        assertEquals(listOf("2025/26"), s.pastSeasons.map { it.label() })
+        assertEquals(listOf("A"), s.stats!!.topStudents.map { it.name })
+    }
+
+    @Test fun pastSeasonShowsItsLessonsWithTheChartEndingThere() = runTest {
+        twoSeasons()
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(2000), clock)
+        val past = vm.uiState.first { it.pastSeasons.isNotEmpty() }.pastSeasons.first()
+        vm.show(OverviewScope.Past(past))
+        val s = vm.uiState.first { it.scope is OverviewScope.Past }
+        assertEquals(90L, s.totalMinutes)
+        assertEquals(YearMonth.of(2026, 2), s.stats!!.lastSixMonths.last().month)
+        assertEquals(listOf("B"), s.stats!!.topStudents.map { it.name })
+    }
+
+    @Test fun lifetimeCountsEverything() = runTest {
+        twoSeasons()
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(2000), clock).apply { show(OverviewScope.Lifetime) }
+        val s = vm.uiState.first { it.scope == OverviewScope.Lifetime && !it.loading }
+        assertEquals(150L, s.totalMinutes)
+        assertNull(s.scopeSeason)
+    }
+
+    @Test fun aSeasonWithoutLessonsFallsBackToThisSeason() = runTest {
+        twoSeasons()
+        val vm = OverviewViewModel(repo, FakeSettingsRepository(2000), clock).apply { show(OverviewScope.Past(Season(2010, 12))) }
+        assertEquals(60L, vm.uiState.first { !it.loading }.totalMinutes)
+        assertEquals(OverviewScope.ThisSeason, vm.uiState.value.scope)
     }
 
     @Test fun statsDoNotChangeRevealDefault() = runTest {

@@ -14,7 +14,7 @@ data class OverviewStats(
     val averageLessonMinutes: Long,
     /** Distinct students, matched ignoring case and surrounding spaces. */
     val studentCount: Int,
-    /** Exactly 6 bars, oldest first, ending at the current month; empty months are 0. */
+    /** Exactly 6 bars, oldest first, ending at the chart's last month (normally today's); empty months are 0. */
     val lastSixMonths: List<MonthBar>,
     /** Earnings for [lastSixMonths], from their summed minutes; null when no rate is set. */
     val sixMonthEarningsCents: Long?,
@@ -26,14 +26,15 @@ data class OverviewStats(
 
 private const val TOP_STUDENTS = 5
 
-fun computeStats(lessons: List<Lesson>, today: LocalDate, rateCents: Long?): OverviewStats {
+/** [lastMonth] is where the 6-month chart ends: today's month, or the last month of a past season. */
+fun computeStats(lessons: List<Lesson>, today: LocalDate, rateCents: Long?, lastMonth: YearMonth = YearMonth.from(today)): OverviewStats {
     fun earnings(minutes: Long) = rateCents?.let { earningsCents(minutes, it) }
 
     val currentMonth = YearMonth.from(today)
     val minutesByMonth = lessons.groupBy { YearMonth.from(it.date) }
         .mapValues { (_, items) -> items.sumOf { it.durationMinutes.toLong() } }
     val lastSixMonths = (5 downTo 0).map { back ->
-        val month = currentMonth.minusMonths(back.toLong())
+        val month = lastMonth.minusMonths(back.toLong())
         val minutes = minutesByMonth[month] ?: 0L
         MonthBar(month, minutes, earnings(minutes))
     }
