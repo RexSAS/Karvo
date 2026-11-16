@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The widget's gold + (summit gold, dark plus), as in the app's add button. -->
+<!-- The widget's +: a small summit-gold disc lit from the top left, a soft halo, a thin dark plus. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="44dp" android:height="44dp"
-    android:viewportWidth="44" android:viewportHeight="44">
-    <path android:fillColor="#F4C06A" android:pathData="M22,0a22,22 0 1,0 0.01,0z" />
-    <path android:strokeColor="#2B1C00" android:strokeWidth="3.2" android:strokeLineCap="round"
-        android:pathData="M22,13V31M13,22H31" />
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="40dp" android:height="40dp"
+    android:viewportWidth="40" android:viewportHeight="40">
+    <!-- Halo -->
+    <path android:pathData="M20,1a19,19 0 1,0 0.01,0z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="radial" android:centerX="20" android:centerY="20" android:gradientRadius="19">
+                <item android:offset="0.7" android:color="#40F4C06A" />
+                <item android:offset="1" android:color="#00F4C06A" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Disc -->
+    <path android:pathData="M20,6a14,14 0 1,0 0.01,0z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="10" android:startY="6" android:endX="30" android:endY="34"
+                android:startColor="#FFFFDDA0" android:endColor="#FFE3A146" />
+        </aapt:attr>
+    </path>
+    <!-- Thin rim of light on the top edge -->
+    <path android:strokeColor="#80FFF4DC" android:strokeWidth="0.8" android:strokeLineCap="round"
+        android:pathData="M11.5,13.5A11,11 0 0,1 28.5,13.5" />
+    <!-- Plus -->
+    <path android:strokeColor="#2B1C00" android:strokeWidth="2" android:strokeLineCap="round"
+        android:pathData="M20,14.5V25.5M14.5,20H25.5" />
 </vector>

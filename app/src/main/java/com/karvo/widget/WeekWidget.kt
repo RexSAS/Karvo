@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 
-/** 2×1 home-screen widget: this week's hours and lessons (Monday to today), and a + that opens a new lesson. */
+/** 2×2 home-screen widget: this week's hours and lessons (Monday to today), and a + that opens a new lesson. */
 class WeekWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         val pending = goAsync()
