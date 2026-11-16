@@ -30,6 +30,7 @@
             android:includeFontPadding="false"
             android:letterSpacing="0.12"
             android:maxLines="1"
+            android:id="@+id/widget_label"
             android:text="@string/widget_week_short"
             android:textAllCaps="true"
             android:textColor="@color/widget_mist"

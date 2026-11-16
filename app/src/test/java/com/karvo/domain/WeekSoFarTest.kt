@@ -14,4 +14,6 @@ class WeekSoFarTest {
     @Test fun mondayCountsOnlyMonday() = assertEquals(90L to 1, weekSoFar(lessons, LocalDate.parse("2026-11-16")))
     @Test fun sundayCountsTheWholeWeek() = assertEquals(150L to 2, weekSoFar(lessons, LocalDate.parse("2026-11-22")))
     @Test fun emptyMondayIsZero() = assertEquals(0L to 0, weekSoFar(lessons.take(1), LocalDate.parse("2026-11-16")))
+    @Test fun monthCountsFromTheFirstToToday() = assertEquals(270L to 3, monthSoFar(lessons, LocalDate.parse("2026-11-18")))
+    @Test fun monthLeavesOutLastMonth() = assertEquals(0L to 0, monthSoFar(listOf(lesson("2026-10-31", 60)), LocalDate.parse("2026-11-01")))
 }

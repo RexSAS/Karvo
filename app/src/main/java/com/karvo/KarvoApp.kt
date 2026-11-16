@@ -1,7 +1,7 @@
 package com.karvo
 
 import android.app.Application
-import com.karvo.widget.WeekWidget
+import com.karvo.widget.LessonWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,7 +18,7 @@ class KarvoApp : Application() {
         container.noteAlarms // arms the next day-note reminder and keeps it in step with the notes
         // Any lesson change (app, phone link, restore, import) redraws the home-screen widget.
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-            container.lessonRepository.observeLessons().drop(1).collect { runCatching { WeekWidget.refresh(this@KarvoApp) } }
+            container.lessonRepository.observeLessons().drop(1).collect { runCatching { LessonWidget.refresh(this@KarvoApp) } }
         }
     }
 }

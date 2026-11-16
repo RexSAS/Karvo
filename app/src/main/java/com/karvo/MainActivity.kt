@@ -23,7 +23,7 @@ import com.karvo.ui.theme.KarvoTheme
 import com.karvo.ui.theme.SPLASH_ANIMATION_MS
 import com.karvo.ui.theme.animateSplashExit
 import com.karvo.ui.theme.shouldKeepSplash
-import com.karvo.widget.WeekWidget
+import com.karvo.widget.LessonWidget
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun takeAddLesson(intent: Intent) {
-        if (intent.getBooleanExtra(WeekWidget.EXTRA_ADD_LESSON, false)) addLessonRequests++
+        if (intent.getBooleanExtra(LessonWidget.EXTRA_ADD_LESSON, false)) addLessonRequests++
     }
 
     // The phone link is reachable while Karvo is in front; a connected PC keeps it alive via LinkService.

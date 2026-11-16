@@ -14,7 +14,9 @@ import android.widget.RemoteViews
 import com.karvo.KarvoApp
 import com.karvo.MainActivity
 import com.karvo.R
+import com.karvo.data.Lesson
 import com.karvo.domain.formatDuration
+import com.karvo.domain.monthSoFar
 import com.karvo.domain.weekSoFar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,31 +24,46 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.TextStyle
 
 /** 2×2 home-screen widget: this week's hours and lessons (Monday to today), and a + that opens a new lesson. */
-class WeekWidget : AppWidgetProvider() {
+class WeekWidget : LessonWidget(Period.WEEK)
+
+/** The same widget for this month (the 1st to today), labelled with the month's name. */
+class MonthWidget : LessonWidget(Period.MONTH)
+
+enum class Period { WEEK, MONTH }
+
+abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
-            try { render(context, manager, ids) } finally { pending.finish() }
+            try { render(context, manager, ids, period) } finally { pending.finish() }
         }
     }
 
     companion object {
         const val EXTRA_ADD_LESSON = "com.karvo.ADD_LESSON"
 
-        /** Redraws every placed widget; called whenever the lessons change. */
+        /** Redraws every placed widget, week and month; called whenever the lessons change. */
         suspend fun refresh(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
-            val ids = manager.getAppWidgetIds(ComponentName(context, WeekWidget::class.java))
-            if (ids.isNotEmpty()) render(context, manager, ids)
+            for ((provider, period) in listOf(WeekWidget::class.java to Period.WEEK, MonthWidget::class.java to Period.MONTH)) {
+                val ids = manager.getAppWidgetIds(ComponentName(context, provider))
+                if (ids.isNotEmpty()) render(context, manager, ids, period)
+            }
         }
 
-        private suspend fun render(context: Context, manager: AppWidgetManager, ids: IntArray) {
+        private suspend fun render(context: Context, manager: AppWidgetManager, ids: IntArray, period: Period) {
             val container = (context.applicationContext as KarvoApp).container
             val zone = runCatching { ZoneId.of(container.settingsRepository.timeZoneId.first()) }.getOrDefault(ZoneId.systemDefault())
-            val (minutes, count) = weekSoFar(container.lessonRepository.allLessons(), LocalDate.now(zone))
+            val today = LocalDate.now(zone)
+            val lessons: List<Lesson> = container.lessonRepository.allLessons()
+            val (minutes, count) = if (period == Period.WEEK) weekSoFar(lessons, today) else monthSoFar(lessons, today)
+            val label = if (period == Period.WEEK) context.getString(R.string.widget_week_short)
+                else today.month.getDisplayName(TextStyle.FULL_STANDALONE, context.resources.configuration.locales[0])
             val views = RemoteViews(context.packageName, R.layout.widget_week).apply {
+                setTextViewText(R.id.widget_label, label)
                 setTextViewText(R.id.widget_hours, hoursText(context, minutes))
                 setTextViewText(R.id.widget_sub, context.resources.getQuantityString(R.plurals.lesson_count, count, count))
                 setOnClickPendingIntent(R.id.widget_root, open(context, add = false))

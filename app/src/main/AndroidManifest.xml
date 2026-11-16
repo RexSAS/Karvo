@@ -85,6 +85,13 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_week_info" />
         </receiver>
+        <!-- The same widget for this month. -->
+        <receiver android:name=".widget.MonthWidget" android:exported="false" android:label="@string/widget_month_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_month_info" />
+        </receiver>
 
         <service
             android:name=".link.LinkService"
