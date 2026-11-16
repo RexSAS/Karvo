@@ -30,6 +30,8 @@
     <string name="widget_week_label">This week</string>
     <string name="widget_week_short">This week</string>
     <string name="widget_month_label">This month</string>
+    <string name="widget_overview_label">Week and month</string>
+    <string name="widget_overview_description">This week and this month side by side, and a button to add a lesson.</string>
     <string name="widget_month_description">Your hours and lessons this month, and a button to add a lesson.</string>
     <string name="widget_week_description">Your hours and lessons since Monday, and a button to add a lesson.</string>
     <string name="no_lessons_hint">No lessons yet. Tap + to add your first one.</string>

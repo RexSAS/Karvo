@@ -92,6 +92,13 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_month_info" />
         </receiver>
+        <!-- Quick overview: week and month side by side. -->
+        <receiver android:name=".widget.OverviewWidget" android:exported="false" android:label="@string/widget_overview_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_overview_info" />
+        </receiver>
 
         <service
             android:name=".link.LinkService"

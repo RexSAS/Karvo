@@ -32,7 +32,10 @@ class WeekWidget : LessonWidget(Period.WEEK)
 /** The same widget for this month (the 1st to today), labelled with the month's name. */
 class MonthWidget : LessonWidget(Period.MONTH)
 
-enum class Period { WEEK, MONTH }
+/** 4×2 quick overview: this week and this month side by side, with the same +. */
+class OverviewWidget : LessonWidget(Period.OVERVIEW)
+
+enum class Period { WEEK, MONTH, OVERVIEW }
 
 abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
@@ -45,10 +48,11 @@ abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
     companion object {
         const val EXTRA_ADD_LESSON = "com.karvo.ADD_LESSON"
 
-        /** Redraws every placed widget, week and month; called whenever the lessons change. */
+        /** Redraws every placed widget, week, month and overview; called whenever the lessons change. */
         suspend fun refresh(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
-            for ((provider, period) in listOf(WeekWidget::class.java to Period.WEEK, MonthWidget::class.java to Period.MONTH)) {
+            for ((provider, period) in listOf(WeekWidget::class.java to Period.WEEK, MonthWidget::class.java to Period.MONTH,
+                    OverviewWidget::class.java to Period.OVERVIEW)) {
                 val ids = manager.getAppWidgetIds(ComponentName(context, provider))
                 if (ids.isNotEmpty()) render(context, manager, ids, period)
             }
@@ -59,13 +63,26 @@ abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
             val zone = runCatching { ZoneId.of(container.settingsRepository.timeZoneId.first()) }.getOrDefault(ZoneId.systemDefault())
             val today = LocalDate.now(zone)
             val lessons: List<Lesson> = container.lessonRepository.allLessons()
-            val (minutes, count) = if (period == Period.WEEK) weekSoFar(lessons, today) else monthSoFar(lessons, today)
-            val label = if (period == Period.WEEK) context.getString(R.string.widget_week_short)
-                else today.month.getDisplayName(TextStyle.FULL_STANDALONE, context.resources.configuration.locales[0])
-            val views = RemoteViews(context.packageName, if (period == Period.WEEK) R.layout.widget_week else R.layout.widget_month).apply {
-                setTextViewText(R.id.widget_label, label)
-                setTextViewText(R.id.widget_hours, hoursText(context, minutes))
-                setTextViewText(R.id.widget_sub, context.resources.getQuantityString(R.plurals.lesson_count, count, count))
+            val weekLabel = context.getString(R.string.widget_week_short)
+            val monthLabel = today.month.getDisplayName(TextStyle.FULL_STANDALONE, context.resources.configuration.locales[0])
+            val layout = when (period) {
+                Period.WEEK -> R.layout.widget_week
+                Period.MONTH -> R.layout.widget_month
+                Period.OVERVIEW -> R.layout.widget_overview
+            }
+            val views = RemoteViews(context.packageName, layout).apply {
+                // The overview's week column uses the single widgets' ids; its month column has its own.
+                fun fill(labelId: Int, hoursId: Int, subId: Int, label: String, totals: Pair<Long, Int>) {
+                    setTextViewText(labelId, label)
+                    setTextViewText(hoursId, hoursText(context, totals.first))
+                    setTextViewText(subId, context.resources.getQuantityString(R.plurals.lesson_count, totals.second, totals.second))
+                }
+                if (period != Period.MONTH) fill(R.id.widget_label, R.id.widget_hours, R.id.widget_sub, weekLabel, weekSoFar(lessons, today))
+                when (period) {
+                    Period.MONTH -> fill(R.id.widget_label, R.id.widget_hours, R.id.widget_sub, monthLabel, monthSoFar(lessons, today))
+                    Period.OVERVIEW -> fill(R.id.widget_month_label, R.id.widget_month_hours, R.id.widget_month_sub, monthLabel, monthSoFar(lessons, today))
+                    Period.WEEK -> Unit
+                }
                 setOnClickPendingIntent(R.id.widget_root, open(context, add = false))
                 setOnClickPendingIntent(R.id.widget_add, open(context, add = true))
             }
