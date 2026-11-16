@@ -5,8 +5,8 @@ enum class Badge(val hours: Int) {
     KARVER(1), FIRST_TRACKS(5), BUNNY_HILL(10),
     SNOWPLOUGH(25), PARALLEL(50), RED_RUN(75),
     EDGE_MASTER(100), BLACK_RUN(150), MOGULS(200),
-    OFF_PISTE(300), POWDER(400), AVALANCHE(500),
-    SUMMIT(600), LEGEND(750);
+    OFF_PISTE(250), POWDER(300), AVALANCHE(400),
+    SUMMIT(500), LEGEND(600);
 
     val minutes: Long get() = hours * 60L
     /** Bronze, silver, gold, amethyst: three badges each; the last two are the ice legends (4). */
