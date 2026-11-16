@@ -352,11 +352,10 @@
     </plurals>
     <string name="whats_new_title">What\'s new in %1$s</string>
     <string-array name="whats_new_items">
-        <item>Overview now shows this season. Tap the season next to the title to see a past one, or everything.</item>
-        <item>Tap a student on the podium to see all their hours and lessons.</item>
-        <item>Swipe right to go back, and lists now slide softly under the top and bottom bars.</item>
-        <item>When a new season starts, Karvo says hello, with last season in one line.</item>
-        <item>Share a photo as a Photobomb: Kevin pops up in the corner, with your photo in his goggles.</item>
+        <item>Badges: earn one as your season\'s hours grow, from Karver at your first hour to Legend of the slopes at 600h. Your badge sits next to the hours on Overview; tap it to see them all.</item>
+        <item>Each new badge unlocks with a notification and a little celebration in the app.</item>
+        <item>Home-screen widgets: This week, This month, a week overview with your next event, and this week against the last.</item>
+        <item>Karvo now always stays upright, even when the phone is turned.</item>
     </string-array>
     <string name="play_update_ready_title">Update ready</string>
     <string name="play_update_ready_text">The new version of Karvo is downloaded. Restart now to use it? Your lessons stay as they are.</string>

@@ -350,11 +350,10 @@
     </plurals>
     <string name="whats_new_title">Novità della %1$s</string>
     <string-array name="whats_new_items">
-        <item>La Panoramica ora mostra questa stagione. Tocca la stagione accanto al titolo per vederne una passata, o tutto.</item>
-        <item>Tocca un allievo sul podio per vedere tutte le sue ore e lezioni.</item>
-        <item>Scorri a destra per tornare indietro, e le liste ora scorrono morbide sotto le barre in alto e in basso.</item>
-        <item>Quando inizia una nuova stagione, Karvo ti saluta, con la stagione scorsa in una riga.</item>
-        <item>Condividi una foto come Photobomb: Kevin spunta nell\'angolo, con la tua foto nei suoi occhiali.</item>
+        <item>Badge: ne guadagni uno man mano che crescono le ore della stagione, da Karver alla prima ora a Leggenda delle piste a 600h. Il tuo badge è accanto alle ore nella Panoramica; toccalo per vederli tutti.</item>
+        <item>Ogni nuovo badge si sblocca con una notifica e una piccola festa nell\'app.</item>
+        <item>Widget per la schermata Home: Questa settimana, Questo mese, una panoramica della settimana con il prossimo evento, e questa settimana contro la scorsa.</item>
+        <item>Karvo ora resta sempre in verticale, anche se giri il telefono.</item>
     </string-array>
     <string name="play_update_ready_title">Aggiornamento pronto</string>
     <string name="play_update_ready_text">La nuova versione di Karvo è scaricata. Riavviare ora per usarla? Le tue lezioni restano come sono.</string>

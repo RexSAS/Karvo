@@ -1,0 +1,14 @@
+<en-US>
+• Season badges: 14 to earn, from Karver at your first hour to Legend of the slopes at 600h
+• Your badge sits next to the hours on Overview; tap it for all of them and how far the next one is
+• Each new badge unlocks with a notification and a celebration in the app
+• Home-screen widgets: This week, This month, a week overview with your next event, and this week vs last
+• Karvo stays in portrait
+</en-US>
+<it-IT>
+• Badge di stagione: 14 da guadagnare, da Karver alla prima ora a Leggenda delle piste a 600h
+• Il tuo badge è accanto alle ore nella Panoramica; toccalo per vederli tutti e quanto manca al prossimo
+• Ogni nuovo badge si sblocca con una notifica e una festa nell'app
+• Widget per la Home: Questa settimana, Questo mese, la settimana con il prossimo evento, e questa settimana contro la scorsa
+• Karvo resta in verticale
+</it-IT>

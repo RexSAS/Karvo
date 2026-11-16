@@ -2,6 +2,17 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.6] — 2026-11-16
+
+### Added
+- **Season badges**: 14 badges unlock with the hours of the current season, from **Karver** (1h) through First tracks, Bunny hill, Snowplough, Parallel, Red run, Edge master, Black run, Mogul master, Off-piste, Powder hound, Avalanche and Summit to **Legend of the slopes** (600h). They come as rank emblems in five metals (bronze, silver, gold, amethyst, ice), with chevrons for the step inside a metal; wings, a crown and light rays mark the higher ones.
+- On Overview the season's badge sits to the right of the hours (a dashed outline before the first). Tapping it opens the **Badges** page: the badge big, a progress bar to the next one, every badge, and the best badge of each season.
+- **Unlocking a badge** posts a notification (its own "Badges" channel) and plays an unlock moment in the app: light rays, the badge popping in with sparkles, then its name. Lessons from the PC link count too.
+- **Home-screen widgets**: **This week** and **This month** (2×2: hours, lessons, and a + for a new lesson), **Overview** (4×2: the week big, month, today and season small, and the next event) and **This week vs last** (4×2: hours per day of both weeks as curves, and the difference so far).
+
+### Changed
+- The app stays in portrait.
+
 ## [3.5] — 2026-11-13
 
 ### Added
