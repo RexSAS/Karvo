@@ -91,8 +91,15 @@ abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
                         setTextViewText(R.id.widget_month_hours, chartDurationLabel(monthSoFar(lessons, today).first))
                         setTextViewText(R.id.widget_today_hours, chartDurationLabel(totalBetween(lessons, today, today).first))
                         setTextViewText(R.id.widget_season_hours, chartDurationLabel(totalBetween(lessons, season, today).first))
-                        val next = container.eventRepository.all().firstOrNull { it.date >= today }
-                        setTextViewText(R.id.widget_event_text, next?.text ?: context.getString(R.string.widget_no_events))
+                        val ahead = container.eventRepository.all().filter { it.date >= today }
+                        val next = ahead.firstOrNull()
+                        val sameDay = ahead.count { it.date == next?.date }
+                        // Several on the next day: "2 events" and the day, rather than one name hiding the others.
+                        setTextViewText(R.id.widget_event_text, when {
+                            next == null -> context.getString(R.string.widget_no_events)
+                            sameDay > 1 -> context.resources.getQuantityString(R.plurals.widget_event_count, sameDay, sameDay)
+                            else -> next.text
+                        })
                         setTextViewText(R.id.widget_event_date, next?.let { dayLabel(context, it.date, today) } ?: "")
                         setViewVisibility(R.id.widget_event_bar, if (next != null) View.VISIBLE else View.GONE)
                     }

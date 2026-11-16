@@ -34,6 +34,10 @@
     <string name="widget_overview_description">This week, the month, today and the season, your next event, and a button to add a lesson.</string>
     <string name="widget_season">Season</string>
     <string name="widget_no_events">No events ahead</string>
+    <plurals name="widget_event_count">
+        <item quantity="one">%d event</item>
+        <item quantity="other">%d events</item>
+    </plurals>
     <string name="widget_month_description">Your hours and lessons this month, and a button to add a lesson.</string>
     <string name="widget_week_description">Your hours and lessons since Monday, and a button to add a lesson.</string>
     <string name="no_lessons_hint">No lessons yet. Tap + to add your first one.</string>
