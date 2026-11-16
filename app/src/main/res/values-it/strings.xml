@@ -344,4 +344,19 @@
     <string name="play_update_ready_text">La nuova versione di Karvo è scaricata. Riavviare ora per usarla? Le tue lezioni restano come sono.</string>
     <string name="play_update_restart">Riavvia</string>
     <string name="play_update_later">Più tardi</string>
+    <string name="badges">Badge</string>
+    <string name="badges_all">Tutti i badge</string>
+    <string name="badges_by_season">Le tue stagioni</string>
+    <string name="badge_none">Ancora nessun badge</string>
+    <string name="badge_earned">Ottenuto</string>
+    <string name="badge_next">Prossimo: %1$s a %2$s</string>
+    <string name="badge_to_go">Mancano %s</string>
+    <string name="badge_all_earned">Tutti i badge ottenuti in questa stagione</string>
+    <string name="badge_first_tracks">Prime tracce</string>
+    <string name="badge_snowplough">Spazzaneve</string>
+    <string name="badge_parallel">Paralleli</string>
+    <string name="badge_carver">Carver</string>
+    <string name="badge_moguls">Re delle gobbe</string>
+    <string name="badge_powder">Cacciatore di neve fresca</string>
+    <string name="badge_legend">Leggenda delle piste</string>
 </resources>

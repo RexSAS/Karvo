@@ -346,4 +346,19 @@
     <string name="play_update_ready_text">The new version of Karvo is downloaded. Restart now to use it? Your lessons stay as they are.</string>
     <string name="play_update_restart">Restart</string>
     <string name="play_update_later">Later</string>
+    <string name="badges">Badges</string>
+    <string name="badges_all">All badges</string>
+    <string name="badges_by_season">Your seasons</string>
+    <string name="badge_none">No badge yet</string>
+    <string name="badge_earned">Earned</string>
+    <string name="badge_next">Next: %1$s at %2$s</string>
+    <string name="badge_to_go">%s to go</string>
+    <string name="badge_all_earned">Every badge earned this season</string>
+    <string name="badge_first_tracks">First tracks</string>
+    <string name="badge_snowplough">Snowplough</string>
+    <string name="badge_parallel">Parallel</string>
+    <string name="badge_carver">Carver</string>
+    <string name="badge_moguls">Mogul master</string>
+    <string name="badge_powder">Powder hound</string>
+    <string name="badge_legend">Legend of the slopes</string>
 </resources>

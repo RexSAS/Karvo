@@ -18,6 +18,12 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import com.karvo.domain.Season
+import com.karvo.domain.Badge
+import com.karvo.domain.badgeProgress
+import com.karvo.ui.components.BadgeMedal
+import com.karvo.ui.components.titleRes
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.style.TextAlign
 import com.karvo.ui.components.PaidBadge
 import com.karvo.ui.components.EmptyState
 import com.karvo.ui.components.partlyPaidColor
@@ -82,6 +88,7 @@ fun OverviewScreen(
     onOpenMonth: (YearMonth) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenStudent: (String) -> Unit,
+    onOpenBadges: () -> Unit,
     /** False while another pager page is on screen: earnings hide as soon as the user swipes away. */
     isCurrentPage: Boolean = true,
     viewModel: OverviewViewModel = viewModel(factory = OverviewViewModel.Factory),
@@ -129,16 +136,21 @@ fun OverviewScreen(
         val totalPanel: @Composable () -> Unit = {
             GlassPanel(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
                 Column(Modifier.padding(start = 18.dp, end = 8.dp, top = 16.dp, bottom = if (state.stats != null) 28.dp else 16.dp)) {
-                    Text(
-                        (state.scopeSeason?.let { stringResource(R.string.overview_scope_season, it.label()) } ?: stringResource(R.string.total_hours)).uppercase(),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        bigDuration(formatDuration(state.totalMinutes), MaterialTheme.colorScheme.onSurfaceVariant),
-                        style = if (isAlpineNight()) MaterialTheme.typography.displayLarge else MaterialTheme.typography.displaySmall,
-                        maxLines = 1,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                (state.scopeSeason?.let { stringResource(R.string.overview_scope_season, it.label()) } ?: stringResource(R.string.total_hours)).uppercase(),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                bigDuration(formatDuration(state.totalMinutes), MaterialTheme.colorScheme.onSurfaceVariant),
+                                style = if (isAlpineNight()) MaterialTheme.typography.displayLarge else MaterialTheme.typography.displaySmall,
+                                maxLines = 1,
+                            )
+                        }
+                        BadgeSlot(badgeProgress(state.badgeMinutes).earned, onOpenBadges)
+                    }
                     HorizonLine(Modifier.padding(end = 10.dp, top = 2.dp, bottom = 6.dp), glint = { glint.value })
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
@@ -255,6 +267,31 @@ fun OverviewScreen(
                 }
             }
         }
+    }
+}
+
+/** The season's best badge, with its name under it; a dashed ring before the first. Opens the badge page. */
+@Composable
+private fun BadgeSlot(badge: Badge?, onClick: () -> Unit) {
+    val title = badge?.let { stringResource(it.titleRes()) } ?: stringResource(R.string.badge_none)
+    Column(
+        Modifier
+            .width(88.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClickLabel = stringResource(R.string.badges)) { onClick() }
+            .padding(vertical = 6.dp)
+            .semantics(mergeDescendants = true) {},
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        BadgeMedal(badge, Modifier.size(52.dp))
+        Text(
+            title,
+            style = MaterialTheme.typography.labelMedium,
+            color = if (badge == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
 

@@ -61,7 +61,12 @@ data class OverviewUiState(
     /** Every season (whatever the scope); null when there are no lessons at all. */
     val seasons: SeasonStats? = null,
     val unpaid: Unpaid = Unpaid(0, 0, null),
-)
+) {
+    /** The hours badges count: the season shown, or this season on Lifetime. */
+    val badgeMinutes: Long get() = if (scopeSeason != null) totalMinutes else seasons?.current?.minutes ?: 0
+    /** The season [badgeMinutes] belongs to; null only before any lesson on Lifetime. */
+    val badgeSeason: Season? get() = scopeSeason ?: seasons?.current?.season
+}
 
 class OverviewViewModel(
     lessons: LessonRepository,

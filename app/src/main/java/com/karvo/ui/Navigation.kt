@@ -7,6 +7,8 @@ import com.karvo.onboarding.SeasonWelcomeDialog
 import java.time.ZoneId
 import com.karvo.domain.studentKey
 import com.karvo.ui.overview.StudentScreen
+import com.karvo.ui.overview.BadgesScreen
+import com.karvo.ui.overview.OverviewViewModel
 import com.karvo.ui.components.swipeBack
 import com.karvo.ui.link.LinkedPcsScreen
 import android.net.Uri
@@ -132,6 +134,7 @@ const val ROUTE_MOMENTS = "moments"
 const val ROUTE_MOMENT = "moment/{date}/{index}"
 const val ROUTE_DAY = "day/{date}"
 const val ROUTE_STUDENT = "student/{key}"
+const val ROUTE_BADGES = "badges"
 fun dayRoute(date: LocalDate): String = "day/$date"
 fun momentRoute(date: LocalDate, index: Int): String = "moment/$date/$index"
 
@@ -272,6 +275,7 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
                                 onOpenMonth = { month -> dropUnlessResumedNow(entry) { navController.navigate(monthRoute(month)) } },
                                 onOpenSettings = { goToPage(PAGE_SETTINGS) },
                                 onOpenStudent = { name -> dropUnlessResumedNow(entry) { navController.navigate(studentRoute(name)) } },
+                                onOpenBadges = { dropUnlessResumedNow(entry) { navController.navigate(ROUTE_BADGES) } },
                                 isCurrentPage = isCurrent,
                             )
                             else -> Box {
@@ -379,6 +383,14 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
                         onEdit = { id -> dropUnlessResumedNow(entry) { navController.navigate(editRoute(id)) } },
                         onBack = goBack,
                     )
+                }
+            }
+            composable(ROUTE_BADGES) { entry ->
+                // Overview's own ViewModel (it lives on the home entry), so the badge follows the season picked there.
+                val home = remember(entry) { navController.getBackStackEntry(ROUTE_HOME) }
+                val goBack = dropUnlessResumed { navController.navigateUp() }
+                AlpineBackdrop(BackdropFigure.None, Modifier.swipeBack(goBack)) {
+                    BadgesScreen(viewModel(home, factory = OverviewViewModel.Factory), onBack = goBack)
                 }
             }
             composable(
