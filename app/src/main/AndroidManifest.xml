@@ -99,6 +99,13 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_overview_info" />
         </receiver>
+        <!-- Graph: this week against last week. -->
+        <receiver android:name=".widget.CompareWidget" android:exported="false" android:label="@string/widget_compare_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_compare_info" />
+        </receiver>
 
         <service
             android:name=".link.LinkService"

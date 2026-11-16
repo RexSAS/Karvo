@@ -17,7 +17,8 @@ import java.time.LocalDate
  * ops: pair (--es qr), add (--es student --es date --ei minutes), list, disconnect, remove (--es room), count,
  * event (--es date --es text), events, fireEvent (posts today's reminder now),
  * fireSeason (posts the "Season is starting!" notification now),
- * seasonCard (adds demo lessons in this and last season, some unpaid, and forgets this season's welcome: reopen the app).
+ * seasonCard (adds demo lessons in this and last season, some unpaid, and forgets this season's welcome: reopen the app),
+ * widgetDay (--es date 2026-11-20 draws the home-screen widgets as if it were that day; no date goes back to today).
  * Results go to logcat with tag KarvoLinkDebug.
  */
 class DebugLinkReceiver : BroadcastReceiver() {
@@ -52,6 +53,11 @@ class DebugLinkReceiver : BroadcastReceiver() {
                         ).forEach { (date, student, paid) -> c.lessonRepository.save(Lesson(0, date, 90, student, paidOn = paid)) }
                         c.settingsRepository.setWelcomedSeason(last) // as if this season had just begun
                         "ok: reopen Karvo Test"
+                    }
+                    "widgetDay" -> {
+                        com.karvo.widget.LessonWidget.pretendToday = intent.getStringExtra("date")?.let(LocalDate::parse)
+                        com.karvo.widget.LessonWidget.refresh(context)
+                        "ok: widgets drawn as of ${com.karvo.widget.LessonWidget.pretendToday ?: "today"}"
                     }
                     else -> "unknown op"
                 }

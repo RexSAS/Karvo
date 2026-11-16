@@ -33,6 +33,9 @@
     <string name="widget_overview_label">Overview</string>
     <string name="widget_overview_description">This week, the month, today and the season, your next event, and a button to add a lesson.</string>
     <string name="widget_season">Season</string>
+    <string name="widget_compare_label">This week vs last</string>
+    <string name="widget_compare_description">A graph of this week\'s hours against last week\'s, day by day.</string>
+    <string name="widget_vs_last_week">vs last week</string>
     <string name="widget_no_events">No events ahead</string>
     <plurals name="widget_event_count">
         <item quantity="one">%d event</item>

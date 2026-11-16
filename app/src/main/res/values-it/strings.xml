@@ -31,6 +31,9 @@
     <string name="widget_overview_label">Panoramica</string>
     <string name="widget_overview_description">Questa settimana, il mese, oggi e la stagione, il prossimo evento, e un pulsante per aggiungere una lezione.</string>
     <string name="widget_season">Stagione</string>
+    <string name="widget_compare_label">Settimana vs la scorsa</string>
+    <string name="widget_compare_description">Un grafico delle ore di questa settimana rispetto alla scorsa, giorno per giorno.</string>
+    <string name="widget_vs_last_week">vs settimana scorsa</string>
     <string name="widget_no_events">Nessun evento in vista</string>
     <plurals name="widget_event_count">
         <item quantity="one">%d evento</item>

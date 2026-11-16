@@ -19,6 +19,17 @@
         <item name="android:textFontWeight">600</item>
         <item name="android:textSize">10sp</item>
     </style>
+    <!-- The compare graph's day initials, one seventh of the width each, under their points. -->
+    <style name="WidgetDay">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:fontFamily">@font/jost</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textColor">@color/widget_mist</item>
+        <item name="android:textSize">10sp</item>
+    </style>
     <style name="WidgetStatValue">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
