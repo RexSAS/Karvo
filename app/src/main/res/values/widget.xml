@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_snow">#F2F5FB</color>
+    <color name="widget_mist">#A9B4CC</color>
+    <dimen name="widget_radius">20dp</dimen>
+</resources>

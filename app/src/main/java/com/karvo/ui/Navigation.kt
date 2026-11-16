@@ -159,8 +159,10 @@ private const val PAGE_SETTINGS = 2
 /** [splashLeaving] turns true when the splash starts to fade: the first screen then rises into place. */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun KarvoNavHost(splashLeaving: Boolean = false) {
+fun KarvoNavHost(splashLeaving: Boolean = false, addLessonRequests: Int = 0) {
     val navController = rememberNavController()
+    // The widget's +: each new request opens a new lesson on top of whatever is showing.
+    LaunchedEffect(addLessonRequests) { if (addLessonRequests > 0) navController.navigate(editRoute()) }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val showBar = currentRoute == ROUTE_HOME

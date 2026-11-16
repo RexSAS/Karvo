@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Karvo's three ranges (AlpineBackdrop colours) gathered in the widget's bottom-left corner (drawn for the right,
+     then mirrored); the corner is rounded here too, so they never poke out where the launcher does not clip (before Android 12). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="132dp" android:height="60dp"
+    android:viewportWidth="132" android:viewportHeight="60">
+    <group android:scaleX="-1" android:pivotX="66">
+        <clip-path android:pathData="M0,0H132V40A20,20 0 0,1 112,60H0Z" />
+        <!-- Far range, catching the alpenglow -->
+        <path android:pathData="M0,60L20,44L32,49L50,24L61,34L77,8L90,27L103,16L117,31L132,20V60Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="0" android:startY="8" android:endX="0" android:endY="60"
+                    android:startColor="#FF5D62AC" android:endColor="#FF2C3478" />
+            </aapt:attr>
+        </path>
+        <path android:fillColor="#9EF6B58E" android:pathData="M77,8L69,20L75,17ZM50,24L43,33L48,31ZM103,16L97,24L102,22Z" />
+        <!-- Middle range -->
+        <path android:pathData="M12,60L33,46L47,52L67,35L82,45L100,30L115,41L132,34V60Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="0" android:startY="30" android:endX="0" android:endY="60"
+                    android:startColor="#FF2B3579" android:endColor="#FF161E52" />
+            </aapt:attr>
+        </path>
+        <!-- Near range -->
+        <path android:pathData="M32,60L55,50L71,54L93,43L112,51L132,45V60Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="0" android:startY="43" android:endX="0" android:endY="60"
+                    android:startColor="#FF151D4C" android:endColor="#FF0A1030" />
+            </aapt:attr>
+        </path>
+    </group>
+</vector>
