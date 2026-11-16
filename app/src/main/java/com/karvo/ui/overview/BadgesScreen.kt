@@ -72,7 +72,7 @@ fun BadgesScreen(viewModel: OverviewViewModel, onBack: () -> Unit) {
                     Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp).semantics(mergeDescendants = true) {},
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    BadgeMedal(progress.earned, Modifier.size(168.dp))
+                    BadgeMedal(progress.earned, Modifier.size(200.dp))
                     Text(
                         progress.earned?.let { stringResource(it.titleRes()) } ?: stringResource(R.string.badge_none),
                         style = MaterialTheme.typography.headlineMedium,
@@ -122,7 +122,7 @@ fun BadgesScreen(viewModel: OverviewViewModel, onBack: () -> Unit) {
                             horizontalArrangement = Arrangement.spacedBy(14.dp),
                         ) {
                             // A locked badge shows faded, so the whole ladder can be seen ahead.
-                            BadgeMedal(badge, Modifier.size(40.dp).alpha(if (earned) 1f else 0.3f))
+                            BadgeMedal(badge, Modifier.size(52.dp).alpha(if (earned) 1f else 0.3f))
                             Text(stringResource(badge.titleRes()), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                             Text(formatDuration(badge.minutes), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             if (earned) Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.badge_earned), tint = accentGold())
@@ -141,7 +141,7 @@ fun BadgesScreen(viewModel: OverviewViewModel, onBack: () -> Unit) {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                             ) {
-                                BadgeMedal(best, Modifier.size(40.dp))
+                                BadgeMedal(best, Modifier.size(52.dp))
                                 Column(Modifier.weight(1f)) {
                                     Text(total.season.label(), style = MaterialTheme.typography.titleMedium)
                                     Text(

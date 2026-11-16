@@ -283,7 +283,7 @@ private fun BadgeSlot(badge: Badge?, onClick: () -> Unit) {
             .semantics(mergeDescendants = true) {},
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        BadgeMedal(badge, Modifier.size(52.dp))
+        BadgeMedal(badge, Modifier.size(64.dp))
         Text(
             title,
             style = MaterialTheme.typography.labelMedium,
