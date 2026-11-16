@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The 4×2 graph: this week against last week. Header 16dp + ~46dp, initials ~16dp, padding: LessonWidget sizes the
-     chart from these (100dp of height, 32dp of width), so keep them in step. -->
+<!-- The 4×2 graph: this week against last week. Header 14dp + ~42dp, initials ~16dp, padding: LessonWidget sizes the
+     chart from these (95dp of height, 32dp of width), so keep them in step. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -53,7 +53,7 @@
                     android:text="0h"
                     android:textColor="@color/widget_snow"
                     android:textFontWeight="300"
-                    android:textSize="30sp" />
+                    android:textSize="26sp" />
             </LinearLayout>
 
             <LinearLayout

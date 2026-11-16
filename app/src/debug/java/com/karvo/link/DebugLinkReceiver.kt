@@ -14,7 +14,7 @@ import java.time.LocalDate
 
 /**
  * Debug builds only. `adb shell am broadcast -n com.karvo/.link.DebugLinkReceiver --es op <op> ...`
- * ops: pair (--es qr), add (--es student --es date --ei minutes), list, disconnect, remove (--es room), count,
+ * ops: pair (--es qr), add (--es student --es date --ei minutes [--es notes] [--es paid]), list, disconnect, remove (--es room), count,
  * event (--es date --es text), events, fireEvent (posts today's reminder now),
  * fireSeason (posts the "Season is starting!" notification now),
  * seasonCard (adds demo lessons in this and last season, some unpaid, and forgets this season's welcome: reopen the app),
@@ -29,7 +29,8 @@ class DebugLinkReceiver : BroadcastReceiver() {
             val out = runCatching {
                 when (intent.getStringExtra("op")) {
                     "pair" -> c.linkManager.pair(parseLinkQr(intent.getStringExtra("qr")!!)).toString()
-                    "add" -> c.lessonRepository.save(Lesson(0, LocalDate.parse(intent.getStringExtra("date")), intent.getIntExtra("minutes", 60), intent.getStringExtra("student")!!)).toString()
+                    "add" -> c.lessonRepository.save(Lesson(0, LocalDate.parse(intent.getStringExtra("date")), intent.getIntExtra("minutes", 60), intent.getStringExtra("student")!!,
+                        notes = intent.getStringExtra("notes"), paidOn = intent.getStringExtra("paid")?.let(LocalDate::parse))).toString()
                     "list" -> c.pairingStore.pcs.first().joinToString { "${it.pcName}=${c.linkManager.states.value[it.roomId]}" }
                     "disconnect" -> { c.linkManager.disconnectAll(); "ok" }
                     "remove" -> { c.linkManager.remove(c.pairingStore.pcs.first().first().roomId); "ok" }

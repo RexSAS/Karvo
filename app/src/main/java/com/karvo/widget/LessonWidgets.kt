@@ -23,7 +23,8 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Shader
 import android.view.View
-import com.karvo.domain.weekRunningTotals
+import com.karvo.domain.weekByDay
+import android.util.TypedValue
 import java.time.DayOfWeek
 import com.karvo.domain.chartDurationLabel
 import com.karvo.domain.formatDuration
@@ -96,6 +97,8 @@ abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
                 fun fill(labelId: Int, hoursId: Int, subId: Int, label: String, totals: Pair<Long, Int>) {
                     setTextViewText(labelId, label)
                     setTextViewText(hoursId, hoursText(context, totals.first))
+                    // "22h 30m" is too wide at full size: it would wrap and lose the minutes.
+                    if (totals.first >= 600 && totals.first % 60 != 0L) setTextViewTextSize(hoursId, TypedValue.COMPLEX_UNIT_SP, 26f)
                     setTextViewText(subId, context.resources.getQuantityString(R.plurals.lesson_count, totals.second, totals.second))
                 }
                 if (period == Period.WEEK || period == Period.OVERVIEW) fill(R.id.widget_label, R.id.widget_hours, R.id.widget_sub, weekLabel, weekSoFar(lessons, today))
@@ -120,12 +123,13 @@ abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
                         setViewVisibility(R.id.widget_event_bar, if (next != null) View.VISIBLE else View.GONE)
                     }
                     Period.COMPARE -> {
-                        val now = weekRunningTotals(lessons, today)
-                        val last = weekRunningTotals(lessons, today.minusWeeks(1))
+                        val now = weekByDay(lessons, today)
+                        val last = weekByDay(lessons, today.minusWeeks(1))
                         val todayIndex = today.dayOfWeek.value - 1
-                        val diff = now[todayIndex] - last[todayIndex] // against last week by the same weekday
+                        val soFar = now.take(todayIndex + 1).sum()
+                        val diff = soFar - last.take(todayIndex + 1).sum() // against last week by the same weekday
                         setTextViewText(R.id.widget_label, weekLabel)
-                        setTextViewText(R.id.widget_hours, hoursText(context, now[todayIndex]))
+                        setTextViewText(R.id.widget_hours, hoursText(context, soFar))
                         setTextViewText(R.id.widget_delta, when {
                             diff > 0 -> "+" + formatDuration(diff)
                             diff < 0 -> "−" + formatDuration(-diff)
@@ -136,7 +140,7 @@ abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
                         // initials and padding of widget_compare) so the dot stays round; a guess if unknown.
                         val size = manager.getAppWidgetOptions(ids.first())
                         val boxW = size.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH).takeIf { it > 0 }?.minus(32) ?: 280
-                        val boxH = size.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).takeIf { it > 0 }?.minus(100) ?: 60
+                        val boxH = size.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).takeIf { it > 0 }?.minus(95) ?: 60
                         setImageViewBitmap(R.id.widget_chart, compareChart(context, now, last, todayIndex, boxW.coerceAtLeast(120), boxH.coerceAtLeast(30)))
                         val locale = context.resources.configuration.locales[0]
                         DAY_IDS.forEachIndexed { i, id ->
@@ -156,21 +160,24 @@ abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
             R.id.widget_d4, R.id.widget_d5, R.id.widget_d6)
 
         /**
-         * The compare graph, stretched to fill its box (so no text in it; the day initials are views under it):
-         * last week as a faint dashed line over all 7 days, this week as a glacier line with a soft fill up to a
-         * gold dot on today. Each day sits at the centre of its seventh, above its initial.
+         * The compare graph, drawn at its box's size (no text in it; the day initials are views under it): hours per
+         * day as smooth curves scaled to the busiest day, so busy days peak and quiet ones dip to the floor. Last week
+         * a faint dashed curve over all 7 days; this week a glacier curve with a fill and a dot per day, up to a gold
+         * dot on today. Each day sits at the centre of its seventh, above its initial.
          */
         private fun compareChart(context: Context, now: List<Long>, last: List<Long>, todayIndex: Int, wDp: Int, hDp: Int): Bitmap {
             val d = context.resources.displayMetrics.density
             val w = wDp * d; val h = hDp * d
             val bitmap = Bitmap.createBitmap(w.toInt(), h.toInt(), Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
-            val top = 8 * d; val bottom = h - 3 * d
-            val max = maxOf(now[todayIndex], last.last(), 60L).toFloat()
+            val top = 10 * d; val bottom = h - 4 * d
+            val max = maxOf(now.take(todayIndex + 1).max(), last.max(), 60L).toFloat()
             fun x(i: Int) = w * (i + .5f) / 7
             fun y(m: Long) = bottom - (bottom - top) * m / max
+            // Smooth: each step bends at its midpoint, so peaks stay on the days and never overshoot.
             fun line(values: List<Long>, upTo: Int) = Path().apply {
-                moveTo(x(0), y(values[0])); for (i in 1..upTo) lineTo(x(i), y(values[i]))
+                moveTo(x(0), y(values[0]))
+                for (i in 1..upTo) { val mid = (x(i - 1) + x(i)) / 2; cubicTo(mid, y(values[i - 1]), mid, y(values[i]), x(i), y(values[i])) }
             }
             canvas.drawLine(0f, bottom, w, bottom, Paint().apply { color = 0x268CCBFF; strokeWidth = d })
             canvas.drawPath(line(last, 6), Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -186,6 +193,8 @@ abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
                 strokeJoin = Paint.Join.ROUND; strokeCap = Paint.Cap.ROUND
             })
             val dot = Paint(Paint.ANTI_ALIAS_FLAG)
+            dot.color = 0xFF8CCBFF.toInt()
+            for (i in 0 until todayIndex) canvas.drawCircle(x(i), y(now[i]), 3 * d, dot)
             dot.color = 0x40F4C06A; canvas.drawCircle(x(todayIndex), y(now[todayIndex]), 8 * d, dot)
             dot.color = 0xFFF4C06A.toInt(); canvas.drawCircle(x(todayIndex), y(now[todayIndex]), 4.5f * d, dot)
             return bitmap
