@@ -69,8 +69,8 @@
                 android:textSize="13sp" />
         </LinearLayout>
 
-        <!-- A faint line between the two -->
-        <View
+        <!-- A faint line between the two (a FrameLayout: widgets refuse a plain View) -->
+        <FrameLayout
             android:layout_width="1dp"
             android:layout_height="64dp"
             android:layout_gravity="center_vertical"
