@@ -22,26 +22,35 @@ import kotlin.math.sin
 
 @StringRes
 fun Badge.titleRes(): Int = when (this) {
+    Badge.KARVER -> R.string.badge_karver
     Badge.FIRST_TRACKS -> R.string.badge_first_tracks
+    Badge.BUNNY_HILL -> R.string.badge_bunny_hill
     Badge.SNOWPLOUGH -> R.string.badge_snowplough
     Badge.PARALLEL -> R.string.badge_parallel
-    Badge.CARVER -> R.string.badge_carver
+    Badge.RED_RUN -> R.string.badge_red_run
+    Badge.EDGE_MASTER -> R.string.badge_edge_master
+    Badge.BLACK_RUN -> R.string.badge_black_run
     Badge.MOGULS -> R.string.badge_moguls
+    Badge.OFF_PISTE -> R.string.badge_off_piste
     Badge.POWDER -> R.string.badge_powder
+    Badge.AVALANCHE -> R.string.badge_avalanche
+    Badge.SUMMIT -> R.string.badge_summit
     Badge.LEGEND -> R.string.badge_legend
 }
 
-/** Bronze, silver, gold; the last one in glacier ice. */
-private fun Badge.metal(): Color = when (this) {
-    Badge.FIRST_TRACKS, Badge.SNOWPLOUGH -> Color(0xFFC98A55)
-    Badge.PARALLEL, Badge.CARVER -> Color(0xFFC3CCD6)
-    Badge.MOGULS, Badge.POWDER -> Color(0xFFF4C06A)
-    Badge.LEGEND -> Color(0xFF9FD8F5)
+/** Bronze, silver, gold, amethyst; the legends in glacier ice. */
+private fun Badge.metal(): Color = when (tier) {
+    0 -> Color(0xFFC98A55)
+    1 -> Color(0xFFC3CCD6)
+    2 -> Color(0xFFF4C06A)
+    3 -> Color(0xFFB9A3FF)
+    else -> Color(0xFF9FD8F5)
 }
 
 /**
  * A crest-shaped badge with a mountain on it; [badge] null draws the empty slot as a dashed outline. Each badge adds
- * something to the one before: stars, a bright trim, laurels, a gem on top, and for the last one a glow.
+ * tier adds to the one before: a bright trim (silver), laurels (gold), a gem (amethyst) and a glow (the ice legends);
+ * stars count the steps inside a tier.
  * Decorative: callers describe it.
  */
 @Composable
@@ -68,21 +77,21 @@ fun BadgeMedal(badge: Badge?, modifier: Modifier = Modifier) {
             drawPath(shield(0.93f), ring.copy(alpha = 0.6f), style = Stroke(box * 0.03f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(box * 0.08f, box * 0.055f))))
             return@Canvas
         }
-        val level = badge.ordinal
+        val tier = badge.tier
         val metal = badge.metal()
         val dark = metal.copy(red = metal.red * 0.62f, green = metal.green * 0.62f, blue = metal.blue * 0.62f)
         val light = Color.White.copy(alpha = 0.9f).compositeOver(metal)
 
-        if (badge == Badge.LEGEND) {
+        if (tier == 4) {
             drawCircle(Brush.radialGradient(listOf(metal.copy(alpha = 0.55f), metal.copy(alpha = 0f)), c, box / 2), box / 2, c)
             listOf(Offset(-0.4f, -0.36f), Offset(0.42f, -0.3f), Offset(-0.44f, 0.3f), Offset(0.4f, 0.38f)).forEachIndexed { n, o ->
                 drawPath(sparkle(Offset(c.x + o.x * box, c.y + o.y * box), box * (if (n % 2 == 0) 0.06f else 0.045f)), Color.White)
             }
         }
-        if (level >= 3) {
-            // Laurel branches hugging the shield's sides, bigger from the gold badges on.
+        if (tier >= 2) {
+            // Laurel branches hugging the shield's sides from gold on, bigger from amethyst.
             val leaves = 5
-            val leaf = if (level >= 4) 1f else 0.72f
+            val leaf = if (tier >= 3) 1f else 0.72f
             val ax = half + box * 0.07f
             val ay = h * 0.42f
             for (side in listOf(-1f, 1f)) for (n in 0 until leaves) {
@@ -96,7 +105,7 @@ fun BadgeMedal(badge: Badge?, modifier: Modifier = Modifier) {
         }
         drawPath(shield(1f), dark)
         drawPath(shield(0.84f), Brush.linearGradient(listOf(light, metal, dark), Offset(c.x - half, c.y - h / 2), Offset(c.x + half, c.y + h / 2)))
-        if (level >= 2) drawPath(shield(0.9f), light.copy(alpha = 0.7f), style = Stroke(box * 0.012f))
+        if (tier >= 1) drawPath(shield(0.9f), light.copy(alpha = 0.7f), style = Stroke(box * 0.012f))
 
         // Two peaks, the front one with a snow cap.
         val r = half * 0.9f
@@ -115,13 +124,13 @@ fun BadgeMedal(badge: Badge?, modifier: Modifier = Modifier) {
             lineTo(peak.x - r * 0.04f, peak.y + r * 0.28f); lineTo(peak.x - r * 0.16f, peak.y + r * 0.27f); close()
         }, Color.White)
 
-        // Stars under the mountain: one per badge after the first, up to three.
-        val stars = minOf(level, 3)
+        // Stars under the mountain: the badge's step within its tier (1 to 3).
+        val stars = badge.step + 1
         val gap = h * 0.13f
         for (n in 0 until stars) {
             drawPath(star(Offset(c.x + (n - (stars - 1) / 2f) * gap, c.y + h * 0.22f), h * 0.055f), ink)
         }
-        if (level >= 5) {
+        if (tier >= 3) {
             // A gem set on the shield's top point.
             val g = Offset(c.x, c.y - h * 0.5f)
             val gr = box * 0.075f

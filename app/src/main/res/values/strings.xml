@@ -354,11 +354,18 @@
     <string name="badge_next">Next: %1$s at %2$s</string>
     <string name="badge_to_go">%s to go</string>
     <string name="badge_all_earned">Every badge earned this season</string>
+    <string name="badge_karver">Karver</string>
     <string name="badge_first_tracks">First tracks</string>
+    <string name="badge_bunny_hill">Bunny hill</string>
     <string name="badge_snowplough">Snowplough</string>
     <string name="badge_parallel">Parallel</string>
-    <string name="badge_carver">Carver</string>
+    <string name="badge_red_run">Red run</string>
+    <string name="badge_edge_master">Edge master</string>
+    <string name="badge_black_run">Black run</string>
     <string name="badge_moguls">Mogul master</string>
+    <string name="badge_off_piste">Off-piste</string>
     <string name="badge_powder">Powder hound</string>
+    <string name="badge_avalanche">Avalanche</string>
+    <string name="badge_summit">Summit</string>
     <string name="badge_legend">Legend of the slopes</string>
 </resources>
