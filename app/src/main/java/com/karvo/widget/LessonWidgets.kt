@@ -62,7 +62,7 @@ abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
             val (minutes, count) = if (period == Period.WEEK) weekSoFar(lessons, today) else monthSoFar(lessons, today)
             val label = if (period == Period.WEEK) context.getString(R.string.widget_week_short)
                 else today.month.getDisplayName(TextStyle.FULL_STANDALONE, context.resources.configuration.locales[0])
-            val views = RemoteViews(context.packageName, R.layout.widget_week).apply {
+            val views = RemoteViews(context.packageName, if (period == Period.WEEK) R.layout.widget_week else R.layout.widget_month).apply {
                 setTextViewText(R.id.widget_label, label)
                 setTextViewText(R.id.widget_hours, hoursText(context, minutes))
                 setTextViewText(R.id.widget_sub, context.resources.getQuantityString(R.plurals.lesson_count, count, count))
