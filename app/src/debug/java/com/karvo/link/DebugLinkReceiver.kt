@@ -14,10 +14,11 @@ import java.time.LocalDate
 
 /**
  * Debug builds only. `adb shell am broadcast -n com.karvo/.link.DebugLinkReceiver --es op <op> ...`
- * ops: pair (--es qr), add (--es student --es date --ei minutes), list, disconnect, remove (--es room), count,
+ * ops: pair (--es qr), add (--es student --es date --ei minutes [--es notes] [--es paid]), list, disconnect, remove (--es room), count,
  * event (--es date --es text), events, fireEvent (posts today's reminder now),
  * fireSeason (posts the "Season is starting!" notification now),
- * seasonCard (adds demo lessons in this and last season, some unpaid, and forgets this season's welcome: reopen the app).
+ * seasonCard (adds demo lessons in this and last season, some unpaid, and forgets this season's welcome: reopen the app),
+ * widgetDay (--es date 2026-11-20 draws the home-screen widgets as if it were that day; no date goes back to today).
  * Results go to logcat with tag KarvoLinkDebug.
  */
 class DebugLinkReceiver : BroadcastReceiver() {
@@ -28,7 +29,8 @@ class DebugLinkReceiver : BroadcastReceiver() {
             val out = runCatching {
                 when (intent.getStringExtra("op")) {
                     "pair" -> c.linkManager.pair(parseLinkQr(intent.getStringExtra("qr")!!)).toString()
-                    "add" -> c.lessonRepository.save(Lesson(0, LocalDate.parse(intent.getStringExtra("date")), intent.getIntExtra("minutes", 60), intent.getStringExtra("student")!!)).toString()
+                    "add" -> c.lessonRepository.save(Lesson(0, LocalDate.parse(intent.getStringExtra("date")), intent.getIntExtra("minutes", 60), intent.getStringExtra("student")!!,
+                        notes = intent.getStringExtra("notes"), paidOn = intent.getStringExtra("paid")?.let(LocalDate::parse))).toString()
                     "list" -> c.pairingStore.pcs.first().joinToString { "${it.pcName}=${c.linkManager.states.value[it.roomId]}" }
                     "disconnect" -> { c.linkManager.disconnectAll(); "ok" }
                     "remove" -> { c.linkManager.remove(c.pairingStore.pcs.first().first().roomId); "ok" }
@@ -53,6 +55,11 @@ class DebugLinkReceiver : BroadcastReceiver() {
                         ).forEach { (date, student, paid) -> c.lessonRepository.save(Lesson(0, date, 90, student, paidOn = paid)) }
                         c.settingsRepository.setWelcomedSeason(last) // as if this season had just begun
                         "ok: reopen Karvo Test"
+                    }
+                    "widgetDay" -> {
+                        com.karvo.widget.LessonWidget.pretendToday = intent.getStringExtra("date")?.let(LocalDate::parse)
+                        com.karvo.widget.LessonWidget.refresh(context)
+                        "ok: widgets drawn as of ${com.karvo.widget.LessonWidget.pretendToday ?: "today"}"
                     }
                     else -> "unknown op"
                 }

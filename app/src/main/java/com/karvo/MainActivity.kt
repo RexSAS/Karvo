@@ -1,5 +1,6 @@
 package com.karvo
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -10,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -21,6 +23,7 @@ import com.karvo.ui.theme.KarvoTheme
 import com.karvo.ui.theme.SPLASH_ANIMATION_MS
 import com.karvo.ui.theme.animateSplashExit
 import com.karvo.ui.theme.shouldKeepSplash
+import com.karvo.widget.LessonWidget
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -49,13 +52,27 @@ class MainActivity : AppCompatActivity() {
             animateSplashExit(provider)
         }
 
+        if (savedInstanceState == null) takeAddLesson(intent) // not again when the activity is recreated
+
         setContent {
             val theme by settings.theme.collectAsStateWithLifecycle(initialValue = startTheme ?: ThemeChoice.ALPINE_NIGHT)
             LaunchedEffect(theme) {
                 if (theme == ThemeChoice.ALPINE_NIGHT) enableAlpineBars() else enableEdgeToEdge()
             }
-            KarvoTheme(theme) { KarvoNavHost(splashLeaving) }
+            KarvoTheme(theme) { KarvoNavHost(splashLeaving, addLessonRequests) }
         }
+    }
+
+    /** Counts the widget's + taps; each new value opens a new lesson. */
+    private var addLessonRequests by mutableIntStateOf(0)
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        takeAddLesson(intent)
+    }
+
+    private fun takeAddLesson(intent: Intent) {
+        if (intent.getBooleanExtra(LessonWidget.EXTRA_ADD_LESSON, false)) addLessonRequests++
     }
 
     // The phone link is reachable while Karvo is in front; a connected PC keeps it alive via LinkService.

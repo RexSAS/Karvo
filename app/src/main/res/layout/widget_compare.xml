@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The 4×2 graph: this week against last week. Header 14dp + ~42dp, initials ~16dp, padding: LessonWidget sizes the
+     chart from these (95dp of height, 32dp of width), so keep them in step. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:clipToOutline="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/widget_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/jost"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.12"
+                    android:maxLines="1"
+                    android:text="@string/widget_week_short"
+                    android:textAllCaps="true"
+                    android:textColor="@color/widget_mist"
+                    android:textFontWeight="600"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/widget_hours"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:fontFamily="@font/jost"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:text="0h"
+                    android:textColor="@color/widget_snow"
+                    android:textFontWeight="300"
+                    android:textSize="26sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:gravity="end"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/widget_delta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/jost"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:text="="
+                    android:textColor="@color/widget_gold"
+                    android:textFontWeight="500"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="@font/jost"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:text="@string/widget_vs_last_week"
+                    android:textColor="@color/widget_mist"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/widget_chart"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            android:importantForAccessibility="no"
+            android:scaleType="fitXY" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
+
+            <TextView android:id="@+id/widget_d0" style="@style/WidgetDay" />
+            <TextView android:id="@+id/widget_d1" style="@style/WidgetDay" />
+            <TextView android:id="@+id/widget_d2" style="@style/WidgetDay" />
+            <TextView android:id="@+id/widget_d3" style="@style/WidgetDay" />
+            <TextView android:id="@+id/widget_d4" style="@style/WidgetDay" />
+            <TextView android:id="@+id/widget_d5" style="@style/WidgetDay" />
+            <TextView android:id="@+id/widget_d6" style="@style/WidgetDay" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

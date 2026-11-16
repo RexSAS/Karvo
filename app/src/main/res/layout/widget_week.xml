@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:clipToOutline="true">
+
+    <ImageView
+        android:layout_width="112dp"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom|start"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_ridges" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="14dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/jost"
+            android:includeFontPadding="false"
+            android:letterSpacing="0.12"
+            android:maxLines="1"
+            android:id="@+id/widget_label"
+            android:text="@string/widget_week_short"
+            android:textAllCaps="true"
+            android:textColor="@color/widget_mist"
+            android:textFontWeight="600"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/widget_hours"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/jost"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="0h"
+            android:textColor="@color/widget_snow"
+            android:textFontWeight="300"
+            android:textSize="34sp" />
+
+        <TextView
+            android:id="@+id/widget_sub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFamily="@font/jost"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/widget_mist"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/widget_add"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="12dp"
+        android:background="@drawable/widget_add_ripple"
+        android:contentDescription="@string/add_lesson"
+        android:scaleType="fitCenter"
+        android:src="@drawable/widget_add" />
+</FrameLayout>
