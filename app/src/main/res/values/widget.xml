@@ -2,5 +2,31 @@
 <resources>
     <color name="widget_snow">#F2F5FB</color>
     <color name="widget_mist">#A9B4CC</color>
+    <color name="widget_gold">#F4C06A</color>
     <dimen name="widget_radius">20dp</dimen>
+
+    <!-- The overview's small stats: a caps label on the left, the hours on the right. -->
+    <style name="WidgetStatLabel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:fontFamily">@font/jost</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:letterSpacing">0.1</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/widget_mist</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+    <style name="WidgetStatValue">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/jost</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:text">0h</item>
+        <item name="android:textColor">@color/widget_snow</item>
+        <item name="android:textSize">15sp</item>
+    </style>
 </resources>

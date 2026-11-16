@@ -15,8 +15,12 @@ import com.karvo.KarvoApp
 import com.karvo.MainActivity
 import com.karvo.R
 import com.karvo.data.Lesson
+import android.view.View
+import com.karvo.domain.chartDurationLabel
 import com.karvo.domain.formatDuration
 import com.karvo.domain.monthSoFar
+import com.karvo.domain.seasonOf
+import com.karvo.domain.totalBetween
 import com.karvo.domain.weekSoFar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +28,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 
 /** 2×2 home-screen widget: this week's hours and lessons (Monday to today), and a + that opens a new lesson. */
@@ -32,7 +37,7 @@ class WeekWidget : LessonWidget(Period.WEEK)
 /** The same widget for this month (the 1st to today), labelled with the month's name. */
 class MonthWidget : LessonWidget(Period.MONTH)
 
-/** 4×2 quick overview: this week and this month side by side, with the same +. */
+/** 4×2 quick overview: this week big; the month, today and the season small; the next event; the same +. */
 class OverviewWidget : LessonWidget(Period.OVERVIEW)
 
 enum class Period { WEEK, MONTH, OVERVIEW }
@@ -80,13 +85,30 @@ abstract class LessonWidget(private val period: Period) : AppWidgetProvider() {
                 if (period != Period.MONTH) fill(R.id.widget_label, R.id.widget_hours, R.id.widget_sub, weekLabel, weekSoFar(lessons, today))
                 when (period) {
                     Period.MONTH -> fill(R.id.widget_label, R.id.widget_hours, R.id.widget_sub, monthLabel, monthSoFar(lessons, today))
-                    Period.OVERVIEW -> fill(R.id.widget_month_label, R.id.widget_month_hours, R.id.widget_month_sub, monthLabel, monthSoFar(lessons, today))
+                    Period.OVERVIEW -> {
+                        val season = seasonOf(today, container.settingsRepository.seasonStartMonth.first()).range().start
+                        setTextViewText(R.id.widget_month_label, monthLabel)
+                        setTextViewText(R.id.widget_month_hours, chartDurationLabel(monthSoFar(lessons, today).first))
+                        setTextViewText(R.id.widget_today_hours, chartDurationLabel(totalBetween(lessons, today, today).first))
+                        setTextViewText(R.id.widget_season_hours, chartDurationLabel(totalBetween(lessons, season, today).first))
+                        val next = container.eventRepository.all().firstOrNull { it.date >= today }
+                        setTextViewText(R.id.widget_event_text, next?.text ?: context.getString(R.string.widget_no_events))
+                        setTextViewText(R.id.widget_event_date, next?.let { dayLabel(context, it.date, today) } ?: "")
+                        setViewVisibility(R.id.widget_event_bar, if (next != null) View.VISIBLE else View.GONE)
+                    }
                     Period.WEEK -> Unit
                 }
                 setOnClickPendingIntent(R.id.widget_root, open(context, add = false))
                 setOnClickPendingIntent(R.id.widget_add, open(context, add = true))
             }
             manager.updateAppWidget(ids, views)
+        }
+
+        /** "Today", "Tomorrow", or a short day like "Thu 20". */
+        private fun dayLabel(context: Context, date: LocalDate, today: LocalDate): String = when (date) {
+            today -> context.getString(R.string.today)
+            today.plusDays(1) -> context.getString(R.string.tomorrow)
+            else -> date.format(DateTimeFormatter.ofPattern("EEE d", context.resources.configuration.locales[0]))
         }
 
         /** "3h 30m" with the h and m smaller and in mist, like the app's big numbers. */
