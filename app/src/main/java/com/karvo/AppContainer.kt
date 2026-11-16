@@ -116,6 +116,8 @@ class AppContainer(context: Context) {
     private val deviceName: String
         get() = Settings.Global.getString(appContext.contentResolver, Settings.Global.DEVICE_NAME)?.takeIf { it.isNotBlank() } ?: Build.MODEL
 
+    val badgeWatch by lazy { com.karvo.notes.BadgeWatch(appContext, lessonRepository, settingsRepository).also { it.start(appScope) } }
+
     val noteAlarms by lazy { com.karvo.notes.NoteAlarms(appContext, eventRepository, settingsRepository).also { it.start(appScope) } }
 
     val linkManager: LinkManager by lazy {

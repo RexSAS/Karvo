@@ -8,6 +8,8 @@ import java.time.ZoneId
 import com.karvo.domain.studentKey
 import com.karvo.ui.overview.StudentScreen
 import com.karvo.ui.overview.BadgesScreen
+import com.karvo.ui.overview.BadgeUnlock
+import androidx.compose.runtime.collectAsState
 import com.karvo.ui.overview.OverviewViewModel
 import com.karvo.ui.components.swipeBack
 import com.karvo.ui.link.LinkedPcsScreen
@@ -215,6 +217,8 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
     var start by remember { mutableStateOf(StartScreen.None) }
     // The new-season card, shown once a season (after Welcome / What's new, if those are due too).
     var seasonCard by remember { mutableStateOf<SeasonWelcome?>(null) }
+    // A badge's unlock moment waits until Welcome / What's new / the season card have been decided.
+    var startDecided by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         val container = (context.applicationContext as KarvoApp).container
         val settings = container.settingsRepository
@@ -228,6 +232,7 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
         if (screen != StartScreen.None) kotlinx.coroutines.delay(700) // after the splash, so its animations are seen
         start = screen
         seasonCard = card
+        startDecided = true
     }
     when (start) {
         StartScreen.Welcome -> WelcomeDialog(onTour = { start = StartScreen.None; tour.start() }, onSkip = { start = StartScreen.None })
@@ -418,6 +423,18 @@ fun KarvoNavHost(splashLeaving: Boolean = false) {
     // The tour only runs on the home pages; leaving them ends it.
     if (currentRoute != ROUTE_HOME) tour.stop()
     TourOverlay(tour) { page -> goToPage(page) }
+    val badgeWatch = (context.applicationContext as KarvoApp).container.badgeWatch
+    val unlocked by badgeWatch.celebrate.collectAsState()
+    unlocked?.takeIf { startDecided && start == StartScreen.None && seasonCard == null && currentRoute != ROUTE_CAMERA }?.let { badge ->
+        BadgeUnlock(
+            badge,
+            onDone = { badgeWatch.celebrated(badge) },
+            onSeeBadges = {
+                badgeWatch.celebrated(badge)
+                navController.navigate(ROUTE_BADGES) { launchSingleTop = true }
+            },
+        )
+    }
     }
     }
 }

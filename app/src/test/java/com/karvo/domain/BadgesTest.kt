@@ -46,3 +46,29 @@ class BadgesTest {
         assertEquals(listOf(0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1), Badge.entries.map { it.step })
     }
 }
+
+class BadgeAnnounceTest {
+    private val season = Season(2026, 11)
+
+    @Test fun firstTimeAnnouncesWhatIsEarned() {
+        assertEquals(Badge.KARVER, badgeToAnnounce(season, Badge.KARVER, null))
+        assertNull(badgeToAnnounce(season, null, null))
+    }
+
+    @Test fun onlyAHigherBadgeInTheSameSeason() {
+        val mark = badgeMark(season, Badge.PARALLEL)
+        assertNull(badgeToAnnounce(season, Badge.PARALLEL, mark))
+        assertNull(badgeToAnnounce(season, Badge.SNOWPLOUGH, mark)) // a lesson was deleted
+        assertEquals(Badge.RED_RUN, badgeToAnnounce(season, Badge.RED_RUN, mark))
+    }
+
+    @Test fun aNewSeasonStartsOver() {
+        val mark = badgeMark(Season(2025, 11), Badge.LEGEND)
+        assertEquals(Badge.KARVER, badgeToAnnounce(season, Badge.KARVER, mark))
+        assertNull(badgeToAnnounce(season, null, mark))
+    }
+
+    @Test fun aBrokenMarkCountsAsNone() {
+        assertEquals(Badge.KARVER, badgeToAnnounce(season, Badge.KARVER, "rubbish"))
+    }
+}

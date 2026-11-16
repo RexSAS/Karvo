@@ -37,6 +37,7 @@ class DebugLinkReceiver : BroadcastReceiver() {
                     "events" -> c.eventRepository.all().joinToString { "${it.date}=${it.text}" }
                     "fireEvent" -> { c.noteAlarms.notifyToday(); "ok" }
                     "fireSeason" -> { c.noteAlarms.postSeasonStart(); "ok" }
+                    "badgeAgain" -> { c.badgeWatch.forget(); "ok: this season's badge is notified and celebrated again" }
                     "seasonCard" -> {
                         val start = c.settingsRepository.seasonStartMonth.first()
                         val season = com.karvo.domain.seasonOf(LocalDate.now(), start)

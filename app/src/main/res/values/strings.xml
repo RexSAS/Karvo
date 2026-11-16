@@ -354,6 +354,13 @@
     <string name="badge_next">Next: %1$s at %2$s</string>
     <string name="badge_to_go">%s to go</string>
     <string name="badge_all_earned">Every badge earned this season</string>
+    <string name="badge_channel">Badges</string>
+    <string name="badge_unlocked">Badge unlocked</string>
+    <string name="badge_unlocked_title">Badge unlocked: %s</string>
+    <string name="badge_unlocked_text">%s taught this season.</string>
+    <string name="badge_unlocked_at">Unlocked at %s this season</string>
+    <string name="badge_unlocked_ok">Nice!</string>
+    <string name="badge_see_all">See badges</string>
     <string name="badge_karver">Karver</string>
     <string name="badge_first_tracks">First tracks</string>
     <string name="badge_bunny_hill">Bunny hill</string>

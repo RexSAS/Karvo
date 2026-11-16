@@ -31,3 +31,16 @@ fun badgeProgress(minutes: Long): BadgeProgress = BadgeProgress(
     next = Badge.entries.firstOrNull { minutes < it.minutes },
     minutes = minutes,
 )
+
+/** What was last announced, kept as "startYear:ordinal" (-1: no badge yet that season). */
+fun badgeMark(season: Season, badge: Badge?): String = "${season.startYear}:${badge?.ordinal ?: -1}"
+
+/**
+ * The badge to announce now: [earned] when it beats the one in [mark] for the same season, or any badge in a new
+ * season. Losing hours (a deleted lesson) never announces; winning them back does not repeat what was announced.
+ */
+fun badgeToAnnounce(season: Season, earned: Badge?, mark: String?): Badge? {
+    earned ?: return null
+    val (year, ordinal) = mark?.split(":")?.mapNotNull { it.toIntOrNull() }?.takeIf { it.size == 2 } ?: return earned
+    return earned.takeIf { year != season.startYear || earned.ordinal > ordinal }
+}
