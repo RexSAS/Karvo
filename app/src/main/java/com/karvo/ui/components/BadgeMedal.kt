@@ -34,23 +34,40 @@ private fun Badge.metal(): Color = when (this) {
     Badge.LEGEND -> Color(0xFF9FD8F5)
 }
 
-/** A round medal with a mountain on it; [badge] null draws the empty slot as a dashed ring. Decorative: callers describe it. */
+/** A crest-shaped badge with a mountain on it; [badge] null draws the empty slot as a dashed outline. Decorative: callers describe it. */
 @Composable
 fun BadgeMedal(badge: Badge?, modifier: Modifier = Modifier) {
     val ring = MaterialTheme.colorScheme.onSurfaceVariant
     Canvas(modifier) {
-        val r = size.minDimension / 2
+        val h = size.minDimension
+        val half = h * 0.43f // the shield is a little narrower than tall
         val c = center
+        /** The shield scaled by [k] around its centre: a raised point on top, straight sides curving into a point below. */
+        fun shield(k: Float) = Path().apply {
+            fun x(u: Float) = c.x + u * half * k
+            fun y(v: Float) = c.y + v * h * k
+            moveTo(x(-1f), y(-0.38f))
+            quadraticTo(x(-0.45f), y(-0.38f), x(0f), y(-0.5f))
+            quadraticTo(x(0.45f), y(-0.38f), x(1f), y(-0.38f))
+            lineTo(x(1f), y(0.02f))
+            cubicTo(x(1f), y(0.3f), x(0.5f), y(0.42f), x(0f), y(0.5f))
+            cubicTo(x(-0.5f), y(0.42f), x(-1f), y(0.3f), x(-1f), y(0.02f))
+            close()
+        }
         if (badge == null) {
-            val w = r * 0.07f
-            drawCircle(ring.copy(alpha = 0.6f), r - w, c, style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(r * 0.22f, r * 0.16f))))
+            val w = h * 0.035f
+            drawPath(shield(0.93f), ring.copy(alpha = 0.6f), style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(h * 0.1f, h * 0.07f))))
             return@Canvas
         }
         val metal = badge.metal()
         val dark = metal.copy(red = metal.red * 0.62f, green = metal.green * 0.62f, blue = metal.blue * 0.62f)
-        drawCircle(dark, r, c)
-        drawCircle(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.9f).compositeOver(metal), metal, dark), Offset(c.x - r, c.y - r), Offset(c.x + r, c.y + r)), r * 0.86f, c)
+        drawPath(shield(1f), dark)
+        drawPath(shield(0.84f), Brush.linearGradient(
+            listOf(Color.White.copy(alpha = 0.9f).compositeOver(metal), metal, dark),
+            Offset(c.x - half, c.y - h / 2), Offset(c.x + half, c.y + h / 2),
+        ))
         // Two peaks, the front one with a snow cap.
+        val r = half * 0.9f
         val ink = Color(0xFF1B2433).copy(alpha = 0.78f)
         val base = c.y + r * 0.38f
         drawPath(Path().apply {
@@ -66,4 +83,3 @@ fun BadgeMedal(badge: Badge?, modifier: Modifier = Modifier) {
         }, Color.White)
     }
 }
-
