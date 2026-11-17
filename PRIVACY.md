@@ -34,7 +34,7 @@ you choose to link a PC (see *Linking a PC*).
   browser on karvo.rxsas.it) through `link.rxsas.it` to GitHub, where it becomes a **public issue** on
   github.com/RexSAS/Karvo. No lessons are sent. To limit spam, the relay keeps a hash of your IP address for 24 hours.
   "Send by email instead" opens your mail app and sends nothing by itself. **My reports** remembers the numbers of the
-  reports you sent (on your device only) and reads their status and answers from `api.github.com`; nothing else is sent. On Android you can **reply** to your own open
+  reports you sent (on your device only) and reads their status and answers from GitHub through `link.rxsas.it`; only the report number is sent. On Android you can **reply** to your own open
   reports: the reply goes the same way and is public too. A random reply key, kept on your phone (the relay keeps only
   its hash), makes sure only you can reply to your reports.
 - The **GitHub version** checks GitHub (`api.github.com`) for a newer release and downloads it if you choose to update.
@@ -103,7 +103,7 @@ tuo telefono, a meno che tu non scelga di collegare un PC (vedi *Collegare un PC
   (o il browser su karvo.rxsas.it) tramite `link.rxsas.it` a GitHub, dove diventa una **segnalazione pubblica** su
   github.com/RexSAS/Karvo. Le lezioni non vengono inviate. Per limitare lo spam, il relay conserva un hash del tuo indirizzo IP per 24 ore.
   "Manda per email" apre la tua app di posta e da solo non invia nulla. **Le mie segnalazioni** ricorda i numeri delle
-  segnalazioni che hai inviato (solo sul tuo dispositivo) e legge stato e risposte da `api.github.com`; nient'altro viene inviato. Su Android puoi **rispondere** alle tue
+  segnalazioni che hai inviato (solo sul tuo dispositivo) e legge stato e risposte da GitHub tramite `link.rxsas.it`; viene inviato solo il numero della segnalazione. Su Android puoi **rispondere** alle tue
   segnalazioni aperte: la risposta fa la stessa strada ed è anch'essa pubblica. Una chiave casuale, tenuta sul telefono
   (il relay ne conserva solo l'hash), fa sì che solo tu possa rispondere alle tue segnalazioni.
 - La **versione GitHub** controlla su GitHub (`api.github.com`) se c'è una nuova versione e la scarica se scegli di

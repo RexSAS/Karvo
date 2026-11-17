@@ -228,11 +228,10 @@ private fun ReportCard(report: SentReport, showMessage: (String) -> Unit) {
     val scope = rememberCoroutineScope()
     var status by remember { mutableStateOf<ReportStatus?>(null) }
     var failed by remember { mutableStateOf(false) }
-    var reload by remember { mutableStateOf(0) }
     var replying by rememberSaveable { mutableStateOf(false) }
     var reply by rememberSaveable { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
-    LaunchedEffect(report.number, reload) {
+    LaunchedEffect(report.number) {
         try {
             status = fetchReportStatus(report.number)
             failed = false
@@ -250,10 +249,12 @@ private fun ReportCard(report: SentReport, showMessage: (String) -> Unit) {
         sending = true
         scope.launch {
             try {
-                sendComment(report, reply.trim())
+                val text = reply.trim()
+                sendComment(report, text)
+                // Shown at once; the next load (fresh from the relay) brings the same comment back from GitHub.
+                status = status?.let { it.copy(replies = it.replies + ReportReply("", text, java.time.LocalDate.now().toString(), mine = true)) }
                 reply = ""
                 replying = false
-                reload++
             } catch (e: CancellationException) {
                 throw e
             } catch (_: TooManyReportsException) {

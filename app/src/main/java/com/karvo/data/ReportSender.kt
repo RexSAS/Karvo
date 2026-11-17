@@ -68,37 +68,35 @@ fun rememberReport(context: Context, report: SentReport) {
 data class ReportReply(val author: String, val body: String, val date: String, val mine: Boolean)
 data class ReportStatus(val open: Boolean, val replies: List<ReportReply>)
 
-/** Public repo, so no token: GitHub's anonymous limit (60 requests an hour) is plenty for a few reports. */
+/**
+ * Read through the relay (it uses the token): always fresh, and not GitHub's anonymous 60 requests an hour per
+ * connection, which instructors on one Wi-Fi would share.
+ */
 suspend fun fetchReportStatus(number: Int): ReportStatus = withContext(Dispatchers.IO) {
-    val issue = JSONObject(getGitHub("issues/$number"))
-    val comments = JSONArray(getGitHub("issues/$number/comments"))
+    val connection = URL("$REPORT_URL/$number").openConnection() as HttpURLConnection
+    val json = try {
+        connection.connectTimeout = 10_000
+        connection.readTimeout = 15_000
+        connection.useCaches = false
+        if (connection.responseCode != HttpURLConnection.HTTP_OK) error("Relay: HTTP ${connection.responseCode}")
+        JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
+    } finally {
+        connection.disconnect()
+    }
+    val comments = json.getJSONArray("comments")
     ReportStatus(
-        open = issue.getString("state") == "open",
+        open = json.getBoolean("open"),
         replies = (0 until comments.length()).map { i ->
             comments.getJSONObject(i).let {
                 val body = it.getString("body").trim()
                 val mine = body.endsWith(REPORTER_MARK)
                 ReportReply(
-                    author = it.getJSONObject("user").getString("login"),
+                    author = it.getString("author"),
                     body = if (mine) body.removeSuffix(REPORTER_MARK).trim() else body,
-                    date = it.getString("created_at").take(10),
+                    date = it.getString("date"),
                     mine = mine,
                 )
             }
         },
     )
-}
-
-private fun getGitHub(path: String): String {
-    val connection = URL("https://api.github.com/repos/RexSAS/Karvo/$path").openConnection() as HttpURLConnection
-    try {
-        connection.connectTimeout = 10_000
-        connection.readTimeout = 10_000
-        connection.setRequestProperty("Accept", "application/vnd.github+json")
-        connection.setRequestProperty("User-Agent", "Karvo")
-        if (connection.responseCode != HttpURLConnection.HTTP_OK) error("GitHub: HTTP ${connection.responseCode}")
-        return connection.inputStream.bufferedReader().use { it.readText() }
-    } finally {
-        connection.disconnect()
-    }
 }
