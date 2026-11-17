@@ -6,6 +6,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import com.karvo.onboarding.TourTarget
+import com.karvo.onboarding.tourTarget
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -140,8 +142,10 @@ private fun LastSixMonthsCard(stats: OverviewStats, revealed: Boolean, locale: L
 @Composable
 private fun TopStudentsCard(stats: OverviewStats, revealed: Boolean, rateSet: Boolean, onOpenStudent: (String) -> Unit) {
     // Each student is read (and opened) on their own, so no description for the whole card.
-    StatsCard(stringResource(R.string.stats_top_students), description = null) {
-        TopStudentsPodium(stats.topStudents, revealed, rateSet, onOpenStudent)
+    Box(Modifier.tourTarget(TourTarget.Students)) {
+        StatsCard(stringResource(R.string.stats_top_students), description = null) {
+            TopStudentsPodium(stats.topStudents, revealed, rateSet, onOpenStudent)
+        }
     }
 }
 

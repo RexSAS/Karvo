@@ -65,18 +65,23 @@ import com.karvo.R
 import kotlinx.coroutines.delay
 
 /** The buttons the quick tour points at; screens mark them with [tourTarget]. */
-enum class TourTarget { AddLesson, Calendar, Camera, Rate, Backups, LinkedPcs }
+enum class TourTarget { AddLesson, Search, Calendar, Camera, Season, Badges, Students, Rate, Backups, LinkedPcs, Report }
 
-/** One step: the home tab it lives on (0 lessons, 2 settings), what it highlights and what it says. */
+/** One step: the home tab it lives on (0 lessons, 1 overview, 2 settings), what it highlights and what it says. */
 data class TourStep(val target: TourTarget, val page: Int, @StringRes val title: Int, @StringRes val body: Int)
 
 val TOUR = listOf(
     TourStep(TourTarget.AddLesson, 0, R.string.tour_add_title, R.string.tour_add_body),
+    TourStep(TourTarget.Search, 0, R.string.tour_search_title, R.string.tour_search_body),
     TourStep(TourTarget.Calendar, 0, R.string.tour_calendar_title, R.string.tour_calendar_body),
     TourStep(TourTarget.Camera, 0, R.string.tour_camera_title, R.string.tour_camera_body),
+    TourStep(TourTarget.Season, 1, R.string.tour_season_title, R.string.tour_season_body),
+    TourStep(TourTarget.Badges, 1, R.string.tour_badges_title, R.string.tour_badges_body),
+    TourStep(TourTarget.Students, 1, R.string.tour_students_title, R.string.tour_students_body),
     TourStep(TourTarget.Rate, 2, R.string.tour_settings_title, R.string.tour_settings_body),
     TourStep(TourTarget.Backups, 2, R.string.tour_backups_title, R.string.tour_backups_body),
     TourStep(TourTarget.LinkedPcs, 2, R.string.tour_pc_title, R.string.tour_pc_body),
+    TourStep(TourTarget.Report, 2, R.string.tour_report_title, R.string.tour_report_body),
 )
 
 class TourState {
