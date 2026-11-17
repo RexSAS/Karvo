@@ -148,7 +148,7 @@ fun LessonsScreen(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).focusRequester(focus),
                     )
                     Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf(false to R.string.not_paid, true to R.string.paid).forEach { (value, label) ->
+                        listOf(false to R.string.filter_unpaid, true to R.string.filter_paid).forEach { (value, label) ->
                             FilterChip(
                                 selected = paidFilter == value,
                                 onClick = { viewModel.paidFilter.value = if (paidFilter == value) null else value },
