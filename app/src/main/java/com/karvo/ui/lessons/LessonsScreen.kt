@@ -1,6 +1,16 @@
 package com.karvo.ui.lessons
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import com.karvo.ui.theme.alpineFieldColors
 import com.karvo.ui.theme.underBars
 import com.karvo.ui.theme.LocalTabBarSpace
 import androidx.compose.ui.res.stringResource
@@ -89,6 +99,16 @@ fun LessonsScreen(
     val moments = rememberMoments()
     val zone = rememberZone()
     val momentCounts = remember(moments, zone) { momentCountsByMonth(moments.orEmpty(), zone) }
+    val query by viewModel.query.collectAsStateWithLifecycle()
+    val paidFilter by viewModel.paidFilter.collectAsStateWithLifecycle()
+    val hasLessons by viewModel.hasLessons.collectAsStateWithLifecycle()
+    var searching by rememberSaveable { mutableStateOf(false) }
+    fun closeSearch() {
+        searching = false
+        viewModel.query.value = ""
+        viewModel.paidFilter.value = null
+    }
+    BackHandler(enabled = searching) { closeSearch() }
 
     fun delete(lesson: Lesson) {
         viewModel.delete(lesson)
@@ -101,13 +121,43 @@ fun LessonsScreen(
         contentWindowInsets = WindowInsets(0), // the header pads itself; the list runs under the tab bar
         topBar = {
             val total = groupsOrNull.orEmpty().sumOf { it.lessons.size }
-            ScreenHeader(
-                title = stringResource(R.string.lessons),
-                subtitle = if (total > 0) pluralStringResource(R.plurals.lesson_count, total, total) else null,
-                trailing = {
-                    IconButton(onClick = onOpenMoments, modifier = Modifier.tourTarget(TourTarget.Calendar)) { Icon(Icons.Filled.CalendarMonth, stringResource(R.string.calendar)) }
-                },
-            )
+            Column {
+                ScreenHeader(
+                    title = stringResource(R.string.lessons),
+                    subtitle = if (total > 0) pluralStringResource(R.plurals.lesson_count, total, total) else null,
+                    afterTitle = {
+                        IconButton(onClick = { if (searching) closeSearch() else searching = true }) {
+                            if (searching) Icon(Icons.Filled.Close, stringResource(R.string.close_search))
+                            else Icon(Icons.Filled.Search, stringResource(R.string.search))
+                        }
+                    },
+                    trailing = {
+                        IconButton(onClick = onOpenMoments, modifier = Modifier.tourTarget(TourTarget.Calendar)) { Icon(Icons.Filled.CalendarMonth, stringResource(R.string.calendar)) }
+                    },
+                )
+                if (searching) {
+                    val focus = remember { FocusRequester() }
+                    LaunchedEffect(Unit) { focus.requestFocus() }
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = { viewModel.query.value = it },
+                        placeholder = { Text(stringResource(R.string.search)) },
+                        leadingIcon = { Icon(Icons.Filled.Search, null) },
+                        singleLine = true,
+                        colors = alpineFieldColors(),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).focusRequester(focus),
+                    )
+                    Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(false to R.string.filter_unpaid, true to R.string.filter_paid).forEach { (value, label) ->
+                            FilterChip(
+                                selected = paidFilter == value,
+                                onClick = { viewModel.paidFilter.value = if (paidFilter == value) null else value },
+                                label = { Text(stringResource(label)) },
+                            )
+                        }
+                    }
+                }
+            }
         },
         floatingActionButton = {
             Column(Modifier.padding(bottom = tabBar), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -119,6 +169,8 @@ fun LessonsScreen(
         val groups = groupsOrNull
         if (groups == null) {
             // Still loading: show nothing rather than flashing the empty state.
+        } else if (groups.isEmpty() && hasLessons) {
+            EmptyState(stringResource(R.string.no_matching_lessons), Modifier.fillMaxSize().padding(padding).padding(32.dp))
         } else if (groups.isEmpty()) {
             Column(Modifier.fillMaxSize().padding(padding).padding(bottom = tabBar)) {
               notesCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))

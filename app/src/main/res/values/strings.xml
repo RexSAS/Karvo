@@ -23,6 +23,10 @@
     <string name="share_style_photobomb">Photobomb</string>
     <string name="save">Save</string>
     <string name="search">Search</string>
+    <string name="close_search">Close search</string>
+    <string name="no_matching_lessons">No lessons match.</string>
+    <string name="filter_unpaid">Not paid</string>
+    <string name="filter_paid">Paid</string>
     <string name="undo">Undo</string>
 
     <!-- Lessons -->

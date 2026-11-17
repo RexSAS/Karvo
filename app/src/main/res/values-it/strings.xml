@@ -21,6 +21,10 @@
     <string name="share_style_photobomb">Photobomb</string>
     <string name="save">Salva</string>
     <string name="search">Cerca</string>
+    <string name="close_search">Chiudi ricerca</string>
+    <string name="no_matching_lessons">Nessuna lezione trovata.</string>
+    <string name="filter_unpaid">Non pagate</string>
+    <string name="filter_paid">Pagate</string>
     <string name="undo">Ripristina</string>
 
     <!-- Lessons -->
