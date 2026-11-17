@@ -72,7 +72,7 @@ fun BadgesScreen(viewModel: OverviewViewModel, onBack: () -> Unit) {
                     Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp).semantics(mergeDescendants = true) {},
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    BadgeMedal(progress.earned, Modifier.size(200.dp))
+                    BadgeMedal(progress.earned, Modifier.size(200.dp), animated = true)
                     Text(
                         progress.earned?.let { stringResource(it.titleRes()) } ?: stringResource(R.string.badge_none),
                         style = MaterialTheme.typography.headlineMedium,
