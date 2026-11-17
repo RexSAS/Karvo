@@ -12,67 +12,110 @@
 <p align="center">
   <a href="https://github.com/RexSAS/Karvo/releases/latest"><img src="https://img.shields.io/github/v/release/RexSAS/Karvo?label=download&color=1565C0" alt="Latest release"></a>
   <a href="https://play.google.com/store/apps/details?id=com.karvo"><img src="https://img.shields.io/badge/Google%20Play-closed%20test-414141?logo=googleplay&logoColor=white" alt="Karvo on Google Play (closed test)"></a>
+  <a href="https://karvo.rxsas.it"><img src="https://img.shields.io/badge/PC%20%26%20iPhone-karvo.rxsas.it-1565C0" alt="Karvo on PC and iPhone: karvo.rxsas.it"></a>
   <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white" alt="Android 8.0+">
   <img src="https://img.shields.io/badge/languages-Italiano%20%C2%B7%20English-1565C0" alt="Italiano and English">
-  <img src="https://img.shields.io/badge/data-stays%20on%20your%20phone-1565C0" alt="Data stays on your phone">
+  <img src="https://img.shields.io/badge/free-no%20ads%2C%20no%20account-1565C0" alt="Free, no ads, no account">
 </p>
 
 <p align="center">
-  <img src="docs/assets/screenshots/new-lesson.png" width="200" alt="Add a lesson">
+  <img src="docs/play/screenshots/en/1-overview.png" width="200" alt="Overview: your season's hours and earnings">
   &nbsp;
-  <img src="docs/assets/screenshots/overview.png" width="200" alt="Overview with statistics">
+  <img src="docs/play/screenshots/en/2-lessons.png" width="200" alt="Lessons grouped by month">
   &nbsp;
-  <img src="docs/assets/screenshots/podium.png" width="200" alt="Top students podium">
+  <img src="docs/play/screenshots/en/3-new-lesson.png" width="200" alt="Add a lesson in seconds">
   &nbsp;
-  <img src="docs/assets/screenshots/settings.png" width="200" alt="Settings">
+  <img src="docs/play/screenshots/en/4-month.png" width="200" alt="A month with its lessons and paid status">
 </p>
 
 ---
 
-Ski instructors are paid by the hour, and at the end of the month the hours have to add up. **Karvo** lets you log each lesson the moment it ends — then check your month, your season and your pay at a glance. No account, no sign-up, nothing to set up.
+Ski instructors are paid by the hour, and at the end of the month the hours have to add up. **Karvo** lets you log each lesson the moment it ends, then see your month, your season and your pay at a glance. No account, no sign-up, nothing to set up. Everything is free: no Pro plan, no ads, no in-app purchases.
 
-## Why Karvo
+## Features
 
-- ⛷️ **Made for the slopes** — log a lesson in two taps: quick durations (1h, 1h 30m, 2h, 3h) and student names suggested from your past lessons.
-- 📅 **Every hour accounted for** — lessons grouped by month with their totals, plus your lifetime hours.
-- 📷 **Moments** — capture your day on the slopes and watch your season fill up a photo calendar. Tap any day for its recap: the moment, the lessons and the hours. Everything is also saved to a *Karvo* album in your gallery.
-- 🔒 **Private by design** — your lessons never leave your phone. No account, no ads, no tracking.
-- 🎁 **Free, all of it** — every feature for everyone: no Pro plan, no in-app purchases.
-- 🇮🇹 **Italiano and English** — follows your phone's language, or pick one in Settings.
+### ⛷️ Log a lesson in seconds
+- Quick durations (1h, 1h 30m, 2h, 3h) or type your own, with student names suggested from your past lessons.
+- A note for each lesson, like "Kids 6 and 9" or "Lesson in English".
+- Lessons grouped by month with each month's total.
+- **Search** by student or note, and filter to the lessons not paid yet.
+
+### 💶 Your hours and your pay
+- **Overview** opens on this season, compared with last season at the same date. The season picker switches to any past season or to **Lifetime**.
+- Earnings from your hourly rate, hidden until you tap the eye, with fingerprint, face or PIN if you want.
+- Tick the months the school has paid and always see what is still to be paid.
+- Statistics: lessons this month, average lesson, students, the last 6 months, your busiest weekdays and a podium of your top students.
+- **Student page**: tap a student for their hours, lessons, months, seasons and earnings.
+
+### 🏅 Season badges
+- 14 badges unlock as your season's hours grow, from **Karver** at your first hour to **Legend of the slopes** at 600h, in bronze, silver, gold, amethyst and ice.
+- Each new badge arrives with a notification and an unlock animation. The badge page shows your progress to the next one and your best badge of every season.
+
+### 📱 Home-screen widgets
+- **This week** and **This month**: your hours and lessons, with a **+** to add a lesson.
+- **Overview**: the week big, plus the month, today, the season and your next event.
+- **This week vs last**: both weeks' hours, day by day, as two curves.
+
+### 📅 Calendar and reminders
+- Add events to any day, like "Ski school meeting 17:00". Karvo reminds you at 07:30 that day.
+- The next 3 days' events sit right on the Lessons page.
+- On the season's first day Kevin wishes you a good one, and Karvo sums up last season and its unpaid months.
+
+### 📷 Moments
+- Tap for a photo, hold for a video of up to 10 seconds: up to 3 moments a day.
+- Your season as a photo calendar: tap a day for its moments, lessons and hours.
+- Share in a Karvo design (Photobomb, Frame or Banner) or straight to an Instagram story.
+- Everything is saved to a *Karvo* album in your gallery, and *Restore moments* brings it back after a new phone.
+
+### 💻 On your PC and iPhone too
+Open **[karvo.rxsas.it](https://karvo.rxsas.it)** on your computer or iPhone and link it by scanning a code. While Karvo is open on your phone, it shows your lessons, calendar, statistics and badges on the big screen, and every change you make there is saved on your phone. Phone and PC talk end-to-end encrypted.
+
+### 🛟 Safe and helpful
+- Up to 3 backups inside the app, plus CSV export and import (MasterSki files too).
+- **Report a problem** from Settings: you can follow the answers under *My reports* and reply to them.
+- A **quick tour** on the first start (replay it from Settings), and *What's new* after each update.
+- The *First Light* look, with the night sky over the mountains and Kevin the penguin, or the plainer *Classic* theme.
+- In Italian and English: Karvo follows your phone's language, or you can pick one in Settings.
 
 ## Privacy
 
-Karvo has no servers and no accounts. Your lessons are stored only on your phone, and the Google Play version doesn't even have internet access. If your phone's Google backup is on, Android includes Karvo's data in it, so your lessons come back when you set up a new phone. Photos and videos go to your phone's gallery and nowhere else. Fingerprint unlock is handled by Android: Karvo never sees your fingerprint.
+Karvo has no accounts, no analytics and no ads, and keeps no copy of your lessons on any server: they live only on your phone. Photos and videos go to your phone's gallery. Fingerprint unlock is handled by Android: Karvo never sees your fingerprint.
+
+Karvo uses the internet for just two things, and only when you choose them:
+- **Linking a PC**: the data travels end-to-end encrypted through a relay (`link.rxsas.it`) that can't read it and stores none of it.
+- **Report a problem**: your report becomes a public issue on this repository. No lessons are sent.
+
+If your phone's Google backup is on, Android includes Karvo's data in it, so your lessons come back on a new phone. The full details are in the [privacy policy](PRIVACY.md).
 
 ## Roadmap
 
-### 3.0 — Moments
-- [x] **Google Play build** — updated by the Play Store, with no in-app updater and no internet access.
-- [x] **Moments** — capture your day on the slopes: tap for a photo, hold for a video, up to 3 moments a day.
-- [x] **Moments calendar and daily recap** — a photo calendar of your season; tap a day for its moments, lessons and hours.
-- [x] **Full-screen viewer** — swipe through a day's moments, zoom photos, play videos with mute and a seek bar.
-- [x] **Better photos** — full 4:3 sensor quality, Karvo's look on every photo, and the phone's HDR or Night mode where available.
-- [x] **Restore moments** — after a new phone or a reinstall, *Settings → Restore moments* brings your photos and videos from the gallery's Karvo album back into the calendar.
-- [x] **Share moments** — share a photo or video in one tap; photos go out in a Karvo design (Banner or Frame).
+### Shipped
+- [x] **Moments**, calendar, full-screen viewer and sharing (3.0)
+- [x] **PC link** via karvo.rxsas.it, end-to-end encrypted (3.1)
+- [x] **Calendar events** with a 07:30 reminder (3.2)
+- [x] **New look "First Light"**, new logo and **Kevin** the penguin (3.3)
+- [x] **Photobomb** sharing (3.4)
+- [x] **Season picker**, **student page**, swipe back and the **season start** greeting (3.5)
+- [x] **Season badges** and **home-screen widgets** (3.6)
 
-### 3.1 — Faster and more fun
-- [ ] **Mascot: Kevin** — a penguin to give Karvo a face: on the splash screen, empty pages and celebrations.
-- [ ] **Repeat a lesson** — long-press a lesson to log the same student and duration again in one tap.
-- [ ] **Badges and achievements** — season milestones (50h, 100h, 250h…) with a small celebration.
-- [ ] **Evening reminder** — an optional notification on days with nothing logged.
-- [ ] **Search and filters** — find lessons by student and filter the list.
+### Next release
+- [x] **Search and filters** on Lessons
+- [x] **Report a problem**, with My reports and replies
+- [x] A longer **quick tour** that covers the new features
 
-### 3.2 — Your season
-- [ ] **Widget** — this month's hours on your home screen, with a quick **+** to add a lesson.
-- [ ] **Season page** — tap a season to see every month in it, with hours, earnings, lessons and paid status.
-- [ ] **Goals** — set a season target and follow your progress on the Overview.
-- [ ] **Season Wrapped** — your season in one shareable card: hours, students, busiest day.
+### Ideas
+- [ ] **Repeat a lesson**: long-press a lesson to log the same student and duration again.
+- [ ] **Evening reminder**: an optional notification on days with nothing logged.
+- [ ] **Goals**: set a season target and follow your progress on Overview.
+- [ ] **Season Wrapped**: your season in one shareable card.
 
 See the [changelog](CHANGELOG.md) for what's new in each version.
 
 ## Download
 
-Karvo is on **[Google Play](https://play.google.com/store/apps/details?id=com.karvo)**, in a closed test for now: the page opens once you've joined the test as a tester. Everyone else can install the APK from the [latest GitHub release](https://github.com/RexSAS/Karvo/releases/latest): download **`Karvo-x.y.apk`**, open it and allow *Install unknown apps* when Android asks.
+Karvo is on **[Google Play](https://play.google.com/store/apps/details?id=com.karvo)**, in a closed test for now: the page opens once you've joined the test as a tester. Everyone else can install the APK from the [latest GitHub release](https://github.com/RexSAS/Karvo/releases/latest): download **`Karvo-x.y.apk`**, open it and allow *Install unknown apps* when Android asks. The GitHub version updates itself from inside the app.
+
+On a PC or an iPhone, open **[karvo.rxsas.it](https://karvo.rxsas.it)** and link it to the app on your phone.
 
 <details>
 <summary><b>For developers</b></summary>
@@ -82,11 +125,11 @@ Requirements: JDK 17 and the Android SDK (platform 36).
 ```sh
 ./gradlew testGithubDebugUnitTest   # run the tests
 ./gradlew assembleGithubRelease     # APK for GitHub releases (with the in-app updater)
-./gradlew bundlePlayRelease         # AAB for Google Play (no updater, no internet permission)
+./gradlew bundlePlayRelease         # AAB for Google Play (no updater)
 ```
 
 Release builds are signed with the key in `keystore.properties` (git-ignored). Every release bumps `versionCode` and `versionName`, is tagged `vX.Y.Z` and has exactly one `Karvo-X.Y.apk` asset, which the in-app updater downloads.
 
-Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation Compose · JUnit + Robolectric
+Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation Compose · App widgets · JUnit + Robolectric
 
 </details>
