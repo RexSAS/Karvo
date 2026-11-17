@@ -18,6 +18,15 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.getValue
+import kotlin.math.PI
+import kotlin.math.sin
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import com.karvo.R
@@ -63,9 +72,24 @@ fun badgeBitmap(badge: Badge, px: Int): ImageBitmap = ImageBitmap(px, px).also {
 
 /** The rank emblem for [badge]; null draws the empty slot as a dashed outline. Decorative: callers describe it. */
 @Composable
-fun BadgeMedal(badge: Badge?, modifier: Modifier = Modifier) {
+fun BadgeMedal(badge: Badge?, modifier: Modifier = Modifier, animated: Boolean = false) {
     val ring = MaterialTheme.colorScheme.onSurfaceVariant
-    Canvas(modifier) { drawBadge(badge, ring) }
+    if (!animated || badge == null) {
+        Canvas(modifier) { drawBadge(badge, ring) }
+        return
+    }
+    // Alive but calm: a shine every few seconds, a slow float, the ice rays turning and the high badges twinkling.
+    // Read only while drawing, so each frame redraws the badge without recomposing the screen.
+    val motion = rememberInfiniteTransition(label = "badge")
+    val cycle by motion.animateFloat(0f, 1f, infiniteRepeatable(tween(4_500, easing = LinearEasing)), label = "cycle")
+    val spin by motion.animateFloat(0f, 360f, infiniteRepeatable(tween(24_000, easing = LinearEasing)), label = "spin")
+    val twinkle by motion.animateFloat(0f, 1f, infiniteRepeatable(tween(2_800, easing = LinearEasing)), label = "twinkle")
+    Canvas(modifier) {
+        val glint = if (cycle < 0.3f) cycle / 0.3f else -1f
+        translate(top = sin(cycle * 2 * PI.toFloat()) * size.minDimension * 0.015f) {
+            drawBadge(badge, ring, glint = glint, spin = spin, twinkle = twinkle)
+        }
+    }
 }
 
 /**
@@ -73,7 +97,7 @@ fun BadgeMedal(badge: Badge?, modifier: Modifier = Modifier) {
  * metal, 1 to 3). Each metal adds to the one before: wings from gold, a crown from amethyst, light rays for the ice
  * legends. [glint] 0..1 sends a shine across it (outside that range: none); [spin] turns the rays, in degrees.
  */
-fun DrawScope.drawBadge(badge: Badge?, emptyColor: Color, glint: Float = -1f, spin: Float = 0f) {
+fun DrawScope.drawBadge(badge: Badge?, emptyColor: Color, glint: Float = -1f, spin: Float = 0f, twinkle: Float = -1f) {
     val s = size.minDimension
     val cx = center.x
     val cy = center.y + s * 0.03f
@@ -163,5 +187,21 @@ fun DrawScope.drawBadge(badge: Badge?, emptyColor: Color, glint: Float = -1f, sp
             listOf(Color.White.copy(alpha = 0f), Color.White.copy(alpha = 0.6f), Color.White.copy(alpha = 0f)),
             Offset(x - s * 0.18f, cy - h / 2), Offset(x + s * 0.18f, cy - h / 2 + s * 0.3f),
         ))
+    }
+
+    // Amethyst and ice twinkle: four sparkles taking turns.
+    if (twinkle >= 0f && tier >= 3) {
+        listOf(Triple(-0.4f, -0.36f, 0f), Triple(0.42f, -0.3f, 1.6f), Triple(0.38f, 0.36f, 3.1f), Triple(-0.36f, 0.32f, 4.5f))
+            .forEach { (dx, dy, phase) ->
+                val a = sin(twinkle * 2 * PI.toFloat() + phase)
+                if (a <= 0f) return@forEach
+                val at = Offset(center.x + dx * s, center.y + dy * s)
+                val k = s * 0.05f * (0.6f + 0.4f * a)
+                val w = k * 0.22f
+                drawPath(poly(listOf(
+                    Offset(at.x, at.y - k), Offset(at.x + w, at.y - w), Offset(at.x + k, at.y), Offset(at.x + w, at.y + w),
+                    Offset(at.x, at.y + k), Offset(at.x - w, at.y + w), Offset(at.x - k, at.y), Offset(at.x - w, at.y - w),
+                )), Color.White, alpha = a)
+            }
     }
 }
