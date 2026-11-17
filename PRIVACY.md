@@ -1,6 +1,6 @@
 # Karvo privacy policy
 
-*Last updated: 8 November 2026 (events)* · [Italiano](#informativa-sulla-privacy-di-karvo)
+*Last updated: 17 November 2026 (deleting reports)* · [Italiano](#informativa-sulla-privacy-di-karvo)
 
 Karvo is an app for ski instructors to log their lesson hours. It is developed by RexSAS. Karvo has **no accounts, no
 analytics and no ads**, and keeps no copy of your data on any server: everything you enter stays on your phone, unless
@@ -36,7 +36,8 @@ you choose to link a PC (see *Linking a PC*).
   "Send by email instead" opens your mail app and sends nothing by itself. **My reports** remembers the numbers of the
   reports you sent (on your device only) and reads their status and answers from GitHub through `link.rxsas.it`; only the report number is sent. On Android you can **reply** to your own open
   reports: the reply goes the same way and is public too. A random reply key, kept on your phone (the relay keeps only
-  its hash), makes sure only you can reply to your reports.
+  its hash), makes sure only you can reply to your reports. To have a report (and its replies) deleted, write to the
+  address under *Changes and contact* with its number or title, and we delete the issue on GitHub.
 - The **GitHub version** checks GitHub (`api.github.com`) for a newer release and downloads it if you choose to update.
   No lesson data is sent; GitHub sees the request like any visit to its website, under the
   [GitHub privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
@@ -53,7 +54,7 @@ Settings → Linked PCs.
 
 ## Your data, your control
 
-Unless you link a PC, your data never leaves your phone, so we can't see, share, sell or delete it for you. You can export it as CSV,
+Unless you link a PC or send a report, your data never leaves your phone, so we can't see, share, sell or delete it for you. You can export it as CSV,
 delete single lessons and moments in the app, or remove everything by uninstalling Karvo (moments in your gallery stay
 until you delete them there). The student names you enter are your responsibility; they stay on your phone.
 
@@ -68,7 +69,7 @@ Questions: **andreafaveri@rxsas.it**
 
 # Informativa sulla privacy di Karvo
 
-*Ultimo aggiornamento: 8 novembre 2026* · [English](#karvo-privacy-policy)
+*Ultimo aggiornamento: 17 novembre 2026* · [English](#karvo-privacy-policy)
 
 Karvo è un'app per maestri di sci che registra le ore di lezione. È sviluppata da RexSAS. Karvo **non ha account,
 statistiche d'uso né pubblicità** e non conserva copie dei tuoi dati su alcun server: tutto ciò che inserisci resta sul
@@ -105,7 +106,9 @@ tuo telefono, a meno che tu non scelga di collegare un PC (vedi *Collegare un PC
   "Manda per email" apre la tua app di posta e da solo non invia nulla. **Le mie segnalazioni** ricorda i numeri delle
   segnalazioni che hai inviato (solo sul tuo dispositivo) e legge stato e risposte da GitHub tramite `link.rxsas.it`; viene inviato solo il numero della segnalazione. Su Android puoi **rispondere** alle tue
   segnalazioni aperte: la risposta fa la stessa strada ed è anch'essa pubblica. Una chiave casuale, tenuta sul telefono
-  (il relay ne conserva solo l'hash), fa sì che solo tu possa rispondere alle tue segnalazioni.
+  (il relay ne conserva solo l'hash), fa sì che solo tu possa rispondere alle tue segnalazioni. Per far cancellare una
+  segnalazione (e le sue risposte), scrivi all'indirizzo in *Modifiche e contatti* con il suo numero o titolo, e
+  cancelliamo la segnalazione su GitHub.
 - La **versione GitHub** controlla su GitHub (`api.github.com`) se c'è una nuova versione e la scarica se scegli di
   aggiornare. Non viene inviato alcun dato delle lezioni; GitHub vede la richiesta come qualsiasi visita al suo sito,
   secondo la sua [informativa sulla privacy](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
@@ -122,7 +125,7 @@ facoltativo; puoi rimuovere un PC in qualsiasi momento da Impostazioni → PC co
 
 ## I tuoi dati, sotto il tuo controllo
 
-Se non colleghi un PC, i tuoi dati non lasciano mai il telefono, quindi non possiamo vederli, condividerli, venderli né cancellarli per te.
+Se non colleghi un PC e non invii segnalazioni, i tuoi dati non lasciano mai il telefono, quindi non possiamo vederli, condividerli, venderli né cancellarli per te.
 Puoi esportarli in CSV, eliminare singole lezioni e momenti nell'app, oppure rimuovere tutto disinstallando Karvo (i
 momenti nella galleria restano finché non li elimini da lì). I nomi degli allievi che inserisci sono sotto la tua
 responsabilità e restano sul tuo telefono.
