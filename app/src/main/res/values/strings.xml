@@ -12,6 +12,10 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="delete">Delete</string>
+    <string name="report_problem">Report a problem</string>
+    <string name="report_problem_hint">Something wrong, or an idea? Send us an email</string>
+    <string name="report_problem_body">What happened? (what you tapped, what you expected)</string>
+    <string name="no_email_app">No email app found. Write to %1$s</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="privacy_policy_hint">What Karvo keeps on your phone, and what it never sends</string>
     <string name="no_browser">No browser found to open the link</string>

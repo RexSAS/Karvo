@@ -10,6 +10,10 @@
     <string name="cancel">Annulla</string>
     <string name="ok">OK</string>
     <string name="delete">Elimina</string>
+    <string name="report_problem">Segnala un problema</string>
+    <string name="report_problem_hint">Qualcosa non va, o hai un\'idea? Mandaci una email</string>
+    <string name="report_problem_body">Cosa è successo? (cosa hai toccato, cosa ti aspettavi)</string>
+    <string name="no_email_app">Nessuna app email trovata. Scrivi a %1$s</string>
     <string name="privacy_policy">Informativa sulla privacy</string>
     <string name="privacy_policy_hint">Cosa tiene Karvo sul telefono, e cosa non invia mai</string>
     <string name="no_browser">Nessun browser trovato per aprire il link</string>

@@ -48,6 +48,7 @@ import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Restore
@@ -100,6 +101,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/** Same public address as PRIVACY.md. */
+private const val SUPPORT_EMAIL = "andreafaveri@rxsas.it"
 
 /** On main, so the link keeps working whichever version is installed. */
 private const val PRIVACY_POLICY_URL = "https://github.com/RexSAS/Karvo/blob/main/PRIVACY.md"
@@ -367,6 +371,28 @@ fun SettingsScreen(
                         else Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
                     },
                     modifier = Modifier.clickable(enabled = !restoringMoments) { showRestoreConsent = true },
+                )
+            }
+
+            AlpineTile(Modifier.fillMaxWidth()) {
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.Feedback, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.report_problem)) },
+                    supportingContent = { Text(stringResource(R.string.report_problem_hint)) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.clickable {
+                        // Version and phone go in the mail so the instructor doesn't have to look them up.
+                        val body = context.getString(R.string.report_problem_body) +
+                            "\n\n---\nKarvo ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})\n" +
+                            "Android ${android.os.Build.VERSION.RELEASE} · ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}"
+                        val subject = "Karvo – " + context.getString(R.string.report_problem)
+                        try {
+                            uriHandler.openUri("mailto:$SUPPORT_EMAIL?subject=${Uri.encode(subject)}&body=${Uri.encode(body)}")
+                        } catch (_: Exception) {
+                            scope.launch { showMessage(context.getString(R.string.no_email_app, SUPPORT_EMAIL)) }
+                        }
+                    },
                 )
             }
 
