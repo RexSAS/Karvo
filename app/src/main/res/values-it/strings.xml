@@ -23,6 +23,7 @@
     <string name="report_email">Manda per email</string>
     <string name="report_title_short">Scrivi un titolo breve</string>
     <string name="report_text_empty">Scrivi cosa è successo</string>
+    <string name="report_too_many">Troppe segnalazioni per ora. Riprova tra un\'ora, o mandala per email.</string>
     <string name="report_sent_hint">Le risposte appaiono in Le mie segnalazioni.</string>
     <string name="my_reports">Le mie segnalazioni</string>
     <string name="my_reports_empty">Nessuna segnalazione inviata da questo telefono.</string>

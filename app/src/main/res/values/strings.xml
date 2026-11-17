@@ -25,6 +25,7 @@
     <string name="report_email">Send by email instead</string>
     <string name="report_title_short">Write a short title</string>
     <string name="report_text_empty">Write what happened</string>
+    <string name="report_too_many">Too many reports right now. Try again in an hour, or send it by email.</string>
     <string name="report_sent_hint">Answers show up in My reports.</string>
     <string name="my_reports">My reports</string>
     <string name="my_reports_empty">No reports sent from this phone yet.</string>

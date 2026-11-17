@@ -707,6 +707,8 @@ private fun ReportDialog(onEmail: (title: String, text: String) -> Unit, onMyRep
                                     sentNumber = n
                                 } catch (e: kotlinx.coroutines.CancellationException) {
                                     throw e
+                                } catch (_: com.karvo.data.TooManyReportsException) {
+                                    error = R.string.report_too_many
                                 } catch (_: Exception) {
                                     error = R.string.report_failed
                                 } finally {

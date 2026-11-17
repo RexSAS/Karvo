@@ -23,12 +23,16 @@ suspend fun sendReport(title: String, text: String, app: String, device: String)
         val body = JSONObject().put("title", title).put("text", text).put("app", app).put("device", device).toString()
         connection.outputStream.use { it.write(body.toByteArray()) }
         val code = connection.responseCode
+        if (code == 429) throw TooManyReportsException()
         if (code != HttpURLConnection.HTTP_OK) error("Report failed: HTTP $code")
         JSONObject(connection.inputStream.bufferedReader().use { it.readText() }).getInt("number")
     } finally {
         connection.disconnect()
     }
 }
+
+/** The relay's limit (10 an hour per connection, 100 a day) was reached. */
+class TooManyReportsException : Exception("Too many reports")
 
 data class SentReport(val number: Int, val title: String)
 
