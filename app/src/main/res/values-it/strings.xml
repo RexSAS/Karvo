@@ -375,7 +375,7 @@
     <string name="badge_unlocked_ok">Grande!</string>
     <string name="badge_see_all">Vedi i badge</string>
     <string name="badge_karver">Karver</string>
-    <string name="badge_first_tracks">Prime tracce</string>
+    <string name="badge_first_snow">Prima neve</string>
     <string name="badge_bunny_hill">Campo scuola</string>
     <string name="badge_snowplough">Spazzaneve</string>
     <string name="badge_parallel">Paralleli</string>
@@ -385,7 +385,7 @@
     <string name="badge_moguls">Re delle gobbe</string>
     <string name="badge_off_piste">Fuoripista</string>
     <string name="badge_powder">Cacciatore di neve fresca</string>
-    <string name="badge_avalanche">Valanga</string>
-    <string name="badge_summit">Vetta</string>
+    <string name="badge_freerider">Freerider</string>
+    <string name="badge_snow_king">Re delle nevi</string>
     <string name="badge_legend">Leggenda delle piste</string>
 </resources>

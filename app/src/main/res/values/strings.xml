@@ -377,7 +377,7 @@
     <string name="badge_unlocked_ok">Nice!</string>
     <string name="badge_see_all">See badges</string>
     <string name="badge_karver">Karver</string>
-    <string name="badge_first_tracks">First tracks</string>
+    <string name="badge_first_snow">First snow</string>
     <string name="badge_bunny_hill">Bunny hill</string>
     <string name="badge_snowplough">Snowplough</string>
     <string name="badge_parallel">Parallel</string>
@@ -387,7 +387,7 @@
     <string name="badge_moguls">Mogul master</string>
     <string name="badge_off_piste">Off-piste</string>
     <string name="badge_powder">Powder hound</string>
-    <string name="badge_avalanche">Avalanche</string>
-    <string name="badge_summit">Summit</string>
+    <string name="badge_freerider">Freerider</string>
+    <string name="badge_snow_king">Snow king</string>
     <string name="badge_legend">Legend of the slopes</string>
 </resources>

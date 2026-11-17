@@ -21,8 +21,8 @@ class BadgesTest {
 
     @Test fun exactlyOnTheLineUnlocks() {
         val p = badgeProgress(50 * 60)
-        assertEquals(Badge.PARALLEL, p.earned)
-        assertEquals(Badge.RED_RUN, p.next)
+        assertEquals(Badge.RED_RUN, p.earned)
+        assertEquals(Badge.PARALLEL, p.next)
         assertEquals(0f, p.fraction)
     }
 
@@ -56,10 +56,10 @@ class BadgeAnnounceTest {
     }
 
     @Test fun onlyAHigherBadgeInTheSameSeason() {
-        val mark = badgeMark(season, Badge.PARALLEL)
-        assertNull(badgeToAnnounce(season, Badge.PARALLEL, mark))
+        val mark = badgeMark(season, Badge.RED_RUN)
+        assertNull(badgeToAnnounce(season, Badge.RED_RUN, mark))
         assertNull(badgeToAnnounce(season, Badge.SNOWPLOUGH, mark)) // a lesson was deleted
-        assertEquals(Badge.RED_RUN, badgeToAnnounce(season, Badge.RED_RUN, mark))
+        assertEquals(Badge.PARALLEL, badgeToAnnounce(season, Badge.PARALLEL, mark))
     }
 
     @Test fun aNewSeasonStartsOver() {

@@ -26,7 +26,7 @@ import com.karvo.domain.Badge
 @StringRes
 fun Badge.titleRes(): Int = when (this) {
     Badge.KARVER -> R.string.badge_karver
-    Badge.FIRST_TRACKS -> R.string.badge_first_tracks
+    Badge.FIRST_SNOW -> R.string.badge_first_snow
     Badge.BUNNY_HILL -> R.string.badge_bunny_hill
     Badge.SNOWPLOUGH -> R.string.badge_snowplough
     Badge.PARALLEL -> R.string.badge_parallel
@@ -36,8 +36,8 @@ fun Badge.titleRes(): Int = when (this) {
     Badge.MOGULS -> R.string.badge_moguls
     Badge.OFF_PISTE -> R.string.badge_off_piste
     Badge.POWDER -> R.string.badge_powder
-    Badge.AVALANCHE -> R.string.badge_avalanche
-    Badge.SUMMIT -> R.string.badge_summit
+    Badge.FREERIDER -> R.string.badge_freerider
+    Badge.SNOW_KING -> R.string.badge_snow_king
     Badge.LEGEND -> R.string.badge_legend
 }
 
