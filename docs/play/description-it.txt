@@ -9,6 +9,7 @@ REGISTRA UNA LEZIONE IN POCHI SECONDI
 • I nomi degli allievi suggeriti dalle lezioni passate
 • Una nota per ogni lezione, come "Bambini di 6 e 9 anni" o "Lezione in inglese"
 • Le lezioni raggruppate per mese, con il totale di ogni mese
+• Cerca per allievo o nota, e mostra solo le lezioni non ancora pagate
 
 LE TUE ORE E I TUOI GUADAGNI
 • Le ore della stagione, confrontate con la stagione scorsa alla stessa data
@@ -17,6 +18,16 @@ LE TUE ORE E I TUOI GUADAGNI
 • Segna i mesi pagati dalla scuola e vedi quanto resta da pagare
 • Statistiche: lezioni questo mese, lezione media, allievi, gli ultimi 6 mesi, i giorni più intensi e il podio dei tuoi allievi migliori
 • Tocca un allievo per la sua pagina: le sue ore, lezioni, mesi e stagioni
+
+BADGE DI STAGIONE
+• 14 badge si sbloccano man mano che crescono le ore della stagione, da Karver alla prima ora a Leggenda delle piste a 600h
+• Bronzo, argento, oro, ametista e ghiaccio, ognuno nuovo con una notifica e un'animazione di sblocco
+• Vedi quanto manca al prossimo badge, e il tuo badge migliore di ogni stagione
+
+WIDGET PER LA SCHERMATA HOME
+• Questa settimana e Questo mese: le tue ore e lezioni, con un + per aggiungere una lezione
+• Panoramica: la settimana, il mese, oggi, la stagione e il prossimo evento
+• Settimana vs la scorsa: le ore delle due settimane, giorno per giorno
 
 CALENDARIO E PROMEMORIA
 • Aggiungi eventi a qualsiasi giorno, come "Riunione scuola sci 17:00"
@@ -30,13 +41,17 @@ MOMENTI
 • Condividi le foto con un design Karvo, o direttamente in una storia Instagram: prova Photobomb, con Kevin che spunta nell'angolo e la tua foto nei suoi occhiali
 • Tutto viene salvato in un album Karvo nella tua galleria
 
-ANCHE SUL PC
-Apri karvo.rxsas.it sul computer e collegalo scansionando un codice. Mentre Karvo è aperto sul telefono, il PC mostra lezioni, calendario e statistiche su uno schermo grande, e ogni modifica fatta lì viene salvata sul telefono. Telefono e PC comunicano con crittografia end-to-end.
+ANCHE SU PC E IPHONE
+Apri karvo.rxsas.it sul computer o sull'iPhone e collegalo scansionando un codice. Mentre Karvo è aperto sul telefono, il computer o l'iPhone mostra lezioni, calendario, statistiche e badge, e ogni modifica fatta lì viene salvata sul telefono. Comunicano con crittografia end-to-end.
 
 LA PRIVACY PRIMA DI TUTTO
 • Le tue lezioni restano sul telefono: nessun account, nessuna pubblicità, nessun tracciamento
 • Fino a 3 backup dentro l'app, più esportazione e importazione in CSV
 • Con il backup Google del telefono attivo, le lezioni tornano anche su un telefono nuovo
+
+SIAMO QUI PER AIUTARTI
+• Qualcosa non va, o hai un'idea? Segnala un problema dalle Impostazioni, e leggi le risposte e rispondi in Le mie segnalazioni
+• Un tour veloce al primo avvio ti mostra l'app, e Novità ti dice cosa è cambiato dopo ogni aggiornamento
 
 UN NUOVO LOOK
 Il cielo notturno all'alba sopra le montagne, con il pinguino Kevin a farti compagnia. Preferisci qualcosa di più semplice? Passa al tema Classico.

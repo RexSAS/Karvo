@@ -9,6 +9,7 @@ LOG A LESSON IN SECONDS
 • Student names suggested from your past lessons
 • A note for each lesson, like "Kids 6 and 9" or "Lesson in English"
 • Lessons grouped by month, with each month's total
+• Search by student or note, and show only the lessons not paid yet
 
 YOUR HOURS AND YOUR PAY
 • Your season's hours, compared with last season at the same date
@@ -17,6 +18,16 @@ YOUR HOURS AND YOUR PAY
 • Tick the months the school has paid, and see what is still to be paid
 • Statistics: lessons this month, average lesson, students, the last 6 months, your busiest weekdays and a podium of your top students
 • Tap a student for their own page: their hours, lessons, months and seasons
+
+SEASON BADGES
+• 14 badges unlock as your season's hours grow, from Karver at your first hour to Legend of the slopes at 600h
+• Bronze, silver, gold, amethyst and ice, each new one with a notification and an unlock animation
+• See your progress to the next badge, and your best badge of every season
+
+HOME-SCREEN WIDGETS
+• This week and This month: your hours and lessons, with a + to add a lesson
+• Overview: the week, the month, today, the season and your next event
+• This week vs last: both weeks' hours, day by day
 
 CALENDAR AND REMINDERS
 • Add events to any day, like "Ski school meeting 17:00"
@@ -30,13 +41,17 @@ MOMENTS
 • Share photos in a Karvo design, or straight to an Instagram story: try Photobomb, where Kevin pops up in the corner with your photo in his goggles
 • Everything is saved to a Karvo album in your gallery
 
-ON YOUR PC TOO
-Open karvo.rxsas.it on your computer and link it by scanning a code. While Karvo is open on your phone, the PC shows your lessons, calendar and statistics on a big screen, and every change you make there is saved on your phone. Phone and PC talk end-to-end encrypted.
+ON YOUR PC AND IPHONE TOO
+Open karvo.rxsas.it on your computer or iPhone and link it by scanning a code. While Karvo is open on your phone, your computer or iPhone shows your lessons, calendar, statistics and badges, and every change you make there is saved on your phone. They talk end-to-end encrypted.
 
 PRIVATE BY DESIGN
 • Your lessons live on your phone: no account, no ads, no tracking
 • Up to 3 backups inside the app, plus export and import as CSV
 • With your phone's Google backup on, your lessons come back on a new phone
+
+HERE TO HELP
+• Something wrong, or an idea? Report a problem from Settings, and read the answers and reply under My reports
+• A quick tour on the first start shows you around, and What's new tells you what changed after each update
 
 A NEW LOOK
 The night sky at first light over the mountains, with Kevin the penguin for company. Prefer something plainer? Switch to the Classic theme.
