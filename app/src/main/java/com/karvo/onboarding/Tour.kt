@@ -6,6 +6,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateRectAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -44,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.CornerRadius
@@ -102,8 +105,20 @@ fun Modifier.tourTarget(target: TourTarget): Modifier = composed {
     val tour = LocalTour.current ?: return@composed this
     val bring = remember { BringIntoViewRequester() }
     val active = tour.current?.target == target
-    LaunchedEffect(active) { if (active) { delay(350); runCatching { bring.bringIntoView() } } }
-    bringIntoViewRequester(bring).onGloballyPositioned { tour.bounds[target] = it.boundsInRoot() }
+    var size by remember { mutableStateOf(Size.Zero) }
+    val density = LocalDensity.current
+    // The lists run under the floating tab bar, so the target is scrolled well clear of it, with room for the ring.
+    LaunchedEffect(active) {
+        if (!active) return@LaunchedEffect
+        delay(350) // after the pager has settled on the step's tab, or the pager itself would be scrolled
+        val top = with(density) { 24.dp.toPx() }
+        val bottom = with(density) { 140.dp.toPx() }
+        runCatching { bring.bringIntoView(Rect(0f, -top, size.width, size.height + bottom)) }
+    }
+    bringIntoViewRequester(bring).onGloballyPositioned {
+        size = Size(it.size.width.toFloat(), it.size.height.toFloat())
+        tour.bounds[target] = it.boundsInRoot()
+    }
 }
 
 /** Dims the app except the current target, with the step's text, Next and Skip; it switches to the step's tab itself. */
@@ -119,24 +134,29 @@ fun TourOverlay(tour: TourState, onShowPage: (Int) -> Unit) {
     val shown = rememberSaveable { mutableStateOf(false) }
     val alpha by animateFloatAsState(if (shown.value) 1f else 0f, tween(250), label = "tourFade")
     LaunchedEffect(Unit) { shown.value = true }
-    val hole by animateRectAsState(rect ?: Rect(Offset(0f, 0f), Size.Zero), tween(400, easing = FastOutSlowInEasing), label = "tourHole")
+    // A spring, not a tween: the target moves every frame while its page scrolls, and a spring follows without restarting.
+    var lastRect by remember { mutableStateOf<Rect?>(null) }
+    if (rect != null) lastRect = rect
+    val hole by animateRectAsState(lastRect ?: Rect.Zero, spring(dampingRatio = 0.9f, stiffness = Spring.StiffnessMediumLow), label = "tourHole")
+    val holeAlpha by animateFloatAsState(if (rect != null) 1f else 0f, tween(300), label = "tourHoleAlpha") // no target: the hole fades shut where it was
     val pulse = rememberInfiniteTransition(label = "tourPulse").animateFloat(0f, 1f, infiniteRepeatable(tween(1600)), label = "tourPulseP")
     val gold = MaterialTheme.colorScheme.tertiary
     Box(Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha }.pointerInput(step) { detectTapGestures { } }) { // the app underneath stays untouchable
         Canvas(Modifier.fillMaxSize().graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)) {
             drawRect(Color.Black.copy(alpha = 0.72f))
-            if (rect != null) {
+            if (lastRect != null && holeAlpha > 0f) {
                 val tl = Offset(hole.left - pad, hole.top - pad)
                 val sz = Size(hole.width + 2 * pad, hole.height + 2 * pad)
-                drawRoundRect(Color.Transparent, tl, sz, CornerRadius(pad * 2), blendMode = BlendMode.Clear)
+                drawRoundRect(Color.Black.copy(alpha = holeAlpha), tl, sz, CornerRadius(pad * 2), blendMode = BlendMode.DstOut)
                 val grow = pulse.value * pad * 1.5f
-                drawRoundRect(gold.copy(alpha = 0.9f * (1 - pulse.value)), Offset(tl.x - grow, tl.y - grow), Size(sz.width + 2 * grow, sz.height + 2 * grow),
+                drawRoundRect(gold.copy(alpha = 0.9f * (1 - pulse.value) * holeAlpha), Offset(tl.x - grow, tl.y - grow), Size(sz.width + 2 * grow, sz.height + 2 * grow),
                     CornerRadius(pad * 2 + grow), style = Stroke(2.dp.toPx()))
             }
         }
         val atTop = rect != null && rect.center.y > screenH / 2 // the card goes on the side away from the target
+        val cardBias by animateFloatAsState(if (atTop) -1f else 1f, spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessLow), label = "tourCardSide")
         AnimatedContent(
-            tour.index, Modifier.align(if (atTop) Alignment.TopCenter else Alignment.BottomCenter),
+            tour.index, Modifier.align(BiasAlignment(0f, cardBias)),
             transitionSpec = { (fadeIn(tween(300, 100)) + slideInVertically(tween(350, 100)) { it / 6 }) togetherWith fadeOut(tween(120)) },
             label = "tourCard",
         ) { _ ->
