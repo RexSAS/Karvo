@@ -25,6 +25,14 @@
     <string name="report_email">Send by email instead</string>
     <string name="report_title_short">Write a short title</string>
     <string name="report_text_empty">Write what happened</string>
+    <string name="report_sent_hint">Answers show up in My reports.</string>
+    <string name="my_reports">My reports</string>
+    <string name="my_reports_empty">No reports sent from this phone yet.</string>
+    <string name="my_reports_failed">Couldn\'t load answers. Check the connection.</string>
+    <string name="report_loading">Loading…</string>
+    <string name="report_open">Open</string>
+    <string name="report_closed">Closed</string>
+    <string name="report_no_replies">No answer yet</string>
     <string name="no_email_app">No email app found. Write to %1$s</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="privacy_policy_hint">What Karvo keeps on your phone, and what it never sends</string>

@@ -49,7 +49,12 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Feedback
+import com.karvo.data.ReportStatus
+import com.karvo.data.SentReport
+import com.karvo.data.fetchReportStatus
+import com.karvo.data.rememberReport
 import com.karvo.data.sendReport
+import com.karvo.data.sentReports
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Restore
@@ -135,6 +140,7 @@ fun SettingsScreen(
     var showLanguagePicker by remember { mutableStateOf(false) }
     var showRestoreConsent by remember { mutableStateOf(false) }
     var showReport by remember { mutableStateOf(false) }
+    var showMyReports by remember { mutableStateOf(false) }
     var restoringMoments by remember { mutableStateOf(false) }
     var rateFocused by remember { mutableStateOf(false) }
 
@@ -425,8 +431,13 @@ fun SettingsScreen(
                     scope.launch { showMessage(context.getString(R.string.no_email_app, SUPPORT_EMAIL)) }
                 }
             },
+            onMyReports = { showReport = false; showMyReports = true },
             onDismiss = { showReport = false },
         )
+    }
+
+    if (showMyReports) {
+        MyReportsDialog(onDismiss = { showMyReports = false })
     }
 
     if (showZonePicker) {
@@ -623,7 +634,9 @@ private fun reportDeviceLines() = reportApp() + "\n" + reportDevice()
 
 /** Title + text, sent to the relay as a public GitHub issue; "Send by email instead" if that fails. */
 @Composable
-private fun ReportDialog(onEmail: (title: String, text: String) -> Unit, onDismiss: () -> Unit) {
+private fun ReportDialog(onEmail: (title: String, text: String) -> Unit, onMyReports: () -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val hasReports = remember { sentReports(context).isNotEmpty() }
     var title by remember { mutableStateOf("") }
     var text by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
@@ -635,7 +648,9 @@ private fun ReportDialog(onEmail: (title: String, text: String) -> Unit, onDismi
         AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text(stringResource(R.string.report_sent, sentNumber!!)) },
+            text = { Text(stringResource(R.string.report_sent_hint)) },
             confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
+            dismissButton = { TextButton(onClick = onMyReports) { Text(stringResource(R.string.my_reports)) } },
         )
         return
     }
@@ -668,6 +683,11 @@ private fun ReportDialog(onEmail: (title: String, text: String) -> Unit, onDismi
                 TextButton(onClick = { onEmail(title.trim(), text.trim()) }, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
                     Text(stringResource(R.string.report_email))
                 }
+                if (hasReports) {
+                    TextButton(onClick = onMyReports, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                        Text(stringResource(R.string.my_reports))
+                    }
+                }
             }
         },
         confirmButton = {
@@ -682,7 +702,9 @@ private fun ReportDialog(onEmail: (title: String, text: String) -> Unit, onDismi
                             sending = true
                             scope.launch {
                                 try {
-                                    sentNumber = sendReport(title.trim(), text.trim(), reportApp(), reportDevice())
+                                    val n = sendReport(title.trim(), text.trim(), reportApp(), reportDevice())
+                                    rememberReport(context, SentReport(n, title.trim()))
+                                    sentNumber = n
                                 } catch (e: kotlinx.coroutines.CancellationException) {
                                     throw e
                                 } catch (_: Exception) {
@@ -697,6 +719,69 @@ private fun ReportDialog(onEmail: (title: String, text: String) -> Unit, onDismi
             ) { Text(stringResource(if (sending) R.string.report_sending else R.string.report_send)) }
         },
         dismissButton = { TextButton(enabled = !sending, onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+    )
+}
+
+/** The reports sent from this phone, each with Open/Closed and the replies on GitHub. */
+@Composable
+private fun MyReportsDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val reports = remember { sentReports(context) }
+    // A report missing from the map is still loading, or failed (then the error line shows).
+    val statuses = remember { androidx.compose.runtime.mutableStateMapOf<Int, ReportStatus>() }
+    var failed by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        for (r in reports.take(10)) {
+            try {
+                statuses[r.number] = fetchReportStatus(r.number)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                failed = true
+            }
+        }
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.my_reports)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                if (reports.isEmpty()) Text(stringResource(R.string.my_reports_empty))
+                if (failed) Text(stringResource(R.string.my_reports_failed), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                for (r in reports.take(10)) {
+                    val s = statuses[r.number]
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(r.title, style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            "#${r.number} · " + when {
+                                s == null -> stringResource(R.string.report_loading)
+                                s.open -> stringResource(R.string.report_open)
+                                else -> stringResource(R.string.report_closed)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        if (s != null && s.replies.isEmpty()) {
+                            Text(stringResource(R.string.report_no_replies), style = MaterialTheme.typography.bodySmall)
+                        }
+                        s?.replies?.forEach { reply ->
+                            Column(
+                                Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant).padding(8.dp),
+                            ) {
+                                Text(
+                                    (if (reply.author == "RexSAS") "Karvo" else reply.author) + " · " + reply.date,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Text(reply.body, style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
     )
 }
 

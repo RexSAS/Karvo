@@ -23,6 +23,14 @@
     <string name="report_email">Manda per email</string>
     <string name="report_title_short">Scrivi un titolo breve</string>
     <string name="report_text_empty">Scrivi cosa è successo</string>
+    <string name="report_sent_hint">Le risposte appaiono in Le mie segnalazioni.</string>
+    <string name="my_reports">Le mie segnalazioni</string>
+    <string name="my_reports_empty">Nessuna segnalazione inviata da questo telefono.</string>
+    <string name="my_reports_failed">Impossibile caricare le risposte. Controlla la connessione.</string>
+    <string name="report_loading">Caricamento…</string>
+    <string name="report_open">Aperta</string>
+    <string name="report_closed">Chiusa</string>
+    <string name="report_no_replies">Nessuna risposta per ora</string>
     <string name="no_email_app">Nessuna app email trovata. Scrivi a %1$s</string>
     <string name="privacy_policy">Informativa sulla privacy</string>
     <string name="privacy_policy_hint">Cosa tiene Karvo sul telefono, e cosa non invia mai</string>
