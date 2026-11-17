@@ -28,6 +28,7 @@
     <string name="report_too_many">Too many reports right now. Try again in an hour, or send it by email.</string>
     <string name="report_sent_hint">Answers show up in My reports.</string>
     <string name="my_reports">My reports</string>
+    <string name="my_reports_hint">The problems you sent, and our answers</string>
     <string name="my_reports_empty">No reports sent from this phone yet.</string>
     <string name="my_reports_failed">Couldn\'t load answers. Check the connection.</string>
     <string name="report_loading">Loading…</string>

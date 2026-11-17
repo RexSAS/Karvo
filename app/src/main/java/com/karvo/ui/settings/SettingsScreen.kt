@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Feedback
+import androidx.compose.material.icons.filled.Forum
 import com.karvo.data.ReportStatus
 import com.karvo.data.SentReport
 import com.karvo.data.fetchReportStatus
@@ -390,6 +391,17 @@ fun SettingsScreen(
                     supportingContent = { Text(stringResource(R.string.report_problem_hint)) },
                     trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                     modifier = Modifier.clickable { showReport = true },
+                )
+            }
+
+            AlpineTile(Modifier.fillMaxWidth()) {
+                ListItem(
+                    colors = transparentRow(),
+                    leadingContent = { Icon(Icons.Filled.Forum, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.my_reports)) },
+                    supportingContent = { Text(stringResource(R.string.my_reports_hint)) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.clickable { showMyReports = true },
                 )
             }
 

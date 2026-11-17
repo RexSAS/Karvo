@@ -26,6 +26,7 @@
     <string name="report_too_many">Troppe segnalazioni per ora. Riprova tra un\'ora, o mandala per email.</string>
     <string name="report_sent_hint">Le risposte appaiono in Le mie segnalazioni.</string>
     <string name="my_reports">Le mie segnalazioni</string>
+    <string name="my_reports_hint">I problemi che hai segnalato, e le nostre risposte</string>
     <string name="my_reports_empty">Nessuna segnalazione inviata da questo telefono.</string>
     <string name="my_reports_failed">Impossibile caricare le risposte. Controlla la connessione.</string>
     <string name="report_loading">Caricamento…</string>
