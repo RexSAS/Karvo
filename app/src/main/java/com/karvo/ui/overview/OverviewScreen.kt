@@ -19,6 +19,8 @@ import androidx.compose.ui.res.stringResource
 import com.karvo.R
 import com.karvo.domain.Season
 import com.karvo.domain.Badge
+import com.karvo.onboarding.TourTarget
+import com.karvo.onboarding.tourTarget
 import com.karvo.domain.badgeProgress
 import com.karvo.ui.components.BadgeMedal
 import com.karvo.ui.components.titleRes
@@ -276,6 +278,7 @@ private fun BadgeSlot(badge: Badge?, onClick: () -> Unit) {
     val title = badge?.let { stringResource(it.titleRes()) } ?: stringResource(R.string.badge_none)
     Column(
         Modifier
+            .tourTarget(TourTarget.Badges)
             .width(88.dp)
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClickLabel = stringResource(R.string.badges)) { onClick() }
@@ -305,6 +308,7 @@ private fun ScopePicker(state: OverviewUiState, onChoose: (OverviewScope) -> Uni
     Box {
         Row(
             Modifier
+                .tourTarget(TourTarget.Season)
                 .clip(CircleShape)
                 .background(tileColor())
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)

@@ -19,7 +19,7 @@ class TourStateTest {
         assertNull(t.current)
     }
 
-    @Test fun lessonStepsOnLessonsTabSettingsStepsOnSettingsTab() {
-        assertEquals(listOf(0, 0, 0, 2, 2, 2), TOUR.map { it.page })
+    @Test fun stepsGoLessonsThenOverviewThenSettings() {
+        assertEquals(listOf(0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2), TOUR.map { it.page })
     }
 }

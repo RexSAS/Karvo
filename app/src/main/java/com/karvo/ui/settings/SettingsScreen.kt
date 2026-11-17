@@ -379,7 +379,7 @@ fun SettingsScreen(
                     headlineContent = { Text(stringResource(R.string.report_problem)) },
                     supportingContent = { Text(stringResource(R.string.report_problem_hint)) },
                     trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                    modifier = Modifier.clickable(onClick = onOpenReport),
+                    modifier = Modifier.tourTarget(TourTarget.Report).clickable(onClick = onOpenReport),
                 )
             }
             AlpineTile(Modifier.fillMaxWidth()) {
