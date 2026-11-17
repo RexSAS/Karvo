@@ -2,6 +2,11 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.6.1] — 2026-11-17
+
+### Changed
+- Badge names: the 5h badge is now **First snow** (Prima neve), the 400h one **Freerider** and the 500h one **Snow king** (Re delle nevi). **Red run** now comes at 50h and **Parallel** at 75h.
+
 ## [3.6] — 2026-11-16
 
 ### Added

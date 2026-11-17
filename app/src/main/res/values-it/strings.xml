@@ -350,6 +350,7 @@
     </plurals>
     <string name="whats_new_title">Novità della %1$s</string>
     <string-array name="whats_new_items">
+        <item>Nuovi nomi per i badge: Prima neve, Freerider e Re delle nevi, e Pista rossa ora viene prima di Paralleli.</item>
         <item>Badge: ne guadagni uno man mano che crescono le ore della stagione, da Karver alla prima ora a Leggenda delle piste a 600h. Il tuo badge è accanto alle ore nella Panoramica; toccalo per vederli tutti.</item>
         <item>Ogni nuovo badge si sblocca con una notifica e una piccola festa nell\'app.</item>
         <item>Widget per la schermata Home: Questa settimana, Questo mese, una panoramica della settimana con il prossimo evento, e questa settimana contro la scorsa.</item>
