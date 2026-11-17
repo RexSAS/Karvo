@@ -125,14 +125,14 @@ fun LessonsScreen(
                 ScreenHeader(
                     title = stringResource(R.string.lessons),
                     subtitle = if (total > 0) pluralStringResource(R.plurals.lesson_count, total, total) else null,
-                    trailing = {
-                        Row {
-                            IconButton(onClick = { if (searching) closeSearch() else searching = true }) {
-                                if (searching) Icon(Icons.Filled.Close, stringResource(R.string.close_search))
-                                else Icon(Icons.Filled.Search, stringResource(R.string.search))
-                            }
-                            IconButton(onClick = onOpenMoments, modifier = Modifier.tourTarget(TourTarget.Calendar)) { Icon(Icons.Filled.CalendarMonth, stringResource(R.string.calendar)) }
+                    afterTitle = {
+                        IconButton(onClick = { if (searching) closeSearch() else searching = true }) {
+                            if (searching) Icon(Icons.Filled.Close, stringResource(R.string.close_search))
+                            else Icon(Icons.Filled.Search, stringResource(R.string.search))
                         }
+                    },
+                    trailing = {
+                        IconButton(onClick = onOpenMoments, modifier = Modifier.tourTarget(TourTarget.Calendar)) { Icon(Icons.Filled.CalendarMonth, stringResource(R.string.calendar)) }
                     },
                 )
                 if (searching) {
