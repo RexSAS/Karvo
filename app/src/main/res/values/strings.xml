@@ -26,6 +26,10 @@
     <string name="report_title_short">Write a short title</string>
     <string name="report_text_empty">Write what happened</string>
     <string name="report_too_many">Too many reports right now. Try again in an hour, or send it by email.</string>
+    <string name="report_reply">Reply</string>
+    <string name="report_reply_hint">Add more details…</string>
+    <string name="report_you">You</string>
+    <string name="report_comment_failed">Couldn\'t send the reply. Check the connection.</string>
     <string name="report_intro">Something not working, or an idea to make Karvo better? Write it here. Our answers show up below, in My reports.</string>
     <string name="my_reports">My reports</string>
     <string name="my_reports_empty">No reports sent from this phone yet.</string>

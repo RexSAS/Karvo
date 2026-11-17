@@ -1,7 +1,10 @@
 package com.karvo.ui.report
 
 import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,11 +53,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.karvo.BuildConfig
 import com.karvo.R
+import com.karvo.data.ReportReply
 import com.karvo.data.ReportStatus
 import com.karvo.data.SentReport
 import com.karvo.data.TooManyReportsException
 import com.karvo.data.fetchReportStatus
 import com.karvo.data.rememberReport
+import com.karvo.data.sendComment
 import com.karvo.data.sendReport
 import com.karvo.data.sentReports
 import com.karvo.ui.components.EmptyState
@@ -93,7 +98,7 @@ fun ReportScreen(onBack: () -> Unit, showMessage: (String) -> Unit) {
                 sending = true
                 scope.launch {
                     try {
-                        val report = SentReport(sendReport(title.trim(), text.trim(), reportApp(), reportDevice()), title.trim())
+                        val report = sendReport(title.trim(), text.trim(), reportApp(), reportDevice())
                         rememberReport(context, report)
                         reports.add(0, report)
                         title = ""
@@ -212,25 +217,56 @@ fun ReportScreen(onBack: () -> Unit, showMessage: (String) -> Unit) {
             if (reports.isEmpty()) {
                 item { EmptyState(stringResource(R.string.my_reports_empty), Modifier.padding(top = 8.dp).fillMaxWidth()) }
             }
-            items(reports.take(10), key = { it.number }) { report -> ReportCard(report) }
+            items(reports.take(10), key = { it.number }) { report -> ReportCard(report, showMessage) }
         }
     }
 }
 
 @Composable
-private fun ReportCard(report: SentReport) {
+private fun ReportCard(report: SentReport, showMessage: (String) -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var status by remember { mutableStateOf<ReportStatus?>(null) }
     var failed by remember { mutableStateOf(false) }
-    LaunchedEffect(report.number) {
+    var reload by remember { mutableStateOf(0) }
+    var replying by rememberSaveable { mutableStateOf(false) }
+    var reply by rememberSaveable { mutableStateOf("") }
+    var sending by remember { mutableStateOf(false) }
+    LaunchedEffect(report.number, reload) {
         try {
             status = fetchReportStatus(report.number)
+            failed = false
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
             failed = true
         }
     }
-    AlpineTile(Modifier.fillMaxWidth()) {
+    // Only open reports sent with a reply key (from this version on) take comments.
+    val canReply = status?.open == true && report.key != null
+
+    fun sendReply() {
+        if (reply.isBlank()) return
+        sending = true
+        scope.launch {
+            try {
+                sendComment(report, reply.trim())
+                reply = ""
+                replying = false
+                reload++
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: TooManyReportsException) {
+                showMessage(context.getString(R.string.report_too_many))
+            } catch (_: Exception) {
+                showMessage(context.getString(R.string.report_comment_failed))
+            } finally {
+                sending = false
+            }
+        }
+    }
+
+    AlpineTile(Modifier.fillMaxWidth().then(if (canReply && !replying) Modifier.clickable { replying = true } else Modifier)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -244,24 +280,71 @@ private fun ReportCard(report: SentReport) {
                 failed -> Text(stringResource(R.string.my_reports_failed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 s == null -> Text(stringResource(R.string.report_loading), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 s.replies.isEmpty() -> Text(stringResource(R.string.report_no_replies), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                else -> s.replies.forEach { reply ->
-                    val fromKarvo = reply.author == "RexSAS"
-                    Surface(
-                        shape = RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomEnd = 16.dp, bottomStart = 16.dp),
-                        color = if (fromKarvo) accentGold().copy(alpha = 0.14f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
-                            Text(
-                                (if (fromKarvo) "Karvo" else reply.author) + " · " + reply.date,
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (fromKarvo) accentGold() else MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Text(reply.body, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 2.dp))
+                else -> s.replies.forEach { r -> ReplyBubble(r) }
+            }
+            if (canReply && replying) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(
+                        value = reply,
+                        onValueChange = { reply = it.take(4000) },
+                        placeholder = { Text(stringResource(R.string.report_reply_hint)) },
+                        enabled = !sending,
+                        maxLines = 5,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(onClick = ::sendReply, enabled = !sending && reply.isNotBlank()) {
+                        if (sending) {
+                            CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                        } else {
+                            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.report_send), tint = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
+            } else if (canReply) {
+                TextButton(onClick = { replying = true }, modifier = Modifier.align(Alignment.End)) {
+                    Icon(Icons.AutoMirrored.Filled.Reply, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.report_reply))
+                }
+            }
+        }
+    }
+}
+
+/** Answers on the left (Karvo's in gold), the reporter's own comments on the right. */
+@Composable
+private fun ReplyBubble(reply: ReportReply) {
+    val fromKarvo = !reply.mine && reply.author == "RexSAS"
+    Box(Modifier.fillMaxWidth(), contentAlignment = if (reply.mine) Alignment.CenterEnd else Alignment.CenterStart) {
+        Surface(
+            shape = if (reply.mine) {
+                RoundedCornerShape(topStart = 16.dp, topEnd = 4.dp, bottomEnd = 16.dp, bottomStart = 16.dp)
+            } else {
+                RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomEnd = 16.dp, bottomStart = 16.dp)
+            },
+            color = when {
+                reply.mine -> MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                fromKarvo -> accentGold().copy(alpha = 0.14f)
+                else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)
+            },
+            modifier = Modifier.fillMaxWidth(0.88f),
+        ) {
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                Text(
+                    when {
+                        reply.mine -> stringResource(R.string.report_you)
+                        fromKarvo -> "Karvo"
+                        else -> reply.author
+                    } + " · " + reply.date,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = when {
+                        reply.mine -> MaterialTheme.colorScheme.primary
+                        fromKarvo -> accentGold()
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+                Text(reply.body, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 2.dp))
             }
         }
     }
