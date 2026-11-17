@@ -49,12 +49,6 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Feedback
-import com.karvo.data.ReportStatus
-import com.karvo.data.SentReport
-import com.karvo.data.fetchReportStatus
-import com.karvo.data.rememberReport
-import com.karvo.data.sendReport
-import com.karvo.data.sentReports
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Restore
@@ -108,9 +102,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Same public address as PRIVACY.md. */
-private const val SUPPORT_EMAIL = "andreafaveri@rxsas.it"
-
 /** On main, so the link keeps working whichever version is installed. */
 private const val PRIVACY_POLICY_URL = "https://github.com/RexSAS/Karvo/blob/main/PRIVACY.md"
 
@@ -119,6 +110,7 @@ private const val PRIVACY_POLICY_URL = "https://github.com/RexSAS/Karvo/blob/mai
 fun SettingsScreen(
     onOpenBackups: () -> Unit,
     onOpenLinkedPcs: () -> Unit,
+    onOpenReport: () -> Unit,
     /** Null in the Play build, which Play keeps up to date. */
     onCheckForUpdates: (() -> Unit)?,
     onShowTour: () -> Unit,
@@ -139,8 +131,6 @@ fun SettingsScreen(
     var showSeasonPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
     var showRestoreConsent by remember { mutableStateOf(false) }
-    var showReport by remember { mutableStateOf(false) }
-    var showMyReports by remember { mutableStateOf(false) }
     var restoringMoments by remember { mutableStateOf(false) }
     var rateFocused by remember { mutableStateOf(false) }
 
@@ -389,7 +379,7 @@ fun SettingsScreen(
                     headlineContent = { Text(stringResource(R.string.report_problem)) },
                     supportingContent = { Text(stringResource(R.string.report_problem_hint)) },
                     trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                    modifier = Modifier.clickable { showReport = true },
+                    modifier = Modifier.clickable(onClick = onOpenReport),
                 )
             }
             AlpineTile(Modifier.fillMaxWidth()) {
@@ -418,26 +408,6 @@ fun SettingsScreen(
         }
     }
 
-    if (showReport) {
-        ReportDialog(
-            onEmail = { title, text ->
-                // Fallback when sending fails: the mail app, with the same version and phone lines.
-                val body = text.ifBlank { context.getString(R.string.report_problem_body) } + "\n\n---\n" + reportDeviceLines()
-                val subject = "Karvo – " + title.ifBlank { context.getString(R.string.report_problem) }
-                try {
-                    uriHandler.openUri("mailto:$SUPPORT_EMAIL?subject=${Uri.encode(subject)}&body=${Uri.encode(body)}")
-                } catch (_: Exception) {
-                    scope.launch { showMessage(context.getString(R.string.no_email_app, SUPPORT_EMAIL)) }
-                }
-            },
-            onMyReports = { showReport = false; showMyReports = true },
-            onDismiss = { showReport = false },
-        )
-    }
-
-    if (showMyReports) {
-        MyReportsDialog(onDismiss = { showMyReports = false })
-    }
 
     if (showZonePicker) {
         TimeZoneDialog(
@@ -626,162 +596,6 @@ private fun TimeZoneDialog(current: String, onSelect: (String) -> Unit, onDismis
 /** Settings rows let the alpine backdrop show through instead of cutting it into fragments. */
 @Composable
 private fun transparentRow() = ListItemDefaults.colors(containerColor = Color.Transparent)
-
-private fun reportApp() = "Karvo ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})"
-private fun reportDevice() = "Android ${android.os.Build.VERSION.RELEASE} · ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}"
-private fun reportDeviceLines() = reportApp() + "\n" + reportDevice()
-
-/** Title + text, sent to the relay as a public GitHub issue; "Send by email instead" if that fails. */
-@Composable
-private fun ReportDialog(onEmail: (title: String, text: String) -> Unit, onMyReports: () -> Unit, onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    var title by remember { mutableStateOf("") }
-    var text by remember { mutableStateOf("") }
-    var sending by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<Int?>(null) }
-    var sentNumber by remember { mutableStateOf<Int?>(null) }
-    val scope = rememberCoroutineScope()
-
-    if (sentNumber != null) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(stringResource(R.string.report_sent, sentNumber!!)) },
-            text = { Text(stringResource(R.string.report_sent_hint)) },
-            confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
-            dismissButton = { TextButton(onClick = onMyReports) { Text(stringResource(R.string.my_reports)) } },
-        )
-        return
-    }
-    AlertDialog(
-        onDismissRequest = { if (!sending) onDismiss() },
-        title = { Text(stringResource(R.string.report_problem)) },
-        text = {
-            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it.take(120) },
-                    label = { Text(stringResource(R.string.report_title)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it.take(4000) },
-                    label = { Text(stringResource(R.string.report_text)) },
-                    placeholder = { Text(stringResource(R.string.report_problem_body)) },
-                    minLines = 4,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Text(
-                    stringResource(R.string.report_public),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
-                TextButton(onClick = { onEmail(title.trim(), text.trim()) }, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
-                    Text(stringResource(R.string.report_email))
-                }
-                TextButton(onClick = onMyReports, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
-                    Text(stringResource(R.string.my_reports))
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = !sending,
-                onClick = {
-                    when {
-                        title.trim().length < 3 -> error = R.string.report_title_short
-                        text.isBlank() -> error = R.string.report_text_empty
-                        else -> {
-                            error = null
-                            sending = true
-                            scope.launch {
-                                try {
-                                    val n = sendReport(title.trim(), text.trim(), reportApp(), reportDevice())
-                                    rememberReport(context, SentReport(n, title.trim()))
-                                    sentNumber = n
-                                } catch (e: kotlinx.coroutines.CancellationException) {
-                                    throw e
-                                } catch (_: com.karvo.data.TooManyReportsException) {
-                                    error = R.string.report_too_many
-                                } catch (_: Exception) {
-                                    error = R.string.report_failed
-                                } finally {
-                                    sending = false
-                                }
-                            }
-                        }
-                    }
-                },
-            ) { Text(stringResource(if (sending) R.string.report_sending else R.string.report_send)) }
-        },
-        dismissButton = { TextButton(enabled = !sending, onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
-    )
-}
-
-/** The reports sent from this phone, each with Open/Closed and the replies on GitHub. */
-@Composable
-private fun MyReportsDialog(onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    val reports = remember { sentReports(context) }
-    // A report missing from the map is still loading, or failed (then the error line shows).
-    val statuses = remember { androidx.compose.runtime.mutableStateMapOf<Int, ReportStatus>() }
-    var failed by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        for (r in reports.take(10)) {
-            try {
-                statuses[r.number] = fetchReportStatus(r.number)
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                throw e
-            } catch (_: Exception) {
-                failed = true
-            }
-        }
-    }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.my_reports)) },
-        text = {
-            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                if (reports.isEmpty()) Text(stringResource(R.string.my_reports_empty))
-                if (failed) Text(stringResource(R.string.my_reports_failed), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                for (r in reports.take(10)) {
-                    val s = statuses[r.number]
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(r.title, style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            "#${r.number} · " + when {
-                                s == null -> stringResource(R.string.report_loading)
-                                s.open -> stringResource(R.string.report_open)
-                                else -> stringResource(R.string.report_closed)
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        if (s != null && s.replies.isEmpty()) {
-                            Text(stringResource(R.string.report_no_replies), style = MaterialTheme.typography.bodySmall)
-                        }
-                        s?.replies?.forEach { reply ->
-                            Column(
-                                Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
-                                    .background(MaterialTheme.colorScheme.surfaceVariant).padding(8.dp),
-                            ) {
-                                Text(
-                                    (if (reply.author == "RexSAS") "Karvo" else reply.author) + " · " + reply.date,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Text(reply.body, style = MaterialTheme.typography.bodyMedium)
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
-    )
-}
 
 /** "November" / "Novembre", capitalised for display. */
 private fun monthName(month: Int, locale: java.util.Locale = java.util.Locale.getDefault()): String =

@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import com.karvo.ui.overview.OverviewViewModel
 import com.karvo.ui.components.swipeBack
 import com.karvo.ui.link.LinkedPcsScreen
+import com.karvo.ui.report.ReportScreen
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
@@ -130,6 +131,7 @@ const val ROUTE_EDIT = "edit?id={id}"
 const val ROUTE_MONTH = "month/{year}/{month}"
 const val ROUTE_BACKUPS = "backups"
 const val ROUTE_LINKED_PCS = "linked-pcs"
+const val ROUTE_REPORT = "report"
 const val ROUTE_RESTORE = "restore/{fileName}"
 const val ROUTE_CAMERA = "camera"
 const val ROUTE_MOMENTS = "moments"
@@ -289,6 +291,7 @@ fun KarvoNavHost(splashLeaving: Boolean = false, addLessonRequests: Int = 0) {
                                 BackdropFigureLayer(BackdropFigure.Snowflakes)
                                 SettingsScreen(
                                     onOpenBackups = dropUnlessResumed { navController.navigate(ROUTE_BACKUPS) },
+                                    onOpenReport = dropUnlessResumed { navController.navigate(ROUTE_REPORT) },
                                     onOpenLinkedPcs = dropUnlessResumed { navController.navigate(ROUTE_LINKED_PCS) },
                                     onCheckForUpdates = updateViewModel?.let { it::checkNow },
                                     onShowTour = tour::start,
@@ -345,6 +348,12 @@ fun KarvoNavHost(splashLeaving: Boolean = false, addLessonRequests: Int = 0) {
                 val goBack = dropUnlessResumed { navController.navigateUp() }
                 AlpineBackdrop(BackdropFigure.None, Modifier.swipeBack(goBack)) {
                     LinkedPcsScreen(onBack = goBack, showMessage = showMessage)
+                }
+            }
+            composable(ROUTE_REPORT) {
+                val goBack = dropUnlessResumed { navController.navigateUp() }
+                AlpineBackdrop(BackdropFigure.None, Modifier.swipeBack(goBack)) {
+                    ReportScreen(onBack = goBack, showMessage = showMessage)
                 }
             }
             composable(ROUTE_BACKUPS) { entry ->
