@@ -1,10 +1,12 @@
 <en-US>
 • Search your lessons by student or note, and show only the ones not paid yet
 • Report a problem from Settings, read the answers and reply under My reports
+• Animated badges: a shine, a gentle float and, from amethyst up, twinkles
 • A longer, smoother quick tour that shows the new features
 </en-US>
 <it-IT>
 • Cerca nelle lezioni per allievo o nota, e mostra solo quelle non ancora pagate
 • Segnala un problema dalle Impostazioni, leggi le risposte e rispondi in Le mie segnalazioni
+• Badge animati: un riflesso, un leggero fluttuare e, da ametista in su, scintille
 • Un tour veloce più lungo e fluido che mostra le novità
 </it-IT>

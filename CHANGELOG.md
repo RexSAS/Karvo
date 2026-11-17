@@ -10,6 +10,7 @@ All notable changes to Karvo are listed here. Versions 1.0–1.3 were released a
 - The **quick tour** now also covers search, the season picker, badges, the top students and Report a problem, and mentions the widget's +.
 
 ### Changed
+- **Animated badges** on Overview and the badge page: a shine passes over them every few seconds, they float gently, the ice badges' rays turn, and from amethyst up they twinkle.
 - The quick tour scrolls each highlighted button well clear of the tab bar; the highlight follows it smoothly and the card glides between the top and the bottom of the screen.
 
 ## [3.6.1] — 2026-11-17

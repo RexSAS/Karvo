@@ -393,6 +393,7 @@
     <string-array name="whats_new_items">
         <item>Cerca nelle lezioni: tocca la lente accanto a Lezioni per trovare un allievo o una nota, e mostra solo le lezioni non ancora pagate.</item>
         <item>Segnala un problema dalle Impostazioni. In Le mie segnalazioni vedi le risposte e puoi rispondere.</item>
+        <item>Il tuo badge prende vita: brilla, fluttua e, da ametista in su, scintilla.</item>
         <item>Un tour veloce più lungo mostra le novità: ricerca, scelta della stagione, badge e i tuoi allievi. Rivedilo dalle Impostazioni.</item>
     </string-array>
     <string name="play_update_ready_title">Aggiornamento pronto</string>

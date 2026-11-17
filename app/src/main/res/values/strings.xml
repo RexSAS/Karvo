@@ -395,6 +395,7 @@
     <string-array name="whats_new_items">
         <item>Search your lessons: tap the magnifier next to Lessons to find a student or a note, and show only the lessons not paid yet.</item>
         <item>Report a problem from Settings. Under My reports you see the answers and can reply.</item>
+        <item>Your badge comes alive: it shines, floats and, from amethyst up, twinkles.</item>
         <item>A longer quick tour shows the new things: search, the season picker, badges and your students. Replay it from Settings.</item>
     </string-array>
     <string name="play_update_ready_title">Update ready</string>
