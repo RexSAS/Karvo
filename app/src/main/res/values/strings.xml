@@ -393,11 +393,9 @@
     </plurals>
     <string name="whats_new_title">What\'s new in %1$s</string>
     <string-array name="whats_new_items">
-        <item>New badge names: First snow, Freerider and Snow king, and Red run now comes before Parallel.</item>
-        <item>Badges: earn one as your season\'s hours grow, from Karver at your first hour to Legend of the slopes at 600h. Your badge sits next to the hours on Overview; tap it to see them all.</item>
-        <item>Each new badge unlocks with a notification and a little celebration in the app.</item>
-        <item>Home-screen widgets: This week, This month, a week overview with your next event, and this week against the last.</item>
-        <item>Karvo now always stays upright, even when the phone is turned.</item>
+        <item>Search your lessons: tap the magnifier next to Lessons to find a student or a note, and show only the lessons not paid yet.</item>
+        <item>Report a problem from Settings. Under My reports you see the answers and can reply.</item>
+        <item>A longer quick tour shows the new things: search, the season picker, badges and your students. Replay it from Settings.</item>
     </string-array>
     <string name="play_update_ready_title">Update ready</string>
     <string name="play_update_ready_text">The new version of Karvo is downloaded. Restart now to use it? Your lessons stay as they are.</string>

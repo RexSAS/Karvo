@@ -97,11 +97,7 @@ If your phone's Google backup is on, Android includes Karvo's data in it, so you
 - [x] **Photobomb** sharing (3.4)
 - [x] **Season picker**, **student page**, swipe back and the **season start** greeting (3.5)
 - [x] **Season badges** and **home-screen widgets** (3.6)
-
-### Next release
-- [x] **Search and filters** on Lessons
-- [x] **Report a problem**, with My reports and replies
-- [x] A longer **quick tour** that covers the new features
+- [x] **Search and filters**, **Report a problem** with My reports and replies, and a longer **quick tour** (3.7)
 
 ### Ideas
 - [ ] **Repeat a lesson**: long-press a lesson to log the same student and duration again.

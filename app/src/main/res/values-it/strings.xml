@@ -391,11 +391,9 @@
     </plurals>
     <string name="whats_new_title">Novità della %1$s</string>
     <string-array name="whats_new_items">
-        <item>Nuovi nomi per i badge: Prima neve, Freerider e Re delle nevi, e Pista rossa ora viene prima di Paralleli.</item>
-        <item>Badge: ne guadagni uno man mano che crescono le ore della stagione, da Karver alla prima ora a Leggenda delle piste a 600h. Il tuo badge è accanto alle ore nella Panoramica; toccalo per vederli tutti.</item>
-        <item>Ogni nuovo badge si sblocca con una notifica e una piccola festa nell\'app.</item>
-        <item>Widget per la schermata Home: Questa settimana, Questo mese, una panoramica della settimana con il prossimo evento, e questa settimana contro la scorsa.</item>
-        <item>Karvo ora resta sempre in verticale, anche se giri il telefono.</item>
+        <item>Cerca nelle lezioni: tocca la lente accanto a Lezioni per trovare un allievo o una nota, e mostra solo le lezioni non ancora pagate.</item>
+        <item>Segnala un problema dalle Impostazioni. In Le mie segnalazioni vedi le risposte e puoi rispondere.</item>
+        <item>Un tour veloce più lungo mostra le novità: ricerca, scelta della stagione, badge e i tuoi allievi. Rivedilo dalle Impostazioni.</item>
     </string-array>
     <string name="play_update_ready_title">Aggiornamento pronto</string>
     <string name="play_update_ready_text">La nuova versione di Karvo è scaricata. Riavviare ora per usarla? Le tue lezioni restano come sono.</string>

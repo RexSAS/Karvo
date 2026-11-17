@@ -2,6 +2,16 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.7] — 2026-11-17
+
+### Added
+- **Search**: the magnifier next to the *Lessons* title finds lessons by student or note, and the **Not paid** / **Paid** chips filter the list.
+- **Report a problem** (*Settings*): its own page to send a title and a description. It becomes a public issue on github.com/RexSAS/Karvo (no lessons are sent), with *Send by email instead* as a fallback. **My reports** lists the reports sent from this phone with Open/Closed and the answers, and you can **reply** to your open ones. If too many reports are sent, Karvo says to try again in an hour.
+- The **quick tour** now also covers search, the season picker, badges, the top students and Report a problem, and mentions the widget's +.
+
+### Changed
+- The quick tour scrolls each highlighted button well clear of the tab bar; the highlight follows it smoothly and the card glides between the top and the bottom of the screen.
+
 ## [3.6.1] — 2026-11-17
 
 ### Changed
