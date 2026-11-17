@@ -49,7 +49,6 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Feedback
-import androidx.compose.material.icons.filled.Forum
 import com.karvo.data.ReportStatus
 import com.karvo.data.SentReport
 import com.karvo.data.fetchReportStatus
@@ -393,18 +392,6 @@ fun SettingsScreen(
                     modifier = Modifier.clickable { showReport = true },
                 )
             }
-
-            AlpineTile(Modifier.fillMaxWidth()) {
-                ListItem(
-                    colors = transparentRow(),
-                    leadingContent = { Icon(Icons.Filled.Forum, contentDescription = null) },
-                    headlineContent = { Text(stringResource(R.string.my_reports)) },
-                    supportingContent = { Text(stringResource(R.string.my_reports_hint)) },
-                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                    modifier = Modifier.clickable { showMyReports = true },
-                )
-            }
-
             AlpineTile(Modifier.fillMaxWidth()) {
                 ListItem(
                     colors = transparentRow(),
@@ -648,7 +635,6 @@ private fun reportDeviceLines() = reportApp() + "\n" + reportDevice()
 @Composable
 private fun ReportDialog(onEmail: (title: String, text: String) -> Unit, onMyReports: () -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val hasReports = remember { sentReports(context).isNotEmpty() }
     var title by remember { mutableStateOf("") }
     var text by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
@@ -695,10 +681,8 @@ private fun ReportDialog(onEmail: (title: String, text: String) -> Unit, onMyRep
                 TextButton(onClick = { onEmail(title.trim(), text.trim()) }, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
                     Text(stringResource(R.string.report_email))
                 }
-                if (hasReports) {
-                    TextButton(onClick = onMyReports, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
-                        Text(stringResource(R.string.my_reports))
-                    }
+                TextButton(onClick = onMyReports, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                    Text(stringResource(R.string.my_reports))
                 }
             }
         },

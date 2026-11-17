@@ -13,7 +13,7 @@
     <string name="ok">OK</string>
     <string name="delete">Delete</string>
     <string name="report_problem">Report a problem</string>
-    <string name="report_problem_hint">Something wrong, or an idea? Tell us here</string>
+    <string name="report_problem_hint">Something wrong, or an idea? Tell us here and see our answers</string>
     <string name="report_problem_body">What you tapped, what you expected, what happened</string>
     <string name="report_title">Title</string>
     <string name="report_text">What happened?</string>
@@ -28,7 +28,6 @@
     <string name="report_too_many">Too many reports right now. Try again in an hour, or send it by email.</string>
     <string name="report_sent_hint">Answers show up in My reports.</string>
     <string name="my_reports">My reports</string>
-    <string name="my_reports_hint">The problems you sent, and our answers</string>
     <string name="my_reports_empty">No reports sent from this phone yet.</string>
     <string name="my_reports_failed">Couldn\'t load answers. Check the connection.</string>
     <string name="report_loading">Loading…</string>
