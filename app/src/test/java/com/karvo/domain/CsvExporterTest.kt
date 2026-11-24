@@ -9,12 +9,12 @@ import org.junit.Assert.assertTrue
 class CsvExporterTest {
     @Test fun headerAndRow() {
         val csv = lessonsToCsv(listOf(Lesson(1, LocalDate.of(2026, 10, 20), 90, "Anna", null)))
-        assertEquals("date,student,duration_minutes,duration_hours,notes,paid_on\r\n2026-10-20,Anna,90,1.5,,\r\n", csv)
+        assertEquals("date,student,duration_minutes,duration_hours,notes,paid_on,rate\r\n2026-10-20,Anna,90,1.5,,,\r\n", csv)
     }
 
     @Test fun escapes() {
         val csv = lessonsToCsv(listOf(Lesson(1, LocalDate.of(2026, 1, 2), 60, "Group \"Rossi\", kids", "line1\nline2")))
-        assertTrue(csv.endsWith("2026-01-02,\"Group \"\"Rossi\"\", kids\",60,1,\"line1\nline2\",\r\n"))
+        assertTrue(csv.endsWith("2026-01-02,\"Group \"\"Rossi\"\", kids\",60,1,\"line1\nline2\",,\r\n"))
     }
 
     @Test fun sortedOldestFirst() {
@@ -41,8 +41,8 @@ class CsvExporterTest {
             ),
         )
         val lines = csv.split("\r\n")
-        assertEquals("date,student,duration_minutes,duration_hours,notes,paid_on", lines[0])
-        assertEquals("2026-12-03,Paid,60,1,,2027-01-15", lines[1])
-        assertEquals("2026-12-04,Unpaid,60,1,,", lines[2])
+        assertEquals("date,student,duration_minutes,duration_hours,notes,paid_on,rate", lines[0])
+        assertEquals("2026-12-03,Paid,60,1,,2027-01-15,", lines[1])
+        assertEquals("2026-12-04,Unpaid,60,1,,,", lines[2])
     }
 }

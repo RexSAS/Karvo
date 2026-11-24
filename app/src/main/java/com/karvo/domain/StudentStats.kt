@@ -30,7 +30,7 @@ data class StudentDetail(
 )
 
 /** Everything about the student matching [key] (see [studentKey]); null when they have no lessons. */
-fun computeStudent(lessons: List<Lesson>, key: String, today: LocalDate, seasonStartMonth: Int, rateCents: Long?): StudentDetail? {
+fun computeStudent(lessons: List<Lesson>, key: String, today: LocalDate, seasonStartMonth: Int, pay: Pay): StudentDetail? {
     val theirs = lessons.filter { studentKey(it.student) == key }
     if (theirs.isEmpty()) return null
     val total = theirs.sumOf { it.durationMinutes.toLong() }
@@ -48,11 +48,11 @@ fun computeStudent(lessons: List<Lesson>, key: String, today: LocalDate, seasonS
         averageMinutes = (total * 2 + n) / (2 * n),
         firstLesson = theirs.minOf { it.date },
         lastLesson = theirs.maxOf { it.date },
-        earningsCents = rateCents?.let { earningsCents(total, it) },
+        earningsCents = pay.earnings(theirs),
         lastSixMonths = (5 downTo 0).map { back ->
             val month = currentMonth.minusMonths(back.toLong())
-            val minutes = byMonth[month].orEmpty().sumOf { it.durationMinutes.toLong() }
-            MonthBar(month, minutes, rateCents?.let { earningsCents(minutes, it) })
+            val items = byMonth[month].orEmpty()
+            MonthBar(month, items.sumOf { it.durationMinutes.toLong() }, pay.earnings(items))
         },
         season = season,
         thisSeasonMinutes = minutesIn(season),

@@ -1,5 +1,9 @@
 package com.karvo.ui.overview
 
+import com.karvo.data.Rate
+import com.karvo.domain.Pay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import com.karvo.data.Lesson
 import com.karvo.domain.Season
 import java.time.YearMonth
@@ -21,7 +25,6 @@ import com.karvo.domain.Unpaid
 import com.karvo.domain.computeSeasons
 import com.karvo.domain.unpaidTotals
 import com.karvo.domain.computeStats
-import com.karvo.domain.earningsCents
 import com.karvo.domain.summarizeByMonth
 import java.time.Clock
 import java.time.LocalDate
@@ -71,6 +74,7 @@ data class OverviewUiState(
 class OverviewViewModel(
     lessons: LessonRepository,
     private val settings: SettingsRepository,
+    rates: Flow<List<Rate>>,
     private val clock: Clock = Clock.systemUTC(),
     private val authenticator: Authenticator = Authenticator.None,
 ) : ViewModel() {
@@ -80,12 +84,12 @@ class OverviewViewModel(
     /** In-memory only: Overview opens on this season every time. */
     private val scope = MutableStateFlow<OverviewScope>(OverviewScope.ThisSeason)
 
-    private data class Inputs(val all: List<Lesson>, val rate: Long?, val revealed: Boolean, val zone: String, val seasonStart: Int)
+    private data class Inputs(val all: List<Lesson>, val pay: Pay, val revealed: Boolean, val zone: String, val seasonStart: Int)
 
     val uiState: StateFlow<OverviewUiState> = combine(
-        combine(lessons.observeLessons(), settings.hourlyRateCents, revealed, settings.timeZoneId, settings.seasonStartMonth, ::Inputs),
+        combine(lessons.observeLessons(), rates.map(::Pay), revealed, settings.timeZoneId, settings.seasonStartMonth, ::Inputs),
         scope,
-    ) { (all, rate, isRevealed, zone, seasonStart), chosen ->
+    ) { (all, pay, isRevealed, zone, seasonStart), chosen ->
         val today = LocalDate.now(clock.withZone(ZoneId.of(zone)))
         val current = seasonOf(today, seasonStart)
         val pastSeasons = all.map { seasonOf(it.date, seasonStart) }.distinct().filter { it.startYear < current.startYear }.sortedByDescending { it.startYear }
@@ -102,14 +106,14 @@ class OverviewViewModel(
             scopeSeason = season,
             pastSeasons = pastSeasons,
             totalMinutes = total,
-            totalEarningsCents = rate?.let { earningsCents(total, it) },
-            months = summaries.map { MonthRow(it, rate?.let { r -> earningsCents(it.totalMinutes, r) }) },
-            rateSet = rate != null,
+            totalEarningsCents = pay.earnings(inScope),
+            months = inScope.groupBy { YearMonth.from(it.date) }.let { byMonth -> summaries.map { MonthRow(it, pay.earnings(byMonth.getValue(it.month))) } },
+            rateSet = pay.isSet,
             revealed = isRevealed,
             loading = false,
-            stats = if (inScope.isEmpty()) null else computeStats(inScope, today, rate, lastMonth),
-            seasons = if (all.isEmpty()) null else computeSeasons(all, today, seasonStart, rate),
-            unpaid = unpaidTotals(all, today, rate),
+            stats = if (inScope.isEmpty()) null else computeStats(inScope, today, pay, lastMonth),
+            seasons = if (all.isEmpty()) null else computeSeasons(all, today, seasonStart, pay),
+            unpaid = unpaidTotals(all, today, pay),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), OverviewUiState())
 
@@ -137,7 +141,7 @@ class OverviewViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KarvoApp).container
-                OverviewViewModel(container.lessonRepository, container.settingsRepository, authenticator = container.authenticator)
+                OverviewViewModel(container.lessonRepository, container.settingsRepository, container.rateRepository.observe(), authenticator = container.authenticator)
             }
         }
     }

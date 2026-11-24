@@ -1,5 +1,9 @@
 package com.karvo.ui.overview
 
+import com.karvo.data.Rate
+import com.karvo.domain.Pay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -34,6 +38,7 @@ data class StudentUiState(
 class StudentViewModel(
     private val lessons: LessonRepository,
     private val settings: SettingsRepository,
+    private val rates: Flow<List<Rate>>,
     private val key: String,
     private val clock: Clock = Clock.systemUTC(),
     private val authenticator: Authenticator = Authenticator.None,
@@ -43,10 +48,10 @@ class StudentViewModel(
     private val revealed = MutableStateFlow(false)
 
     val uiState: StateFlow<StudentUiState> = combine(
-        lessons.observeLessons(), settings.hourlyRateCents, settings.timeZoneId, settings.seasonStartMonth, revealed,
-    ) { all, rate, zone, seasonStart, isRevealed ->
+        lessons.observeLessons(), rates.map(::Pay), settings.timeZoneId, settings.seasonStartMonth, revealed,
+    ) { all, pay, zone, seasonStart, isRevealed ->
         val today = LocalDate.now(clock.withZone(ZoneId.of(zone)))
-        StudentUiState(loading = false, detail = computeStudent(all, key, today, seasonStart, rate), rateSet = rate != null, revealed = isRevealed)
+        StudentUiState(loading = false, detail = computeStudent(all, key, today, seasonStart, pay), rateSet = pay.isSet, revealed = isRevealed)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StudentUiState())
 
     /** Same rule as Overview: hiding is immediate, showing may ask for fingerprint/PIN. */
@@ -66,7 +71,7 @@ class StudentViewModel(
         fun factory(key: String): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KarvoApp).container
-                StudentViewModel(container.lessonRepository, container.settingsRepository, key, authenticator = container.authenticator)
+                StudentViewModel(container.lessonRepository, container.settingsRepository, container.rateRepository.observe(), key, authenticator = container.authenticator)
             }
         }
     }

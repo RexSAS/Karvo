@@ -19,12 +19,12 @@ fun paidStatus(lessons: List<Lesson>): PaidStatus {
 /** What the school still owes: unpaid lessons up to [today] (future lessons aren't owed yet). */
 data class Unpaid(val months: Int, val minutes: Long, val earningsCents: Long?)
 
-fun unpaidTotals(lessons: List<Lesson>, today: LocalDate, rateCents: Long?): Unpaid {
+fun unpaidTotals(lessons: List<Lesson>, today: LocalDate, pay: Pay): Unpaid {
     val owed = lessons.filter { it.paidOn == null && !it.date.isAfter(today) }
     val minutes = owed.sumOf { it.durationMinutes.toLong() }
     return Unpaid(
         months = owed.map { YearMonth.from(it.date) }.distinct().size,
         minutes = minutes,
-        earningsCents = rateCents?.let { earningsCents(minutes, it) },
+        earningsCents = pay.earnings(owed),
     )
 }

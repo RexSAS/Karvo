@@ -1,5 +1,6 @@
 package com.karvo.ui
 
+import com.karvo.testing.rateFlow
 import com.karvo.data.Lesson
 import com.karvo.testing.FakeAuthenticator
 import com.karvo.testing.FakeLessonRepository
@@ -25,13 +26,13 @@ class MonthDetailViewModelTest {
     @Test fun onlyThatMonth() = runTest {
         repo.save(Lesson(date = LocalDate.of(2026, 10, 1), durationMinutes = 60, student = "A"))
         repo.save(Lesson(date = LocalDate.of(2025, 10, 1), durationMinutes = 60, student = "B"))
-        val s = MonthDetailViewModel(repo, FakeSettingsRepository(1000), YearMonth.of(2026, 10)).uiState.first { it.lessons.isNotEmpty() }
+        val s = MonthDetailViewModel(repo, FakeSettingsRepository(1000), rateFlow(1000L), YearMonth.of(2026, 10)).uiState.first { it.lessons.isNotEmpty() }
         assertEquals(listOf("A"), s.lessons.map { it.student }); assertEquals(1000L, s.earningsCents)
     }
 
     private val dec = YearMonth.of(2026, 12)
     private fun vm(clock: Clock = Clock.systemUTC(), zone: String = "Europe/Rome") =
-        MonthDetailViewModel(repo, FakeSettingsRepository(1000, zone = zone), dec, clock)
+        MonthDetailViewModel(repo, FakeSettingsRepository(1000, zone = zone), rateFlow(1000L), dec, clock)
 
     @Test fun stateShowsPartlyPaidAndLatestDate() = runTest {
         repo.save(Lesson(date = LocalDate.of(2026, 12, 1), durationMinutes = 60, student = "A", paidOn = LocalDate.of(2027, 1, 15)))
@@ -70,7 +71,7 @@ class MonthDetailViewModelTest {
     @Test fun monthRevealAlsoAsks() = runTest {
         repo.save(Lesson(date = LocalDate.of(2026, 12, 1), durationMinutes = 60, student = "A"))
         val auth = FakeAuthenticator(succeeds = false)
-        val vm = MonthDetailViewModel(repo, FakeSettingsRepository(1000), dec, authenticator = auth)
+        val vm = MonthDetailViewModel(repo, FakeSettingsRepository(1000), rateFlow(1000L), dec, authenticator = auth)
         vm.uiState.first { it.lessons.isNotEmpty() }
         vm.toggleReveal("Show earnings")
         assertEquals(false, vm.uiState.value.revealed)

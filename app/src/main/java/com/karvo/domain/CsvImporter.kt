@@ -7,6 +7,9 @@ import java.time.format.DateTimeParseException
 /** Header of files written before 2.1, without paid_on. */
 private const val HEADER_V1 = "date,student,duration_minutes,duration_hours,notes"
 
+/** Header of files written before 3.8, without rate. */
+private const val HEADER_V2 = "$HEADER_V1,paid_on"
+
 /** A backup/export file that can't be read; [line] is the 1-based line where the bad record starts. */
 class BackupFormatException(val line: Int, message: String) : Exception("Line $line: $message")
 
@@ -15,18 +18,20 @@ private class Record(val line: Int, val fields: List<String>)
 
 /**
  * Reads lessons from a Karvo CSV (as written by [lessonsToCsv], optionally with a UTF-8 BOM). Files from
- * before 2.1 have no paid_on column; their lessons come back unpaid.
+ * before 2.1 have no paid_on column; their lessons come back unpaid. [rateId] turns the rate column (a title) into
+ * a rate id; files from before 3.8 have none, and their lessons come back on the default rate.
  * All-or-nothing: any invalid record throws [BackupFormatException]. Returned lessons have id 0.
  */
-fun parseLessonsCsv(text: String): List<Lesson> {
+fun parseLessonsCsv(text: String, rateId: (String) -> Long? = { null }): List<Lesson> {
     val records = tokenize(text.removePrefix("﻿"))
     val header = records.firstOrNull()
     val fieldCount = when (header?.fields?.joinToString(",")) {
-        CSV_HEADER -> 6
+        CSV_HEADER -> 7
+        HEADER_V2 -> 6
         HEADER_V1 -> 5
         else -> throw BackupFormatException(1, "Not a Karvo file")
     }
-    return records.drop(1).map { toLesson(it, fieldCount) }
+    return records.drop(1).map { toLesson(it, fieldCount).copy(rateId = it.fields.getOrNull(6)?.takeIf(String::isNotBlank)?.let(rateId)) }
 }
 
 private fun toLesson(r: Record, fieldCount: Int): Lesson {

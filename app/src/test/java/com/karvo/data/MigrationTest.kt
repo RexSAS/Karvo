@@ -42,6 +42,16 @@ class MigrationTest {
         helper.runMigrationsAndValidate("m24.db", 4, true, MIGRATION_2_3, MIGRATION_3_4)
     }
 
+    @Test fun v4LessonsSurviveWithNoRateAndRatesAppear() {
+        helper.createDatabase("m5.db", 4).apply {
+            execSQL("INSERT INTO lessons (id, date, durationMinutes, student, notes, paidOn) VALUES (1, ${LocalDate.of(2026, 12, 3).toEpochDay()}, 90, 'Rossi', NULL, NULL)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("m5.db", 5, true, MIGRATION_4_5)
+        db.query("SELECT student, rateId FROM lessons").use { c -> assertTrue(c.moveToFirst()); assertEquals("Rossi", c.getString(0)); assertTrue(c.isNull(1)) }
+        db.execSQL("INSERT INTO rates (title, cents, color, isDefault) VALUES ('Private', 4000, 0, 1)")
+    }
+
     @Test fun v1LessonsSurviveAsUnpaid() {
         helper.createDatabase("m.db", 1).apply {
             execSQL(

@@ -1,5 +1,6 @@
 package com.karvo.domain
 
+import com.karvo.testing.payOf
 import com.karvo.data.Lesson
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
@@ -25,7 +26,7 @@ class SeasonStartTest {
     }
 
     @Test fun a_new_season_gets_the_card_with_last_season_in_it() {
-        val card = seasonWelcome(lessons, firstDay, 12, welcomedSeason = 2025, rateCents = 3000)!!
+        val card = seasonWelcome(lessons, firstDay, 12, welcomedSeason = 2025, pay = payOf(3000L))!!
         assertEquals("2026/27", card.season.label())
         assertEquals(270L, card.last!!.minutes)
         assertEquals(3, card.last!!.lessonCount)
@@ -35,13 +36,13 @@ class SeasonStartTest {
     }
 
     @Test fun no_card_twice_in_a_season_or_before_it_ever_was_stored() {
-        assertNull(seasonWelcome(lessons, firstDay, 12, welcomedSeason = 2026, rateCents = null))
-        assertNull(seasonWelcome(lessons, firstDay, 12, welcomedSeason = null, rateCents = null)) // fresh install or update
-        assertNull(seasonWelcome(emptyList(), firstDay, 12, welcomedSeason = 2025, rateCents = null))
+        assertNull(seasonWelcome(lessons, firstDay, 12, welcomedSeason = 2026, pay = payOf(null)))
+        assertNull(seasonWelcome(lessons, firstDay, 12, welcomedSeason = null, pay = payOf(null))) // fresh install or update
+        assertNull(seasonWelcome(emptyList(), firstDay, 12, welcomedSeason = 2025, pay = payOf(null)))
     }
 
     @Test fun an_empty_last_season_still_welcomes_without_a_summary() {
-        val card = seasonWelcome(listOf(lesson("2024-01-05", 60, "A")), firstDay, 12, welcomedSeason = 2024, rateCents = null)
+        val card = seasonWelcome(listOf(lesson("2024-01-05", 60, "A")), firstDay, 12, welcomedSeason = 2024, pay = payOf(null))
         assertNotNull(card)
         assertNull(card!!.last)
         assertEquals(0, card.lastUnpaidMonths)

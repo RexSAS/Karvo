@@ -119,7 +119,6 @@
     <!-- Settings -->
     <string name="hourly_rate">Tariffa oraria</string>
     <string name="rate_error">Inserisci un importo come 25.00</string>
-    <string name="rate_hint">Lascia vuoto per nascondere i guadagni</string>
     <string name="time_zone">Fuso orario</string>
     <string name="export_csv">Esporta in CSV</string>
     <string name="export_csv_hint">Salva tutte le lezioni in un foglio di calcolo</string>
@@ -368,7 +367,7 @@
     <string name="tour_students_title">I tuoi allievi</string>
     <string name="tour_students_body">I tuoi migliori allievi della stagione. Toccane uno per vedere tutte le sue lezioni e cosa resta da pagare.</string>
     <string name="tour_settings_title">Personalizzala</string>
-    <string name="tour_settings_body">Imposta tariffa oraria, inizio stagione, lingua e aspetto.</string>
+    <string name="tour_settings_body">Imposta le tariffe orarie, inizio stagione, lingua e aspetto.</string>
     <string name="tour_backups_title">Backup</string>
     <string name="tour_backups_body">Karvo conserva qui fino a 3 backup. Esporta un CSV per tenerne una copia anche altrove.</string>
     <string name="tour_pc_title">Usa Karvo sul PC</string>
@@ -429,4 +428,21 @@
     <string name="badge_freerider">Freerider</string>
     <string name="badge_snow_king">Re delle nevi</string>
     <string name="badge_legend">Leggenda delle piste</string>
+    <string name="edit">Modifica</string>
+    <string name="hourly_rates">Tariffe orarie</string>
+    <string name="rates_empty_hint">Aggiungi una tariffa per vedere i guadagni</string>
+    <string name="rate_standard">Standard</string>
+    <string name="rate_per_hour">%1$s €/h</string>
+    <string name="rate_default">Predefinita</string>
+    <string name="rate_options">Opzioni per %1$s</string>
+    <string name="rate_set_default">Imposta come predefinita</string>
+    <string name="rate_add">Aggiungi tariffa</string>
+    <string name="rate_edit">Modifica tariffa</string>
+    <string name="rate_title">Nome</string>
+    <string name="rate_color">Colore</string>
+    <string name="rate_color_n">Colore %1$d</string>
+    <string name="rate_delete_question">Eliminare “%1$s”?</string>
+    <string name="rate_delete_moves">Le sue lezioni saranno pagate con la tariffa predefinita, %1$s.</string>
+    <string name="rate_delete_last">I guadagni saranno nascosti finché non aggiungi di nuovo una tariffa.</string>
+    <string name="lesson_rate">Tariffa</string>
 </resources>

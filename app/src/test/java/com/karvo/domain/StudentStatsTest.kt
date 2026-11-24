@@ -1,5 +1,6 @@
 package com.karvo.domain
 
+import com.karvo.testing.payOf
 import com.karvo.data.Lesson
 import java.time.LocalDate
 import java.time.YearMonth
@@ -21,7 +22,7 @@ class StudentStatsTest {
     )
 
     @Test fun matches_the_student_ignoring_case_and_spaces() {
-        val s = computeStudent(all, studentKey("  GIULIA bianchi"), today, 12, rateCents = null)!!
+        val s = computeStudent(all, studentKey("  GIULIA bianchi"), today, 12, pay = payOf(null))!!
         assertEquals(3, s.lessonCount)
         assertEquals(270L, s.totalMinutes)
         assertEquals("Giulia Bianchi", s.name) // the most recent spelling
@@ -30,25 +31,25 @@ class StudentStatsTest {
     }
 
     @Test fun average_rounds_half_up_and_earnings_follow_the_rate() {
-        val s = computeStudent(all, "giulia bianchi", today, 12, rateCents = 3000)!!
+        val s = computeStudent(all, "giulia bianchi", today, 12, pay = payOf(3000L))!!
         assertEquals(90L, s.averageMinutes)
         assertEquals(13500L, s.earningsCents) // 4h 30m at 30.00 €
-        val odd = computeStudent(listOf(lesson("2026-11-01", 60, "A"), lesson("2026-11-02", 61, "a")), "a", today, 12, null)!!
+        val odd = computeStudent(listOf(lesson("2026-11-01", 60, "A"), lesson("2026-11-02", 61, "a")), "a", today, 12, payOf(null))!!
         assertEquals(61L, odd.averageMinutes) // 60.5 rounds up
     }
 
     @Test fun seasons_split_at_the_start_month() {
-        val s = computeStudent(all, "giulia bianchi", today, 12, null)!!
+        val s = computeStudent(all, "giulia bianchi", today, 12, payOf(null))!!
         assertEquals(2025, s.season.startYear) // 13 Nov 2026 is still in the 2025/26 season
         assertEquals(270L, s.thisSeasonMinutes)
         assertEquals(0L, s.lastSeasonMinutes)
-        val novStart = computeStudent(all, "giulia bianchi", today, 11, null)!!
+        val novStart = computeStudent(all, "giulia bianchi", today, 11, payOf(null))!!
         assertEquals(120L, novStart.thisSeasonMinutes)
         assertEquals(150L, novStart.lastSeasonMinutes)
     }
 
     @Test fun last_six_months_and_months_newest_first() {
-        val s = computeStudent(all, "giulia bianchi", today, 12, null)!!
+        val s = computeStudent(all, "giulia bianchi", today, 12, payOf(null))!!
         assertEquals(6, s.lastSixMonths.size)
         assertEquals(YearMonth.of(2026, 11), s.lastSixMonths.last().month)
         assertEquals(120L, s.lastSixMonths.last().minutes)
@@ -56,6 +57,6 @@ class StudentStatsTest {
     }
 
     @Test fun no_lessons_no_page() {
-        assertNull(computeStudent(all, "nobody", today, 12, null))
+        assertNull(computeStudent(all, "nobody", today, 12, payOf(null)))
     }
 }

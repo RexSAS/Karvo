@@ -42,6 +42,7 @@ class ImportViewModel(
     private val lessons: LessonRepository,
     private val backups: BackupService,
     private val reader: TextFileReader,
+    private val rates: com.karvo.data.RateRepository? = null,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ImportState>(ImportState.Idle)
@@ -51,7 +52,7 @@ class ImportViewModel(
         _state.value = ImportState.Reading
         viewModelScope.launch {
             _state.value = try {
-                val incoming = parseLessonsCsv(reader.read(uri))
+                val incoming = parseLessonsCsv(reader.read(uri), com.karvo.domain.Pay(rates?.all().orEmpty())::idOfTitle)
                 val plan = planImport(lessons.allLessons(), incoming)
                 when {
                     incoming.isEmpty() -> ImportState.Empty
@@ -99,7 +100,7 @@ class ImportViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KarvoApp).container
-                ImportViewModel(container.lessonRepository, container.backupService, container.textFileReader)
+                ImportViewModel(container.lessonRepository, container.backupService, container.textFileReader, container.rateRepository)
             }
         }
     }

@@ -13,4 +13,6 @@ data class Lesson(
     val notes: String? = null,
     /** Day the school paid this lesson; null = unpaid. */
     val paidOn: LocalDate? = null,
+    /** The [Rate] this lesson is paid at; null (or a deleted rate) = the default rate. */
+    val rateId: Long? = null,
 )

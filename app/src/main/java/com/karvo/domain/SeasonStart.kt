@@ -23,7 +23,7 @@ data class SeasonWelcome(
  * and then nothing is shown, so the card only ever appears when a season really begins. No lessons at all, no card.
  * Whatever the answer, the caller then stores today's season as welcomed.
  */
-fun seasonWelcome(lessons: List<Lesson>, today: LocalDate, startMonth: Int, welcomedSeason: Int?, rateCents: Long?): SeasonWelcome? {
+fun seasonWelcome(lessons: List<Lesson>, today: LocalDate, startMonth: Int, welcomedSeason: Int?, pay: Pay): SeasonWelcome? {
     val season = seasonOf(today, startMonth)
     if (welcomedSeason == null || welcomedSeason >= season.startYear || lessons.isEmpty()) return null
     val lastSeason = Season(season.startYear - 1, startMonth)
@@ -31,7 +31,7 @@ fun seasonWelcome(lessons: List<Lesson>, today: LocalDate, startMonth: Int, welc
     val minutes = inLast.sumOf { it.durationMinutes.toLong() }
     return SeasonWelcome(
         season = season,
-        last = if (inLast.isEmpty()) null else SeasonTotal(lastSeason, minutes, rateCents?.let { earningsCents(minutes, it) }, inLast.size),
+        last = if (inLast.isEmpty()) null else SeasonTotal(lastSeason, minutes, pay.earnings(inLast), inLast.size),
         lastStudents = inLast.map { studentKey(it.student) }.distinct().size,
         lastUnpaidMonths = summarizeByMonth(inLast).count { it.paidStatus != PaidStatus.PAID },
     )

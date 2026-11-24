@@ -1,5 +1,6 @@
 package com.karvo.domain
 
+import com.karvo.testing.payOf
 import com.karvo.data.Lesson
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
@@ -25,16 +26,16 @@ class PaidTest {
             l(LocalDate.of(2027, 1, 20), 45), // after today: not owed yet
             l(LocalDate.of(2026, 11, 3), 120, paidOn = paid),
         )
-        assertEquals(Unpaid(months = 2, minutes = 90, earningsCents = null), unpaidTotals(lessons, LocalDate.of(2027, 1, 10), null))
+        assertEquals(Unpaid(months = 2, minutes = 90, earningsCents = null), unpaidTotals(lessons, LocalDate.of(2027, 1, 10), payOf(null)))
     }
 
     @Test fun unpaidIncludesToday() =
-        assertEquals(60L, unpaidTotals(listOf(l(LocalDate.of(2027, 1, 10))), LocalDate.of(2027, 1, 10), null).minutes)
+        assertEquals(60L, unpaidTotals(listOf(l(LocalDate.of(2027, 1, 10))), LocalDate.of(2027, 1, 10), payOf(null)).minutes)
 
     @Test fun unpaidEarningsFromSummedMinutes() {
         val lessons = listOf(l(LocalDate.of(2026, 12, 3), 45), l(LocalDate.of(2026, 12, 4), 45))
-        assertEquals(earningsCents(90, 2550), unpaidTotals(lessons, LocalDate.of(2027, 1, 10), 2550).earningsCents)
+        assertEquals(earningsCents(90, 2550), unpaidTotals(lessons, LocalDate.of(2027, 1, 10), payOf(2550L)).earningsCents)
     }
 
-    @Test fun nothingUnpaid() = assertEquals(Unpaid(0, 0, 0), unpaidTotals(emptyList(), LocalDate.of(2027, 1, 10), 2550))
+    @Test fun nothingUnpaid() = assertEquals(Unpaid(0, 0, 0), unpaidTotals(emptyList(), LocalDate.of(2027, 1, 10), payOf(2550L)))
 }

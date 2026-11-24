@@ -1,5 +1,6 @@
 package com.karvo.domain
 
+import com.karvo.testing.payOf
 import com.karvo.data.Lesson
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
@@ -37,7 +38,7 @@ class SeasonsTest {
     }
 
     @Test fun currentSeasonCanBeEmpty() {
-        val s = computeSeasons(listOf(l(2025, 12, 5)), LocalDate.of(2027, 1, 10), 11, null)
+        val s = computeSeasons(listOf(l(2025, 12, 5)), LocalDate.of(2027, 1, 10), 11, payOf(null))
         assertEquals(Season(2026, 11), s.current.season)
         assertEquals(0L, s.current.minutes)
         assertEquals(0, s.current.lessonCount)
@@ -47,7 +48,7 @@ class SeasonsTest {
     @Test fun allNewestFirstOnlyWithLessons() {
         val s = computeSeasons(
             listOf(l(2024, 12, 1, 30), l(2026, 12, 1, 90), l(2027, 1, 2, 60)),
-            LocalDate.of(2027, 1, 10), 11, 2000,
+            LocalDate.of(2027, 1, 10), 11, payOf(2000L),
         )
         assertEquals(listOf(Season(2026, 11), Season(2024, 11)), s.all.map { it.season })
         assertEquals(SeasonTotal(Season(2026, 11), 150, earningsCents(150, 2000), 2), s.all[0])
@@ -55,34 +56,34 @@ class SeasonsTest {
     }
 
     @Test fun previousToDateCountsUpToSameDay() {
-        val s = computeSeasons(listOf(l(2025, 12, 5), l(2026, 1, 10, 30), l(2026, 1, 20)), LocalDate.of(2027, 1, 10), 11, null)
+        val s = computeSeasons(listOf(l(2025, 12, 5), l(2026, 1, 10, 30), l(2026, 1, 20)), LocalDate.of(2027, 1, 10), 11, payOf(null))
         assertEquals(90L, s.previousToDateMinutes) // 5 Dec + 10 Jan (inclusive), not 20 Jan
     }
 
     @Test fun previousNullWithoutLessons() =
-        assertNull(computeSeasons(listOf(l(2026, 12, 1)), LocalDate.of(2027, 1, 10), 11, null).previousToDateMinutes)
+        assertNull(computeSeasons(listOf(l(2026, 12, 1)), LocalDate.of(2027, 1, 10), 11, payOf(null)).previousToDateMinutes)
 
     @Test fun leapDay() {
-        val s = computeSeasons(listOf(l(2027, 2, 28), l(2027, 3, 1)), LocalDate.of(2028, 2, 29), 11, null)
+        val s = computeSeasons(listOf(l(2027, 2, 28), l(2027, 3, 1)), LocalDate.of(2028, 2, 29), 11, payOf(null))
         assertEquals(60L, s.previousToDateMinutes)
     }
 
     @Test fun earningsNullWithoutRate() =
-        assertNull(computeSeasons(listOf(l(2026, 12, 1)), LocalDate.of(2027, 1, 10), 11, null).current.earningsCents)
+        assertNull(computeSeasons(listOf(l(2026, 12, 1)), LocalDate.of(2027, 1, 10), 11, payOf(null)).current.earningsCents)
 
     @Test fun changeComparesWithTheSeasonJustBeforeEvenAfterAGap() {
         // 2024/25 had no lessons: 2025/26 compares with an empty season (+2h), not with 2023/24.
-        val s = computeSeasons(listOf(l(2023, 12, 1, 300), l(2025, 12, 1, 120)), LocalDate.of(2026, 1, 10), 11, null)
+        val s = computeSeasons(listOf(l(2023, 12, 1, 300), l(2025, 12, 1, 120)), LocalDate.of(2026, 1, 10), 11, payOf(null))
         assertEquals(120L, s.changeFromPrevious(Season(2025, 11)))
     }
 
     @Test fun changeFromPreviousSeason() {
-        val s = computeSeasons(listOf(l(2024, 12, 1, 60), l(2025, 12, 1, 180)), LocalDate.of(2026, 1, 10), 11, null)
+        val s = computeSeasons(listOf(l(2024, 12, 1, 60), l(2025, 12, 1, 180)), LocalDate.of(2026, 1, 10), 11, payOf(null))
         assertEquals(120L, s.changeFromPrevious(Season(2025, 11)))
     }
 
     @Test fun oldestSeasonHasNoChange() {
-        val s = computeSeasons(listOf(l(2024, 12, 1, 60), l(2025, 12, 1, 180)), LocalDate.of(2026, 1, 10), 11, null)
+        val s = computeSeasons(listOf(l(2024, 12, 1, 60), l(2025, 12, 1, 180)), LocalDate.of(2026, 1, 10), 11, payOf(null))
         assertNull(s.changeFromPrevious(Season(2024, 11)))
     }
 }

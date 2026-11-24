@@ -9,18 +9,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.karvo.R
 import com.karvo.data.Lesson
+import com.karvo.domain.Pay
 import com.karvo.domain.formatDuration
+import com.karvo.ui.settings.RateDot
 import com.karvo.ui.theme.rowNumber
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+
+/** The user's rates, so every lesson list can mark lessons not on the default rate. */
+val LocalPay = staticCompositionLocalOf { Pay.NONE }
 
 @Composable
 fun LessonRow(
@@ -47,6 +56,8 @@ fun LessonRow(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
+            val pay = LocalPay.current
+            pay.rateOf(lesson)?.takeIf { it != pay.default }?.let { RateDot(it.color, Modifier.padding(end = 8.dp).semantics { contentDescription = it.title }, size = 10) }
             Text(formatDuration(lesson.durationMinutes.toLong()), style = MaterialTheme.typography.rowNumber)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {

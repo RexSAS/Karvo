@@ -26,80 +26,52 @@ import org.junit.Test
 class SettingsViewModelTest {
     @get:Rule val mainRule = MainDispatcherRule()
     private val repo = FakeLessonRepository()
+    private val rates = com.karvo.data.RateRepository(com.karvo.testing.FakeRateDao(repo))
 
-    @Test fun showsStoredRate() = runTest {
-        val vm = SettingsViewModel(FakeSettingsRepository(2500), repo, FakeLanguageController())
-        assertEquals("25.00", vm.uiState.first { it.rateText.isNotEmpty() }.rateText)
+    @Test fun ratesAreListedAddedMadeDefaultAndDeleted() = runTest {
+        val vm = SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController(), rates)
+        vm.saveRate(com.karvo.data.Rate(title = "Standard", cents = 3000, color = 1))
+        vm.saveRate(com.karvo.data.Rate(title = "Private", cents = 4500, color = 2))
+        assertEquals(listOf("Standard", "Private"), vm.uiState.first { it.rates.size == 2 }.rates.map { it.title })
+        val private = rates.all().single { it.title == "Private" }
+        vm.setDefaultRate(private)
+        assertEquals("Private", vm.uiState.first { it.rates.first().title == "Private" }.rates.first().title)
+        vm.deleteRate(rates.all().single { it.title == "Standard" })
+        assertEquals(listOf("Private"), vm.uiState.first { it.rates.size == 1 }.rates.map { it.title })
     }
 
-    @Test fun commaBecomesDotWhileTyping() = runTest {
-        val vm = SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController()); vm.onRateChange("25,5")
-        assertEquals("25.5", vm.uiState.value.rateText)
-    }
-
-    @Test fun savesValidRateAndReformats() = runTest {
-        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo, FakeLanguageController())
-        vm.onRateChange("25,5"); vm.saveRate()
-        assertEquals(2550L, s.hourlyRateCents.first()); assertFalse(vm.uiState.value.rateError)
-        assertEquals("25.50", vm.uiState.value.rateText)
+    @Test fun csvNamesEachLessonsRate() = runTest {
+        rates.save(com.karvo.data.Rate(title = "Standard", cents = 3000, color = 1))
+        repo.save(Lesson(date = LocalDate.of(2026, 10, 20), durationMinutes = 90, student = "Anna"))
+        assertTrue(SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController(), rates).buildCsv().contains("2026-10-20,Anna,90,1.5,,,Standard"))
     }
 
     @Test fun timeZoneChange() = runTest {
-        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo, FakeLanguageController())
+        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo, FakeLanguageController(), rates)
         assertEquals("Europe/Rome", vm.uiState.first().timeZoneId)
         vm.onTimeZoneSelected("Europe/Zurich"); assertEquals("Europe/Zurich", s.timeZoneId.first())
     }
 
     @Test fun unknownTimeZoneIgnored() = runTest {
-        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo, FakeLanguageController())
+        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo, FakeLanguageController(), rates)
         vm.onTimeZoneSelected("Nowhere/Land"); assertEquals("Europe/Rome", s.timeZoneId.first())
     }
 
     @Test fun exportFileNameUsesZone() = runTest {
         val clock = Clock.fixed(Instant.parse("2026-10-19T22:30:00Z"), ZoneOffset.UTC)
-        assertEquals("karvo-lessons-2026-10-20.csv", SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController(), clock).exportFileName())
+        assertEquals("karvo-lessons-2026-10-20.csv", SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController(), rates, clock).exportFileName())
     }
 
     @Test fun zoneListHasRome() = assertTrue("Europe/Rome" in availableTimeZones)
 
-    @Test fun invalidRateShowsErrorAndKeepsOld() = runTest {
-        val s = FakeSettingsRepository(1000); val vm = SettingsViewModel(s, repo, FakeLanguageController())
-        vm.onRateChange("abc"); vm.saveRate()
-        assertTrue(vm.uiState.value.rateError); assertEquals(1000L, s.hourlyRateCents.first())
-    }
-
-    @Test fun blankClearsRate() = runTest {
-        val s = FakeSettingsRepository(1000); val vm = SettingsViewModel(s, repo, FakeLanguageController())
-        vm.onRateChange(""); vm.saveRate(); assertNull(s.hourlyRateCents.first())
-    }
-
     @Test fun csvContainsLessons() = runTest {
         repo.save(Lesson(date = LocalDate.of(2026, 10, 20), durationMinutes = 90, student = "Anna"))
-        assertTrue(SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController()).buildCsv().contains("2026-10-20,Anna,90,1.5,"))
-    }
-
-    @Test fun saveRateTwiceIsIdempotent() = runTest {
-        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo, FakeLanguageController())
-        vm.onRateChange("30"); vm.saveRate(); vm.saveRate()
-        assertEquals(3000L, s.hourlyRateCents.first()); assertEquals(1, s.rateWrites)
-    }
-
-    @Test fun saveRateWithoutEditDoesNotWrite() = runTest {
-        val s = FakeSettingsRepository(2500); val vm = SettingsViewModel(s, repo, FakeLanguageController())
-        vm.saveRate()
-        assertEquals(2500L, s.hourlyRateCents.first()); assertEquals(0, s.rateWrites)
-    }
-
-    @Test fun typedRateSavedWithoutDone() = runTest {
-        val s = FakeSettingsRepository(null); val vm = SettingsViewModel(s, repo, FakeLanguageController())
-        vm.onRateChange("30")
-        vm.saveRate() // what the screen's onDispose / ON_STOP path calls
-        assertEquals(3000L, s.hourlyRateCents.first())
+        assertTrue(SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController(), rates).buildCsv().contains("2026-10-20,Anna,90,1.5,"))
     }
 
     @Test fun themeSelectionPersistsAndShows() = runTest {
         val settings = FakeSettingsRepository()
-        val vm = SettingsViewModel(settings, repo, FakeLanguageController())
+        val vm = SettingsViewModel(settings, repo, FakeLanguageController(), rates)
         vm.onThemeSelected(ThemeChoice.CLASSIC)
         assertEquals(ThemeChoice.CLASSIC, settings.theme.first())
         assertEquals(ThemeChoice.CLASSIC, vm.uiState.first { it.theme == ThemeChoice.CLASSIC }.theme)
@@ -107,23 +79,15 @@ class SettingsViewModelTest {
 
     @Test fun languageShowsCurrentAndSetsController() = runTest {
         val lang = FakeLanguageController(LanguageChoice.ITALIAN)
-        val vm = SettingsViewModel(FakeSettingsRepository(), repo, lang)
+        val vm = SettingsViewModel(FakeSettingsRepository(), repo, lang, rates)
         assertEquals(LanguageChoice.ITALIAN, vm.uiState.value.language)
         vm.onLanguageSelected(LanguageChoice.ENGLISH)
         assertEquals(LanguageChoice.ENGLISH, lang.current())
         assertEquals(LanguageChoice.ENGLISH, vm.uiState.value.language)
     }
 
-    @Test fun languageChangeSavesTypedRateFirst() = runTest {
-        val settings = FakeSettingsRepository()
-        val vm = SettingsViewModel(settings, repo, FakeLanguageController())
-        vm.onRateChange("30")
-        vm.onLanguageSelected(LanguageChoice.ITALIAN)
-        assertEquals(3000L, settings.hourlyRateCents.first { it != null })
-    }
-
     @Test fun settingSeasonStartPersists() = runTest {
-        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo, FakeLanguageController())
+        val s = FakeSettingsRepository(); val vm = SettingsViewModel(s, repo, FakeLanguageController(), rates)
         assertEquals(12, vm.uiState.value.seasonStartMonth)
         vm.onSeasonStartSelected(11)
         assertEquals(11, s.seasonStartMonth.first())
@@ -132,7 +96,7 @@ class SettingsViewModelTest {
 
     @Test fun turningSettingOffNeedsAuth() = runTest {
         val s = FakeSettingsRepository(); val auth = FakeAuthenticator(succeeds = false)
-        val vm = SettingsViewModel(s, repo, FakeLanguageController(), authenticator = auth)
+        val vm = SettingsViewModel(s, repo, FakeLanguageController(), rates, authenticator = auth)
         assertTrue(vm.uiState.value.biometricReveal)
         vm.onBiometricRevealChange(false, "Show earnings")
         assertTrue(s.biometricReveal.first())
@@ -144,7 +108,7 @@ class SettingsViewModelTest {
 
     @Test fun turningSettingOnNeedsNoAuth() = runTest {
         val s = FakeSettingsRepository().apply { setBiometricReveal(false) }; val auth = FakeAuthenticator()
-        val vm = SettingsViewModel(s, repo, FakeLanguageController(), authenticator = auth)
+        val vm = SettingsViewModel(s, repo, FakeLanguageController(), rates, authenticator = auth)
         vm.onBiometricRevealChange(true, "Show earnings")
         assertTrue(s.biometricReveal.first())
         assertEquals(0, auth.calls)
@@ -152,7 +116,7 @@ class SettingsViewModelTest {
 
     @Test fun availabilityShownAndRefreshed() = runTest {
         val auth = FakeAuthenticator(available = false)
-        val vm = SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController(), authenticator = auth)
+        val vm = SettingsViewModel(FakeSettingsRepository(), repo, FakeLanguageController(), rates, authenticator = auth)
         assertFalse(vm.uiState.value.biometricAvailable)
         auth.available = true
         vm.refreshBiometricAvailability()

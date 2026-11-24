@@ -14,12 +14,11 @@ import com.karvo.data.LanguageController
 import com.karvo.data.LessonRepository
 import com.karvo.data.SettingsRepository
 import com.karvo.data.ThemeChoice
-import com.karvo.domain.RateParseResult
+import com.karvo.data.Rate
+import com.karvo.data.RateRepository
+import com.karvo.domain.Pay
 import com.karvo.domain.csvFileName
-import com.karvo.domain.formatRateText
 import com.karvo.domain.lessonsToCsv
-import com.karvo.domain.normalizeRateInput
-import com.karvo.domain.parseRateCents
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
@@ -31,8 +30,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class SettingsUiState(
-    val rateText: String = "",
-    val rateError: Boolean = false,
+    /** Default first. */
+    val rates: List<Rate> = emptyList(),
     val timeZoneId: String = DEFAULT_TIME_ZONE,
     val theme: ThemeChoice = ThemeChoice.ALPINE_NIGHT,
     val language: LanguageChoice = LanguageChoice.SYSTEM,
@@ -54,6 +53,7 @@ class SettingsViewModel(
     private val settings: SettingsRepository,
     private val lessons: LessonRepository,
     private val language: LanguageController,
+    private val rates: RateRepository,
     private val clock: Clock = Clock.systemUTC(),
     private val authenticator: Authenticator = Authenticator.None,
 ) : ViewModel() {
@@ -61,24 +61,9 @@ class SettingsViewModel(
     private val _uiState = MutableStateFlow(SettingsUiState(language = language.current()))
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
-    /** True when the rate text was edited since it was loaded or last saved. */
-    private var rateDirty = false
-
-    /** Last known stored rate (valid once [storedKnown]), used to skip redundant writes. */
-    private var storedRate: Long? = null
-    private var storedKnown = false
-
     init {
         viewModelScope.launch {
-            val stored = settings.hourlyRateCents.first()
-            if (!storedKnown) {
-                storedRate = stored
-                storedKnown = true
-            }
-            if (stored != null) {
-                // Do not clobber text the user has already started typing.
-                _uiState.update { if (it.rateText.isEmpty()) it.copy(rateText = formatRateText(stored)) else it }
-            }
+            rates.observe().collect { list -> _uiState.update { it.copy(rates = list) } }
         }
         viewModelScope.launch {
             settings.timeZoneId.collect { id -> _uiState.update { it.copy(timeZoneId = id) } }
@@ -95,31 +80,17 @@ class SettingsViewModel(
         refreshBiometricAvailability()
     }
 
-    fun onRateChange(input: String) {
-        rateDirty = true
-        _uiState.update { it.copy(rateText = normalizeRateInput(input), rateError = false) }
+    /** Adds ([Rate.id] 0) or updates a rate; invalid ones are ignored (the dialog doesn't offer them). */
+    fun saveRate(rate: Rate) {
+        viewModelScope.launch { rates.save(rate) }
     }
 
-    /**
-     * Saves the typed rate. Idempotent: called on Done, focus loss, ON_STOP and when the screen leaves;
-     * it writes only if the text was edited and differs from the stored rate. Invalid text leaves storage unchanged.
-     */
-    fun saveRate() {
-        if (!rateDirty) return
-        val cents = when (val result = parseRateCents(_uiState.value.rateText)) {
-            RateParseResult.Cleared -> null
-            is RateParseResult.Valid -> result.cents
-            RateParseResult.Invalid -> {
-                _uiState.update { it.copy(rateError = true) }
-                return
-            }
-        }
-        rateDirty = false
-        _uiState.update { it.copy(rateText = cents?.let(::formatRateText).orEmpty(), rateError = false) }
-        if (storedKnown && cents == storedRate) return
-        storedRate = cents
-        storedKnown = true
-        viewModelScope.launch { settings.setHourlyRateCents(cents) }
+    fun setDefaultRate(rate: Rate) {
+        viewModelScope.launch { rates.setDefault(rate.id) }
+    }
+
+    fun deleteRate(rate: Rate) {
+        viewModelScope.launch { rates.delete(rate.id) }
     }
 
     fun onTimeZoneSelected(id: String) {
@@ -148,16 +119,14 @@ class SettingsViewModel(
         viewModelScope.launch { settings.setTheme(choice) }
     }
 
-    /** Saves a typed rate first: applying a language recreates the activity. */
     fun onLanguageSelected(choice: LanguageChoice) {
-        saveRate()
         language.set(choice)
         _uiState.update { it.copy(language = choice) }
     }
 
     suspend fun exportData(): CsvExport {
         val all = lessons.allLessons()
-        return CsvExport(lessonsToCsv(all), all.size)
+        return CsvExport(lessonsToCsv(all, Pay(rates.all())::titleOf), all.size)
     }
 
     suspend fun buildCsv(): String = exportData().csv
@@ -172,7 +141,7 @@ class SettingsViewModel(
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KarvoApp).container
                 SettingsViewModel(
-                    container.settingsRepository, container.lessonRepository, container.languageController,
+                    container.settingsRepository, container.lessonRepository, container.languageController, container.rateRepository,
                     authenticator = container.authenticator,
                 )
             }

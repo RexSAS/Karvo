@@ -9,6 +9,7 @@ import com.karvo.KarvoApp
 import com.karvo.data.DEFAULT_TIME_ZONE
 import com.karvo.data.Lesson
 import com.karvo.data.LessonRepository
+import com.karvo.data.Rate
 import com.karvo.data.SettingsRepository
 import com.karvo.domain.LessonError
 import com.karvo.domain.PaidStatus
@@ -18,7 +19,9 @@ import java.time.Clock
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -40,7 +43,14 @@ data class EditLessonUiState(
     val durationTouched: Boolean = false,
     /** The lesson's month when it's already marked paid; this lesson would make it partly paid. */
     val paidMonthNote: YearMonth? = null,
+    /** Default first; the editor shows the rate flags only when there is a choice. */
+    val rates: List<Rate> = emptyList(),
+    /** The rate picked, or the lesson's own; null = the default. */
+    val rateId: Long? = null,
 ) {
+    /** The rate the lesson will be saved with: [rateId] while it exists, else the default. */
+    val selectedRateId: Long? get() = (rates.firstOrNull { it.id == rateId } ?: rates.firstOrNull { it.isDefault } ?: rates.firstOrNull())?.id
+
     val isValid get() = errors.isEmpty()
 }
 
@@ -49,6 +59,7 @@ class EditLessonViewModel(
     private val settings: SettingsRepository,
     private val lessonId: Long?,
     private val clock: Clock = Clock.systemUTC(),
+    rates: Flow<List<Rate>> = flowOf(emptyList()),
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -76,6 +87,9 @@ class EditLessonViewModel(
             }
         }
         viewModelScope.launch {
+            rates.collect { list -> update { it.copy(rates = list) } }
+        }
+        viewModelScope.launch {
             repo.observeLessons().collect { lessons ->
                 allLessons = lessons
                 update { it }
@@ -96,6 +110,7 @@ class EditLessonViewModel(
                             minutesText = (lesson.durationMinutes % 60).toString(),
                             student = lesson.student,
                             notes = lesson.notes.orEmpty(),
+                            rateId = lesson.rateId,
                         )
                     }
                 }
@@ -152,6 +167,8 @@ class EditLessonViewModel(
 
     fun onNotesChange(text: String) = update { it.copy(notes = text) }
 
+    fun onRateChange(id: Long) = update { it.copy(rateId = id) }
+
     fun save(onDone: () -> Unit) {
         val s = _uiState.value
         if (!s.isValid || busy) return
@@ -159,8 +176,8 @@ class EditLessonViewModel(
         val minutes = (s.hoursText.toIntOrNull() ?: 0) * 60 + (s.minutesText.toIntOrNull() ?: 0)
         viewModelScope.launch {
             // Copying the original keeps fields the form doesn't edit, such as paidOn.
-            val lesson = original?.copy(date = s.date, durationMinutes = minutes, student = s.student, notes = s.notes)
-                ?: Lesson(date = s.date, durationMinutes = minutes, student = s.student, notes = s.notes)
+            val lesson = original?.copy(date = s.date, durationMinutes = minutes, student = s.student, notes = s.notes, rateId = s.selectedRateId)
+                ?: Lesson(date = s.date, durationMinutes = minutes, student = s.student, notes = s.notes, rateId = s.selectedRateId)
             repo.save(lesson)
             onDone()
         }
@@ -180,7 +197,7 @@ class EditLessonViewModel(
         fun factory(lessonId: Long?): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KarvoApp).container
-                EditLessonViewModel(container.lessonRepository, container.settingsRepository, lessonId)
+                EditLessonViewModel(container.lessonRepository, container.settingsRepository, lessonId, rates = container.rateRepository.observe())
             }
         }
     }

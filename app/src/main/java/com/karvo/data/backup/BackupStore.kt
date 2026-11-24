@@ -56,7 +56,7 @@ class BackupStore(private val dir: File, private val clock: Clock) {
     }
 
     /** Writes a new backup atomically (temp file, then rename), then deletes the oldest beyond [MAX_BACKUPS]. */
-    fun create(reason: BackupReason, lessons: List<Lesson>, events: List<com.karvo.data.Event> = emptyList()): Backup {
+    fun create(reason: BackupReason, lessons: List<Lesson>, events: List<com.karvo.data.Event> = emptyList(), rateTitle: (Lesson) -> String = { "" }): Backup {
         if (!dir.isDirectory && !dir.mkdirs()) throw IOException("Can't create $dir")
         // Always newer than every existing backup, even if the clock went backwards; otherwise the
         // rotation below would treat the new backup as the oldest and delete it straight away.
@@ -64,7 +64,7 @@ class BackupStore(private val dir: File, private val clock: Clock) {
         val millis = maxOf(clock.millis(), newest + 1)
         val name = "backup-$millis-${reason.slug()}.csv"
         val tmp = File(dir, "$name.tmp")
-        tmp.writeBytes(csvFileBytes(lessonsToCsv(lessons)))
+        tmp.writeBytes(csvFileBytes(lessonsToCsv(lessons, rateTitle)))
         // Events go in a sidecar written first, so a listed backup never lacks the events it was made with.
         // Always written (even "{}"): no sidecar means a backup from before 3.2.
         run {
@@ -82,7 +82,7 @@ class BackupStore(private val dir: File, private val clock: Clock) {
     }
 
     /** Throws [com.karvo.domain.BackupFormatException] for a damaged file, [IOException] for a missing one. */
-    fun read(fileName: String): List<Lesson> = parseLessonsCsv(File(dir, fileName).readText(Charsets.UTF_8))
+    fun read(fileName: String, rateId: (String) -> Long? = { null }): List<Lesson> = parseLessonsCsv(File(dir, fileName).readText(Charsets.UTF_8), rateId)
 
     /** The backup's events; null for a backup made before 3.2 (no sidecar) or an unreadable sidecar. */
     fun readEvents(fileName: String): List<com.karvo.data.Event>? = try {

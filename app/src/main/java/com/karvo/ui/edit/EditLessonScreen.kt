@@ -12,6 +12,8 @@ import com.karvo.ui.messageRes
 import com.karvo.ui.theme.alpineFieldColors
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import com.karvo.ui.settings.RateDot
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -212,6 +214,22 @@ fun EditLessonScreen(lessonId: Long?, onDone: () -> Unit) {
                                 studentMenuOpen = false
                             },
                         )
+                    }
+                }
+            }
+
+            if (state.rates.size > 1) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.lesson_rate), style = MaterialTheme.typography.labelLarge)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        state.rates.forEach { rate ->
+                            FilterChip(
+                                selected = rate.id == state.selectedRateId,
+                                onClick = { vm.onRateChange(rate.id) },
+                                label = { Text(rate.title) },
+                                leadingIcon = { RateDot(rate.color) },
+                            )
+                        }
                     }
                 }
             }

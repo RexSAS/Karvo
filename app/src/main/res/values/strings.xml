@@ -121,7 +121,6 @@
     <!-- Settings -->
     <string name="hourly_rate">Hourly rate</string>
     <string name="rate_error">Enter an amount like 25.00</string>
-    <string name="rate_hint">Leave empty to hide earnings</string>
     <string name="time_zone">Time zone</string>
     <string name="export_csv">Export to CSV</string>
     <string name="export_csv_hint">Save all lessons as a spreadsheet</string>
@@ -370,7 +369,7 @@
     <string name="tour_students_title">Your students</string>
     <string name="tour_students_body">Your top students of the season. Tap one to see all their lessons and what is still unpaid.</string>
     <string name="tour_settings_title">Make it yours</string>
-    <string name="tour_settings_body">Set your hourly rate, when the season starts, the language and the look.</string>
+    <string name="tour_settings_body">Set your hourly rates, when the season starts, the language and the look.</string>
     <string name="tour_backups_title">Backups</string>
     <string name="tour_backups_body">Karvo keeps up to 3 backups here. Export a CSV to keep a copy somewhere else too.</string>
     <string name="tour_pc_title">Use Karvo on your PC</string>
@@ -431,4 +430,21 @@
     <string name="badge_freerider">Freerider</string>
     <string name="badge_snow_king">Snow king</string>
     <string name="badge_legend">Legend of the slopes</string>
+    <string name="edit">Edit</string>
+    <string name="hourly_rates">Hourly rates</string>
+    <string name="rates_empty_hint">Add a rate to see your earnings</string>
+    <string name="rate_standard">Standard</string>
+    <string name="rate_per_hour">%1$s €/h</string>
+    <string name="rate_default">Default</string>
+    <string name="rate_options">Options for %1$s</string>
+    <string name="rate_set_default">Set as default</string>
+    <string name="rate_add">Add rate</string>
+    <string name="rate_edit">Edit rate</string>
+    <string name="rate_title">Name</string>
+    <string name="rate_color">Color</string>
+    <string name="rate_color_n">Color %1$d</string>
+    <string name="rate_delete_question">Delete “%1$s”?</string>
+    <string name="rate_delete_moves">Its lessons will be paid at the default rate, %1$s.</string>
+    <string name="rate_delete_last">Earnings will be hidden until you add a rate again.</string>
+    <string name="lesson_rate">Rate</string>
 </resources>

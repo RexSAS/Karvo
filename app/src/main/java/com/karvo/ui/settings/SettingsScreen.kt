@@ -114,7 +114,7 @@ fun SettingsScreen(
     /** Null in the Play build, which Play keeps up to date. */
     onCheckForUpdates: (() -> Unit)?,
     onShowTour: () -> Unit,
-    /** False while another pager page is on screen: a typed rate is saved as soon as the user swipes away. */
+    /** False while another pager page is on screen. */
     isCurrentPage: Boolean = true,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
     importViewModel: ImportViewModel = viewModel(factory = ImportViewModel.Factory),
@@ -132,20 +132,9 @@ fun SettingsScreen(
     var showLanguagePicker by remember { mutableStateOf(false) }
     var showRestoreConsent by remember { mutableStateOf(false) }
     var restoringMoments by remember { mutableStateOf(false) }
-    var rateFocused by remember { mutableStateOf(false) }
-
-    // Besides Done and focus loss, save a typed rate when the app stops or the screen leaves
-    // (saveRate is idempotent; the ViewModel outlives this composition, so the write completes).
-    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.saveRate() }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshBiometricAvailability() }
     val biometricPromptTitle = stringResource(R.string.biometric_turn_off_prompt)
-    DisposableEffect(viewModel) { onDispose { viewModel.saveRate() } }
-    LaunchedEffect(isCurrentPage) {
-        if (!isCurrentPage) {
-            viewModel.saveRate()
-            focusManager.clearFocus()
-        }
-    }
+    LaunchedEffect(isCurrentPage) { if (!isCurrentPage) focusManager.clearFocus() }
 
     suspend fun showMessage(message: String) {
         snackbarHostState.currentSnackbarData?.dismiss()
@@ -220,29 +209,12 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            OutlinedTextField(
-                colors = alpineFieldColors(),
-                value = state.rateText,
-                onValueChange = viewModel::onRateChange,
-                label = { Text(stringResource(R.string.hourly_rate)) },
-                placeholder = { Text("00.00") },
-                suffix = { Text("€") },
-                singleLine = true,
-                isError = state.rateError,
-                supportingText = {
-                    Text(stringResource(if (state.rateError) R.string.rate_error else R.string.rate_hint))
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = {
-                    viewModel.saveRate()
-                    focusManager.clearFocus()
-                }),
-                modifier = Modifier.tourTarget(TourTarget.Rate)
-                    .fillMaxWidth()
-                    .onFocusChanged {
-                        if (rateFocused && !it.isFocused) viewModel.saveRate()
-                        rateFocused = it.isFocused
-                    },
+            RatesSection(
+                rates = state.rates,
+                onSave = viewModel::saveRate,
+                onSetDefault = viewModel::setDefaultRate,
+                onDelete = viewModel::deleteRate,
+                modifier = Modifier.tourTarget(TourTarget.Rate),
             )
 
             AlpineTile(Modifier.fillMaxWidth()) {
@@ -595,7 +567,7 @@ private fun TimeZoneDialog(current: String, onSelect: (String) -> Unit, onDismis
 
 /** Settings rows let the alpine backdrop show through instead of cutting it into fragments. */
 @Composable
-private fun transparentRow() = ListItemDefaults.colors(containerColor = Color.Transparent)
+internal fun transparentRow() = ListItemDefaults.colors(containerColor = Color.Transparent)
 
 /** "November" / "Novembre", capitalised for display. */
 private fun monthName(month: Int, locale: java.util.Locale = java.util.Locale.getDefault()): String =

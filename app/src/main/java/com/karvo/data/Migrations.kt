@@ -26,3 +26,11 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
         db.execSQL("DROP TABLE day_notes")
     }
 }
+
+/** 3.8: several hourly rates; each lesson may name its rate (null = the default). */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `rates` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `cents` INTEGER NOT NULL, `color` INTEGER NOT NULL, `isDefault` INTEGER NOT NULL)")
+        db.execSQL("ALTER TABLE lessons ADD COLUMN rateId INTEGER")
+    }
+}

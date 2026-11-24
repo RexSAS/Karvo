@@ -73,4 +73,16 @@ class CsvImporterTest {
         val mixed = tricky.mapIndexed { i, l -> if (i % 2 == 0) l.copy(paidOn = LocalDate.of(2027, 1, 15)) else l }
         assertEquals(mixed, parseLessonsCsv(lessonsToCsv(mixed)))
     }
+
+    @Test fun rateTitlesComeBackAsTheMatchingRateAndUnknownOnesAsTheDefault() {
+        val pay = Pay(listOf(com.karvo.data.Rate(1, "Standard", 3000, 0, true), com.karvo.data.Rate(2, "Private", 4500, 0)))
+        val lessons = listOf(
+            Lesson(date = LocalDate.of(2026, 12, 3), durationMinutes = 60, student = "A", rateId = 2),
+            Lesson(date = LocalDate.of(2026, 12, 4), durationMinutes = 60, student = "B"),
+        )
+        val csv = lessonsToCsv(lessons, pay::titleOf)
+        assertEquals(listOf(2L, 1L), parseLessonsCsv(csv) { pay.idOfTitle(it) }.map { it.rateId })
+        assertEquals(listOf<Long?>(null, null), parseLessonsCsv(csv.replace("Private", "Gone").replace("Standard", "")) { pay.idOfTitle(it) }.map { it.rateId })
+        assertEquals(listOf(2L), parseLessonsCsv("$headerV2,rate\r\n2026-12-03,A,60,1,,,private\r\n") { pay.idOfTitle(it) }.map { it.rateId })
+    }
 }

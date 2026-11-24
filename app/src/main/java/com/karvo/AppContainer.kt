@@ -15,6 +15,9 @@ import com.karvo.data.LessonRepository
 import com.karvo.data.MIGRATION_1_2
 import com.karvo.data.MIGRATION_2_3
 import com.karvo.data.MIGRATION_3_4
+import com.karvo.data.MIGRATION_4_5
+import com.karvo.data.RateRepository
+import kotlinx.coroutines.launch
 import com.karvo.data.RoomEventRepository
 import com.karvo.data.EventRepository
 import com.karvo.data.KarvoDatabase
@@ -52,7 +55,7 @@ class AppContainer(context: Context) {
 
     private val database: KarvoDatabase by lazy {
         Room.databaseBuilder(appContext, KarvoDatabase::class.java, "karvo.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .build()
     }
 
@@ -66,6 +69,11 @@ class AppContainer(context: Context) {
     val lessonRepository: LessonRepository by lazy { RoomLessonRepository(database.lessonDao()) }
     val eventRepository: EventRepository by lazy { RoomEventRepository(database.eventDao()) }
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(dataStore) }
+    val rateRepository: RateRepository by lazy {
+        RateRepository(database.rateDao()).also { r ->
+            appScope.launch { r.adoptLegacyRate(settingsRepository, appContext.getString(R.string.rate_standard)) }
+        }
+    }
     val languageController: LanguageController = AppCompatLanguageController()
     val textFileReader by lazy { ContentResolverTextFileReader(appContext) }
     val authenticator = BiometricAuthenticator(appContext)
@@ -97,7 +105,7 @@ class AppContainer(context: Context) {
         CoroutineExceptionHandler { _, e -> android.util.Log.w("KarvoLink", "link task failed", e) })
 
     private val linkHandler by lazy {
-        LinkCommandHandler(lessonRepository, settingsRepository, eventRepository,
+        LinkCommandHandler(lessonRepository, settingsRepository, eventRepository, rateRepository,
             messages = { e: LessonError -> appContext.getString(e.messageRes()) },
             refusal = { r -> appContext.getString(when (r) {
                 Refusal.LessonGone -> R.string.link_refused_lesson_gone
@@ -107,7 +115,7 @@ class AppContainer(context: Context) {
                 Refusal.InvalidMonth -> R.string.link_refused_invalid_month
                 Refusal.InvalidData -> R.string.link_refused_invalid_data
                 Refusal.UnknownCommand -> R.string.link_refused_unknown
-            }) })
+            }) }, standardTitle = appContext.getString(R.string.rate_standard))
     }
 
     private val relaySockets by lazy { OkHttpRelaySocketFactory(OkHttpClient.Builder().pingInterval(30, java.util.concurrent.TimeUnit.SECONDS).build()) }
@@ -126,6 +134,6 @@ class AppContainer(context: Context) {
     }
 
     val backupService: BackupService by lazy {
-        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository, events = eventRepository)
+        BackupService(BackupStore(File(appContext.filesDir, "backups"), Clock.systemUTC()), lessonRepository, events = eventRepository, rates = rateRepository)
     }
 }

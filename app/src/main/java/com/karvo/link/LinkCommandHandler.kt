@@ -4,6 +4,8 @@ import com.karvo.data.Event
 import com.karvo.data.EventRepository
 import com.karvo.data.Lesson
 import com.karvo.data.MAX_EVENT
+import com.karvo.data.Rate
+import com.karvo.data.RateRepository
 import com.karvo.data.LessonRepository
 import com.karvo.data.SettingsRepository
 import com.karvo.domain.LessonError
@@ -24,6 +26,10 @@ class CommandRefused(message: String) : Exception(message)
 fun Lesson.toJson(): JSONObject = JSONObject()
     .put("id", id).put("date", date.toString()).put("durationMinutes", durationMinutes).put("student", student)
     .put("notes", notes ?: JSONObject.NULL).put("paidOn", paidOn?.toString() ?: JSONObject.NULL)
+    .put("rateId", rateId ?: JSONObject.NULL)
+
+fun Rate.toJson(): JSONObject = JSONObject()
+    .put("id", id).put("title", title).put("cents", cents).put("color", color).put("isDefault", isDefault)
 
 /**
  * Applies PC commands (spec "Messages") with the same rules as the app's own screens, and produces the
@@ -33,8 +39,11 @@ class LinkCommandHandler(
     private val lessons: LessonRepository,
     private val settings: SettingsRepository,
     private val events: EventRepository,
+    private val rates: RateRepository,
     private val messages: (LessonError) -> String,
     private val refusal: (Refusal) -> String,
+    /** Title of the rate a pre-3.8 PC creates when it sets its one rate. */
+    private val standardTitle: String = "Standard",
 ) {
     private fun refuse(r: Refusal): Nothing = throw CommandRefused(refusal(r))
 
@@ -48,6 +57,7 @@ class LinkCommandHandler(
                 student = o.getString("student"),
                 notes = if (o.isNull("notes")) null else o.getString("notes"),
                 paidOn = if (o.isNull("paidOn")) null else LocalDate.parse(o.getString("paidOn")),
+                rateId = if (o.isNull("rateId")) null else o.getLong("rateId"),
             )
         } catch (e: Exception) { refuse(Refusal.InvalidData) }
         if (l.durationMinutes < 0) refuse(Refusal.InvalidData)
@@ -75,18 +85,35 @@ class LinkCommandHandler(
             "addLesson" -> lessons.save(lessonFrom(args.optJSONObject("lesson")).copy(id = 0))
             "updateLesson" -> {
                 val l = lessonFrom(args.optJSONObject("lesson"))
-                if (l.id == 0L || lessons.get(l.id) == null) refuse(Refusal.LessonGone)
-                lessons.save(l)
+                val old = if (l.id == 0L) null else lessons.get(l.id)
+                if (old == null) refuse(Refusal.LessonGone)
+                // A PC from before 3.8 sends no rateId: the lesson keeps its rate.
+                lessons.save(if (args.optJSONObject("lesson")!!.has("rateId")) l else l.copy(rateId = old.rateId))
             }
             "deleteLesson" -> lessons.delete(lessons.get(args.optLong("id", -1)) ?: refuse(Refusal.LessonGone))
             "markPaid" -> lessons.markMonthPaid(month(args.optString("month")),
                 runCatching { LocalDate.parse(args.optString("paidOn")) }.getOrElse { refuse(Refusal.InvalidData) })
             "markUnpaid" -> lessons.markMonthUnpaid(month(args.optString("month")))
+            // A PC from before 3.8 sets its one rate: that is the default rate here (cleared = removed if it's the last).
             "setRate" -> {
                 val cents = if (args.isNull("rateCents")) null else args.optLong("rateCents", 0)
                 if (cents != null && cents <= 0) refuse(Refusal.InvalidRate)
-                settings.setHourlyRateCents(cents)
+                val default = rates.all().firstOrNull { it.isDefault }
+                when {
+                    cents == null -> if (default != null) rates.delete(default.id)
+                    default == null -> rates.save(Rate(title = standardTitle, cents = cents, color = com.karvo.data.RATE_COLORS[0]))
+                    else -> rates.save(default.copy(cents = cents))
+                }
             }
+            "saveRate" -> {
+                val o = args.optJSONObject("rate") ?: refuse(Refusal.InvalidData)
+                val rate = runCatching {
+                    Rate(id = o.optLong("id", 0), title = o.getString("title"), cents = o.getLong("cents"), color = o.getInt("color"))
+                }.getOrElse { refuse(Refusal.InvalidData) }
+                if (!rates.save(rate)) refuse(if (rate.cents <= 0) Refusal.InvalidRate else Refusal.InvalidData)
+            }
+            "setDefaultRate" -> rates.setDefault(args.optLong("id", -1))
+            "deleteRate" -> if (!rates.delete(args.optLong("id", -1))) refuse(Refusal.InvalidData)
             "setSeasonStart" -> {
                 val m = args.optInt("month", 0)
                 if (m !in 1..12) refuse(Refusal.InvalidMonth)
@@ -120,9 +147,12 @@ class LinkCommandHandler(
 
     /** The full data the PC shows, again after every change from either side. */
     fun snapshots(): Flow<JSONObject> = combine(
-        lessons.observeLessons(), settings.hourlyRateCents, settings.seasonStartMonth, settings.timeZoneId, events.observe(),
-    ) { all, rate, seasonStart, zone, evs ->
-        JSONObject().put("lessons", JSONArray(all.map { it.toJson() })).put("rateCents", rate ?: JSONObject.NULL)
+        lessons.observeLessons(), rates.observe(), settings.seasonStartMonth, settings.timeZoneId, events.observe(),
+    ) { all, rateList, seasonStart, zone, evs ->
+        // rateCents (the default's) is for PCs from before 3.8.
+        JSONObject().put("lessons", JSONArray(all.map { it.toJson() }))
+            .put("rates", JSONArray(rateList.map { it.toJson() }))
+            .put("rateCents", rateList.firstOrNull { it.isDefault }?.cents ?: JSONObject.NULL)
             .put("seasonStartMonth", seasonStart).put("timeZoneId", zone)
             .put("events", JSONArray(evs.map { JSONObject().put("id", it.id).put("date", it.date.toString()).put("text", it.text) }))
     }

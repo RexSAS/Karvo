@@ -41,10 +41,10 @@ data class SeasonStats(
     }
 }
 
-fun computeSeasons(lessons: List<Lesson>, today: LocalDate, startMonth: Int, rateCents: Long?): SeasonStats {
+fun computeSeasons(lessons: List<Lesson>, today: LocalDate, startMonth: Int, pay: Pay): SeasonStats {
     fun total(season: Season, items: List<Lesson>): SeasonTotal {
         val minutes = items.sumOf { it.durationMinutes.toLong() }
-        return SeasonTotal(season, minutes, rateCents?.let { earningsCents(minutes, it) }, items.size)
+        return SeasonTotal(season, minutes, pay.earnings(items), items.size)
     }
 
     val bySeason = lessons.groupBy { seasonOf(it.date, startMonth) }

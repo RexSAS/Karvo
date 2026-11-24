@@ -1,5 +1,8 @@
 package com.karvo.ui.overview
 
+import com.karvo.data.Rate
+import com.karvo.domain.Pay
+import kotlinx.coroutines.flow.Flow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -12,7 +15,6 @@ import com.karvo.data.LessonRepository
 import com.karvo.data.SettingsRepository
 import com.karvo.data.mayRevealEarnings
 import com.karvo.domain.PaidStatus
-import com.karvo.domain.earningsCents
 import com.karvo.domain.paidStatus
 import java.time.Clock
 import java.time.LocalDate
@@ -41,6 +43,7 @@ data class MonthDetailUiState(
 class MonthDetailViewModel(
     private val lessons: LessonRepository,
     private val settings: SettingsRepository,
+    private val rates: Flow<List<Rate>>,
     private val month: YearMonth,
     private val clock: Clock = Clock.systemUTC(),
     private val authenticator: Authenticator = Authenticator.None,
@@ -50,15 +53,15 @@ class MonthDetailViewModel(
     private val revealed = MutableStateFlow(false)
 
     val uiState: StateFlow<MonthDetailUiState> = combine(
-        lessons.observeLessons(), settings.hourlyRateCents, settings.timeZoneId, revealed,
-    ) { all, rate, zone, isRevealed ->
+        lessons.observeLessons(), rates, settings.timeZoneId, revealed,
+    ) { all, rates, zone, isRevealed ->
         val inMonth = all.filter { YearMonth.from(it.date) == month }
         val total = inMonth.sumOf { it.durationMinutes.toLong() }
         MonthDetailUiState(
             month = month,
             lessons = inMonth,
             totalMinutes = total,
-            earningsCents = rate?.let { earningsCents(total, it) },
+            earningsCents = Pay(rates).earnings(inMonth),
             paidStatus = paidStatus(inMonth),
             paidOn = inMonth.mapNotNull { it.paidOn }.maxOrNull(),
             today = LocalDate.now(clock.withZone(ZoneId.of(zone))),
@@ -94,7 +97,7 @@ class MonthDetailViewModel(
         fun factory(month: YearMonth): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KarvoApp).container
-                MonthDetailViewModel(container.lessonRepository, container.settingsRepository, month, authenticator = container.authenticator)
+                MonthDetailViewModel(container.lessonRepository, container.settingsRepository, container.rateRepository.observe(), month, authenticator = container.authenticator)
             }
         }
     }

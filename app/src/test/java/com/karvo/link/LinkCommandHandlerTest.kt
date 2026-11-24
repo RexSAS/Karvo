@@ -22,7 +22,9 @@ class LinkCommandHandlerTest {
     private val lessons = FakeLessonRepository(listOf(anna))
     private val settings = FakeSettingsRepository(initial = 3000L, zone = "Europe/Rome")
     private val events = com.karvo.testing.FakeEventRepository()
-    private val handler = LinkCommandHandler(lessons, settings, events, messages = { it.name }, refusal = { it.name })
+    private val rates = com.karvo.data.RateRepository(com.karvo.testing.FakeRateDao(lessons))
+        .also { kotlinx.coroutines.runBlocking { it.save(com.karvo.data.Rate(title = "Standard", cents = 3000, color = 1)) } }
+    private val handler = LinkCommandHandler(lessons, settings, events, rates, messages = { it.name }, refusal = { it.name })
 
     private fun lessonJson(id: Long = 0, date: String = "2026-01-06", minutes: Int = 90, student: String = "Bo", paidOn: String? = null) =
         JSONObject().put("id", id).put("date", date).put("durationMinutes", minutes).put("student", student)
@@ -51,15 +53,45 @@ class LinkCommandHandlerTest {
         assertEquals("LessonGone", refused("deleteLesson", JSONObject().put("id", 99)))
     }
 
+    @Test fun `rates are added, edited, made default and deleted, and lessons keep or move their rate`() = runTest {
+        val rate = { o: JSONObject -> JSONObject().put("rate", o) }
+        handler.handle("saveRate", rate(JSONObject().put("title", " Private ").put("cents", 4500).put("color", 7)))
+        val private = rates.all().single { it.title == "Private" }
+        assertEquals(listOf(false, 4500L), listOf(private.isDefault, private.cents))
+        handler.handle("saveRate", rate(JSONObject().put("id", private.id).put("title", "Private").put("cents", 5000).put("color", 7)))
+        assertEquals(5000L, rates.all().single { it.id == private.id }.cents)
+        assertEquals("InvalidRate", refused("saveRate", rate(JSONObject().put("title", "X").put("cents", 0).put("color", 1))))
+        assertEquals("InvalidData", refused("saveRate", rate(JSONObject().put("title", " ").put("cents", 100).put("color", 1))))
+
+        handler.handle("updateLesson", JSONObject().put("lesson", lessonJson(id = 1, student = "Anna").put("rateId", private.id)))
+        assertEquals(private.id, lessons.get(1)!!.rateId)
+        // A PC from before 3.8 sends no rateId: the lesson keeps its rate.
+        handler.handle("updateLesson", JSONObject().put("lesson", lessonJson(id = 1, minutes = 30, student = "Anna")))
+        assertEquals(private.id, lessons.get(1)!!.rateId)
+
+        val standard = rates.all().single { it.title == "Standard" }
+        assertEquals("InvalidData", refused("deleteRate", JSONObject().put("id", standard.id))) // the default, not the last
+        handler.handle("setDefaultRate", JSONObject().put("id", private.id))
+        assertEquals(private.id, rates.all().first().id)
+        handler.handle("deleteRate", JSONObject().put("id", standard.id))
+        assertEquals(listOf(private.id), rates.all().map { it.id })
+        val snap = handler.snapshots().first()
+        assertEquals(5000L, snap.getLong("rateCents"))
+        assertEquals("Private", snap.getJSONArray("rates").getJSONObject(0).getString("title"))
+        assertEquals(private.id, snap.getJSONArray("lessons").getJSONObject(0).getLong("rateId"))
+    }
+
     @Test fun `months, rate and season start`() = runTest {
         handler.handle("markPaid", JSONObject().put("month", "2026-01").put("paidOn", "2026-02-01"))
         assertEquals(LocalDate.parse("2026-02-01"), lessons.get(1)!!.paidOn)
         handler.handle("markUnpaid", JSONObject().put("month", "2026-01"))
         assertNull(lessons.get(1)!!.paidOn)
         handler.handle("setRate", JSONObject().put("rateCents", 2750))
-        assertEquals(2750L, settings.hourlyRateCents.first())
+        assertEquals(2750L, rates.all().single().cents)
         handler.handle("setRate", JSONObject().put("rateCents", JSONObject.NULL))
-        assertNull(settings.hourlyRateCents.first())
+        assertTrue(rates.all().isEmpty())
+        handler.handle("setRate", JSONObject().put("rateCents", 2000))
+        assertEquals(listOf(2000L to true), rates.all().map { it.cents to it.isDefault })
         assertEquals("InvalidRate", refused("setRate", JSONObject().put("rateCents", 0)))
         handler.handle("setSeasonStart", JSONObject().put("month", 10))
         assertEquals(10, settings.seasonStartMonth.first())
@@ -76,7 +108,7 @@ class LinkCommandHandlerTest {
         val args = JSONObject().put("lessons", JSONArray().put(lessonJson()))
         assertEquals("PhoneNotEmpty", refused("restoreAll", args))
         val empty = FakeLessonRepository()
-        LinkCommandHandler(empty, settings, com.karvo.testing.FakeEventRepository(), { it.name }, { it.name }).handle("restoreAll", args)
+        LinkCommandHandler(empty, settings, com.karvo.testing.FakeEventRepository(), rates, { it.name }, { it.name }).handle("restoreAll", args)
         assertEquals(listOf("Bo"), empty.allLessons().map { it.student })
     }
 
@@ -122,7 +154,7 @@ class LinkCommandHandlerTest {
     @Test fun `restore into an empty phone also brings the PC events, without duplicates`() = runTest {
         val empty = FakeLessonRepository()
         val ev = com.karvo.testing.FakeEventRepository(listOf(com.karvo.data.Event(1, LocalDate.parse("2026-11-12"), "phone")))
-        val h = LinkCommandHandler(empty, settings, ev, { it.name }, { it.name })
+        val h = LinkCommandHandler(empty, settings, ev, rates, { it.name }, { it.name })
         h.handle("restoreAll", JSONObject().put("lessons", JSONArray().put(lessonJson())).put("events", JSONArray()
             .put(JSONObject().put("date", "2026-11-10").put("text", "Meeting")).put(JSONObject().put("date", "2026-11-12").put("text", "phone"))))
         assertEquals(listOf("phone", "Meeting"), ev.events.value.map { it.text })
