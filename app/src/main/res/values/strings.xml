@@ -447,4 +447,5 @@
     <string name="rate_delete_moves">Its lessons will be paid at the default rate, %1$s.</string>
     <string name="rate_delete_last">Earnings will be hidden until you add a rate again.</string>
     <string name="lesson_rate">Rate</string>
+    <string name="rate_title_taken">There is already a rate with this name</string>
 </resources>

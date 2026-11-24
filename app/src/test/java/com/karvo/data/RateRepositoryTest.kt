@@ -46,6 +46,8 @@ class RateRepositoryTest {
         assertEquals(listOf("Standard" to true, "Private" to false), rates.observe().first().map { it.title to it.isDefault })
         assertFalse(rates.save(Rate(title = " ", cents = 100, color = 1)))
         assertFalse(rates.save(Rate(title = "Zero", cents = 0, color = 1)))
+        assertFalse(rates.save(Rate(title = " private ", cents = 100, color = 1))) // the name is taken
+        assertTrue(rates.save(rates.all().single { it.title == "Private" }.copy(title = "PRIVATE"))) // its own name
     }
 
     @Test fun changingTheDefaultKeepsWhatOldLessonsEarn() = runTest {

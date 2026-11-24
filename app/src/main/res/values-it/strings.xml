@@ -445,4 +445,5 @@
     <string name="rate_delete_moves">Le sue lezioni saranno pagate con la tariffa predefinita, %1$s.</string>
     <string name="rate_delete_last">I guadagni saranno nascosti finché non aggiungi di nuovo una tariffa.</string>
     <string name="lesson_rate">Tariffa</string>
+    <string name="rate_title_taken">Esiste già una tariffa con questo nome</string>
 </resources>

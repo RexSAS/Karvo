@@ -23,6 +23,10 @@ data class Rate(
 
 const val MAX_RATE_TITLE = 30
 
+/** True when a rate other than [id] already has [title], ignoring case and surrounding spaces. */
+fun titleTaken(rates: List<Rate>, title: String, id: Long = 0): Boolean =
+    rates.any { it.id != id && it.title.equals(title.trim(), ignoreCase = true) }
+
 /** The swatches a rate can take; the first is given to the rate made from the old single hourly rate. */
 val RATE_COLORS = listOf(0xFF4FA3E0, 0xFFE0B04F, 0xFF5CC08A, 0xFFE0675C, 0xFFA57BE0, 0xFFE07FB8, 0xFF5CC6C6, 0xFF9AA5B1).map { it.toInt() }
 
@@ -80,12 +84,17 @@ class RateRepository(private val dao: RateDao) {
     fun observe(): Flow<List<Rate>> = dao.observeAll()
     suspend fun all(): List<Rate> = dao.getAll()
 
-    /** Adds ([Rate.id] 0) or updates a rate; the title is trimmed. Returns false for an invalid or vanished rate. */
+    /**
+     * Adds ([Rate.id] 0) or updates a rate; the title is trimmed. Returns false for an invalid or vanished rate, or a
+     * title another rate already has (ignoring case: CSV files name rates by title).
+     */
     suspend fun save(rate: Rate): Boolean {
         val clean = rate.copy(title = rate.title.trim())
         if (clean.title.isEmpty() || clean.title.length > MAX_RATE_TITLE || clean.cents <= 0) return false
+        val all = dao.getAll()
+        if (titleTaken(all, clean.title, clean.id)) return false
         if (clean.id == 0L) { dao.add(clean); return true }
-        val old = dao.getAll().firstOrNull { it.id == clean.id } ?: return false
+        val old = all.firstOrNull { it.id == clean.id } ?: return false
         dao.updateRow(clean.copy(isDefault = old.isDefault))
         return true
     }

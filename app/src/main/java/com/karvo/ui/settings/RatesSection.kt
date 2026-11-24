@@ -44,6 +44,7 @@ import com.karvo.R
 import com.karvo.data.MAX_RATE_TITLE
 import com.karvo.data.RATE_COLORS
 import com.karvo.data.Rate
+import com.karvo.data.titleTaken
 import com.karvo.domain.RateParseResult
 import com.karvo.domain.formatRateText
 import com.karvo.domain.normalizeRateInput
@@ -115,7 +116,7 @@ fun RatesSection(
         }
     }
 
-    editing?.let { rate -> RateDialog(rate, onDismiss = { editing = null }, onSave = { onSave(it); editing = null }) }
+    editing?.let { rate -> RateDialog(rate, rates, onDismiss = { editing = null }, onSave = { onSave(it); editing = null }) }
     deleting?.let { rate ->
         val default = rates.firstOrNull { it.isDefault && it.id != rate.id }
         AlertDialog(
@@ -130,13 +131,14 @@ fun RatesSection(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun RateDialog(rate: Rate, onDismiss: () -> Unit, onSave: (Rate) -> Unit) {
+private fun RateDialog(rate: Rate, others: List<Rate>, onDismiss: () -> Unit, onSave: (Rate) -> Unit) {
     var title by remember { mutableStateOf(rate.title) }
     var amount by remember { mutableStateOf(if (rate.cents > 0) formatRateText(rate.cents) else "") }
     var color by remember { mutableStateOf(rate.color) }
     val cents = (parseRateCents(amount) as? RateParseResult.Valid)?.cents
     val amountError = amount.isNotBlank() && cents == null
-    val valid = title.isNotBlank() && cents != null
+    val taken = titleTaken(others, title, rate.id)
+    val valid = title.isNotBlank() && !taken && cents != null
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (rate.id == 0L) R.string.rate_add else R.string.rate_edit)) },
@@ -148,6 +150,8 @@ private fun RateDialog(rate: Rate, onDismiss: () -> Unit, onSave: (Rate) -> Unit
                     onValueChange = { if (it.length <= MAX_RATE_TITLE) title = it },
                     label = { Text(stringResource(R.string.rate_title)) },
                     singleLine = true,
+                    isError = taken,
+                    supportingText = if (taken) { { Text(stringResource(R.string.rate_title_taken)) } } else null,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
