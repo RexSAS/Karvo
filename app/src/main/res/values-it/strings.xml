@@ -390,10 +390,11 @@
     </plurals>
     <string name="whats_new_title">Novità della %1$s</string>
     <string-array name="whats_new_items">
-        <item>Cerca nelle lezioni: tocca la lente accanto a Lezioni per trovare un allievo o una nota, e mostra solo le lezioni non ancora pagate.</item>
-        <item>Segnala un problema dalle Impostazioni. In Le mie segnalazioni vedi le risposte e puoi rispondere.</item>
-        <item>Il tuo badge prende vita: brilla, fluttua e, da ametista in su, scintilla.</item>
-        <item>Un tour veloce più lungo mostra le novità: ricerca, scelta della stagione, badge e i tuoi allievi. Rivedilo dalle Impostazioni.</item>
+        <item>Più tariffe orarie: nelle Impostazioni dai a ognuna un nome, un importo e un colore. Dal menu ⋮ la rendi predefinita, la modifichi o la elimini.</item>
+        <item>Quando aggiungi una lezione, scegli la tariffa con i chip colorati. I totali contano ogni lezione con la sua tariffa.</item>
+        <item>Le lezioni che non sono sulla tariffa predefinita hanno un piccolo pallino colorato.</item>
+        <item>La tua vecchia tariffa oraria ora è la tariffa Standard.</item>
+        <item>Un tour veloce più fluido.</item>
     </string-array>
     <string name="play_update_ready_title">Aggiornamento pronto</string>
     <string name="play_update_ready_text">La nuova versione di Karvo è scaricata. Riavviare ora per usarla? Le tue lezioni restano come sono.</string>

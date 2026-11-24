@@ -42,7 +42,7 @@ Ski instructors are paid by the hour, and at the end of the month the hours have
 
 ### 💶 Your hours and your pay
 - **Overview** opens on this season, compared with last season at the same date. The season picker switches to any past season or to **Lifetime**.
-- Earnings from your hourly rate, hidden until you tap the eye, with fingerprint, face or PIN if you want.
+- Earnings from your hourly rates (each lesson on its own rate), hidden until you tap the eye, with fingerprint, face or PIN if you want.
 - Tick the months the school has paid and always see what is still to be paid.
 - Statistics: lessons this month, average lesson, students, the last 6 months, your busiest weekdays and a podium of your top students.
 - **Student page**: tap a student for their hours, lessons, months, seasons and earnings.
@@ -98,6 +98,7 @@ If your phone's Google backup is on, Android includes Karvo's data in it, so you
 - [x] **Season picker**, **student page**, swipe back and the **season start** greeting (3.5)
 - [x] **Season badges** and **home-screen widgets** (3.6)
 - [x] **Search and filters**, **Report a problem** with My reports and replies, **animated badges** and a longer **quick tour** (3.7)
+- [x] **Several hourly rates**, each with a name, an amount and a color, picked per lesson (3.8)
 
 ### Ideas
 - [ ] **Repeat a lesson**: long-press a lesson to log the same student and duration again.

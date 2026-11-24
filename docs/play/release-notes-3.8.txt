@@ -1,0 +1,12 @@
+<en-US>
+• Several hourly rates, each with a name, an amount and a color
+• Pick each lesson's rate with colored chips; totals count every lesson at its own rate
+• Your old hourly rate becomes the rate called Standard
+• A smoother quick tour
+</en-US>
+<it-IT>
+• Più tariffe orarie, ognuna con un nome, un importo e un colore
+• Scegli la tariffa di ogni lezione con i chip colorati; i totali contano ogni lezione con la sua tariffa
+• La tua vecchia tariffa oraria diventa la tariffa Standard
+• Un tour veloce più fluido
+</it-IT>

@@ -8,7 +8,7 @@ you choose to link a PC (see *Linking a PC*).
 
 ## What Karvo stores, and where
 
-- **Lessons**: student names, dates, durations, notes, your hourly rate, paid months and your settings. They are stored
+- **Lessons**: student names, dates, durations, notes, your hourly rates, paid months and your settings. They are stored
   only inside the app on your phone. We never receive them.
 - **Moments**: photos and videos you take with Karvo's camera are saved in your phone's gallery, in a *Karvo* album.
   From there they are handled like any other photo, including your gallery's own cloud backup if you turned it on.
@@ -44,7 +44,7 @@ you choose to link a PC (see *Linking a PC*).
 
 ## Linking a PC
 
-If you link a PC (Settings → Linked PCs, then karvo.rxsas.it on the PC), your lessons, events, rate and settings are sent
+If you link a PC (Settings → Linked PCs, then karvo.rxsas.it on the PC), your lessons, events, rates and settings are sent
 between your phone and that PC while they are connected. Everything is **end-to-end encrypted** with a key shared only
 by scanning the QR code: it travels through a relay we run on Cloudflare (`link.rxsas.it`), which forwards the encrypted
 data without being able to read it and stores none of it. Cloudflare sees connection details such as IP addresses, under
@@ -77,7 +77,7 @@ tuo telefono, a meno che tu non scelga di collegare un PC (vedi *Collegare un PC
 
 ## Cosa salva Karvo, e dove
 
-- **Lezioni**: nomi degli allievi, date, durate, note, la tua tariffa oraria, i mesi pagati e le impostazioni. Restano
+- **Lezioni**: nomi degli allievi, date, durate, note, le tue tariffe orarie, i mesi pagati e le impostazioni. Restano
   solo dentro l'app sul tuo telefono. Noi non le riceviamo mai.
 - **Momenti**: le foto e i video scattati con la fotocamera di Karvo vengono salvati nella galleria del telefono,
   nell'album *Karvo*. Da lì sono trattati come qualsiasi altra foto, compreso il backup cloud della galleria se l'hai
@@ -115,7 +115,7 @@ tuo telefono, a meno che tu non scelga di collegare un PC (vedi *Collegare un PC
 
 ## Collegare un PC
 
-Se colleghi un PC (Impostazioni → PC collegati, poi karvo.rxsas.it sul PC), le tue lezioni, gli eventi, la tariffa e le impostazioni
+Se colleghi un PC (Impostazioni → PC collegati, poi karvo.rxsas.it sul PC), le tue lezioni, gli eventi, le tariffe e le impostazioni
 vengono inviate tra il telefono e quel PC mentre sono connessi. Tutto è **cifrato end-to-end** con una chiave condivisa
 solo scansionando il codice QR: passa attraverso un relay che gestiamo su Cloudflare (`link.rxsas.it`), che inoltra i
 dati cifrati senza poterli leggere e non ne conserva nessuno. Cloudflare vede i dati di connessione, come gli indirizzi

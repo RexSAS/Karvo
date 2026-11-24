@@ -392,10 +392,11 @@
     </plurals>
     <string name="whats_new_title">What\'s new in %1$s</string>
     <string-array name="whats_new_items">
-        <item>Search your lessons: tap the magnifier next to Lessons to find a student or a note, and show only the lessons not paid yet.</item>
-        <item>Report a problem from Settings. Under My reports you see the answers and can reply.</item>
-        <item>Your badge comes alive: it shines, floats and, from amethyst up, twinkles.</item>
-        <item>A longer quick tour shows the new things: search, the season picker, badges and your students. Replay it from Settings.</item>
+        <item>Several hourly rates: in Settings give each one a name, an amount and a color. The ⋮ menu makes one the default, edits or deletes it.</item>
+        <item>When you add a lesson, pick its rate with the colored chips. Totals count each lesson at its own rate.</item>
+        <item>Lessons not on the default rate show a small colored dot.</item>
+        <item>Your old hourly rate is now the rate called Standard.</item>
+        <item>A smoother quick tour.</item>
     </string-array>
     <string name="play_update_ready_title">Update ready</string>
     <string name="play_update_ready_text">The new version of Karvo is downloaded. Restart now to use it? Your lessons stay as they are.</string>

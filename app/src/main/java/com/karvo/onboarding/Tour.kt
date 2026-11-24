@@ -2,6 +2,12 @@ package com.karvo.onboarding
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
+import kotlin.math.sin
+import kotlin.math.PI
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -30,6 +36,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -58,7 +66,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -90,10 +98,21 @@ val TOUR = listOf(
 class TourState {
     var index by mutableStateOf<Int?>(null)
         private set
+    /** Each target's real position, also while it is off screen (not clipped to the screen). */
     val bounds = mutableStateMapOf<TourTarget, Rect>()
     val current: TourStep? get() = index?.let(TOUR::getOrNull)
-    fun start() { index = 0 }
-    fun next() { index = index?.let { if (it + 1 < TOUR.size) it + 1 else null } }
+    /** False while the step's tab and scroll are still moving: the highlight and the card wait for the target to rest. */
+    var settled by mutableStateOf(false)
+    /** True when the current step is on another tab than the step before (the pager must settle first). */
+    var pageChanged = true
+        private set
+    fun start() { pageChanged = true; settled = false; index = 0 }
+    fun next() {
+        val from = current?.page
+        settled = false
+        index = index?.let { if (it + 1 < TOUR.size) it + 1 else null }
+        pageChanged = current?.page != from
+    }
     fun stop() { index = null }
 }
 
@@ -107,73 +126,90 @@ fun Modifier.tourTarget(target: TourTarget): Modifier = composed {
     val active = tour.current?.target == target
     var size by remember { mutableStateOf(Size.Zero) }
     val density = LocalDensity.current
-    // The lists run under the floating tab bar, so the target is scrolled well clear of it, with room for the ring.
+    // The lists run under the floating tab bar and the screen title, so the target is scrolled well clear of both
+    // (scrolling up, e.g. to the rates from "Show the tour again" low in Settings), with room for the ring.
+    val statusBar = WindowInsets.statusBars.getTop(density)
     LaunchedEffect(active) {
         if (!active) return@LaunchedEffect
-        delay(350) // after the pager has settled on the step's tab, or the pager itself would be scrolled
-        val top = with(density) { 24.dp.toPx() }
+        if (tour.pageChanged) delay(350) // after the pager has settled on the step's tab, or the pager itself would be scrolled
+        val top = statusBar + with(density) { 110.dp.toPx() }
         val bottom = with(density) { 140.dp.toPx() }
-        runCatching { bring.bringIntoView(Rect(0f, -top, size.width, size.height + bottom)) }
+        runCatching { bring.bringIntoView(Rect(0f, -top, size.width, size.height + bottom)) } // returns once scrolled
+        tour.settled = true
     }
     bringIntoViewRequester(bring).onGloballyPositioned {
         size = Size(it.size.width.toFloat(), it.size.height.toFloat())
-        tour.bounds[target] = it.boundsInRoot()
+        tour.bounds[target] = Rect(it.positionInRoot(), size)
     }
 }
 
-/** Dims the app except the current target, with the step's text, Next and Skip; it switches to the step's tab itself. */
+/**
+ * Dims the app except the current target, with the step's text, Next and Skip; it switches to the step's tab itself.
+ * The highlight and the card move only once the target rests ([TourState.settled]): while a tab slides or a page
+ * scrolls the highlight fades out and comes back on the target, so it never wanders over the page in between.
+ */
 @Composable
 fun TourOverlay(tour: TourState, onShowPage: (Int) -> Unit) {
     val step = tour.current ?: return
     LaunchedEffect(step) { onShowPage(step.page) }
+    // A target that never shows (not laid out) must not hold the tour forever.
+    LaunchedEffect(step) { delay(1200); tour.settled = true }
     val density = LocalDensity.current
     val screenH = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
-    val rect = tour.bounds[step.target]
     val pad = with(density) { 8.dp.toPx() }
-    // The highlight glides from one target to the next and pulses a gold ring; the whole overlay fades in.
     val shown = rememberSaveable { mutableStateOf(false) }
     val alpha by animateFloatAsState(if (shown.value) 1f else 0f, tween(250), label = "tourFade")
     LaunchedEffect(Unit) { shown.value = true }
-    // A spring, not a tween: the target moves every frame while its page scrolls, and a spring follows without restarting.
-    var lastRect by remember { mutableStateOf<Rect?>(null) }
-    if (rect != null) lastRect = rect
-    val hole by animateRectAsState(lastRect ?: Rect.Zero, spring(dampingRatio = 0.9f, stiffness = Spring.StiffnessMediumLow), label = "tourHole")
-    val holeAlpha by animateFloatAsState(if (rect != null) 1f else 0f, tween(300), label = "tourHoleAlpha") // no target: the hole fades shut where it was
-    val pulse = rememberInfiniteTransition(label = "tourPulse").animateFloat(0f, 1f, infiniteRepeatable(tween(1600)), label = "tourPulseP")
+    val target = if (tour.settled) tour.bounds[step.target] else null
+    val holeAlpha = animateFloatAsState(if (target != null) 1f else 0f, tween(if (target != null) 260 else 140), label = "tourHoleAlpha")
+    // Glides from one resting target to the next; after a fade (tab change or scroll) it reappears in place instead.
+    val hole = remember { Animatable(Rect.Zero, Rect.VectorConverter) }
+    LaunchedEffect(target) {
+        val to = target ?: return@LaunchedEffect
+        if (holeAlpha.value < 0.3f) hole.snapTo(to) else hole.animateTo(to, spring(dampingRatio = 0.9f, stiffness = Spring.StiffnessMediumLow))
+    }
+    // The ring grows and fades in and out, so each pulse starts from nothing instead of snapping back.
+    val pulse = rememberInfiniteTransition(label = "tourPulse").animateFloat(0f, 1f, infiniteRepeatable(tween(1800, easing = LinearEasing)), label = "tourPulseP")
     val gold = MaterialTheme.colorScheme.tertiary
+    var atTop by remember { mutableStateOf(false) }
+    if (target != null) atTop = target.center.y > screenH / 2 // the card goes on the side away from the resting target
     Box(Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha }.pointerInput(step) { detectTapGestures { } }) { // the app underneath stays untouchable
         Canvas(Modifier.fillMaxSize().graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)) {
             drawRect(Color.Black.copy(alpha = 0.72f))
-            if (lastRect != null && holeAlpha > 0f) {
-                val tl = Offset(hole.left - pad, hole.top - pad)
-                val sz = Size(hole.width + 2 * pad, hole.height + 2 * pad)
-                drawRoundRect(Color.Black.copy(alpha = holeAlpha), tl, sz, CornerRadius(pad * 2), blendMode = BlendMode.DstOut)
-                val grow = pulse.value * pad * 1.5f
-                drawRoundRect(gold.copy(alpha = 0.9f * (1 - pulse.value) * holeAlpha), Offset(tl.x - grow, tl.y - grow), Size(sz.width + 2 * grow, sz.height + 2 * grow),
+            val a = holeAlpha.value
+            if (a > 0f) {
+                val r = hole.value
+                val tl = Offset(r.left - pad, r.top - pad)
+                val sz = Size(r.width + 2 * pad, r.height + 2 * pad)
+                drawRoundRect(Color.Black.copy(alpha = a), tl, sz, CornerRadius(pad * 2), blendMode = BlendMode.DstOut)
+                val p = pulse.value
+                val grow = p * pad * 1.5f
+                drawRoundRect(gold.copy(alpha = 0.9f * sin(PI.toFloat() * p) * a), Offset(tl.x - grow, tl.y - grow), Size(sz.width + 2 * grow, sz.height + 2 * grow),
                     CornerRadius(pad * 2 + grow), style = Stroke(2.dp.toPx()))
             }
         }
-        val atTop = rect != null && rect.center.y > screenH / 2 // the card goes on the side away from the target
-        val cardBias by animateFloatAsState(if (atTop) -1f else 1f, spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessLow), label = "tourCardSide")
-        AnimatedContent(
-            tour.index, Modifier.align(BiasAlignment(0f, cardBias)),
-            transitionSpec = { (fadeIn(tween(300, 100)) + slideInVertically(tween(350, 100)) { it / 6 }) togetherWith fadeOut(tween(120)) },
-            label = "tourCard",
-        ) { _ ->
+        val cardBias by animateFloatAsState(if (atTop) -1f else 1f, spring(dampingRatio = 0.9f, stiffness = Spring.StiffnessMediumLow), label = "tourCardSide")
+        // One card for the whole tour: only its text crossfades, and its height follows.
         Card(
-            Modifier.safeDrawingPadding().padding(20.dp).fillMaxWidth(),
+            Modifier.align(BiasAlignment(0f, cardBias)).safeDrawingPadding().padding(20.dp).fillMaxWidth(),
             shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
-            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("${(tour.index ?: 0) + 1}/${TOUR.size}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(stringResource(step.title), style = MaterialTheme.typography.titleLarge)
-                Text(stringResource(step.body), style = MaterialTheme.typography.bodyMedium)
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = tour::stop) { Text(stringResource(R.string.tour_skip)) }
-                    Button(onClick = tour::next) { Text(stringResource(if (tour.index == TOUR.lastIndex) R.string.tour_done else R.string.tour_next)) }
+            AnimatedContent(
+                tour.index ?: 0,
+                transitionSpec = { (fadeIn(tween(220, 90)) togetherWith fadeOut(tween(90))) using SizeTransform(clip = false) },
+                label = "tourCard",
+            ) { i ->
+                val s = TOUR[i]
+                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("${i + 1}/${TOUR.size}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(s.title), style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(s.body), style = MaterialTheme.typography.bodyMedium)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        TextButton(onClick = tour::stop) { Text(stringResource(R.string.tour_skip)) }
+                        Button(onClick = tour::next) { Text(stringResource(if (i == TOUR.lastIndex) R.string.tour_done else R.string.tour_next)) }
+                    }
                 }
             }
-        }
         }
     }
 }

@@ -2,6 +2,20 @@
 
 All notable changes to Karvo are listed here. Versions 1.0–1.3 were released as **MasterSki**.
 
+## [3.8] — 2026-11-25
+
+### Added
+- **Several hourly rates** (*Settings → Hourly rates*): each has a name, an amount and a color. The first one is the default; the ⋮ menu makes another rate the default, edits it or deletes it. Two rates can't share a name.
+- When adding or editing a lesson, colored **rate chips** pick its rate (the default is preselected). Lessons not on the default rate show a small colored dot in every list.
+- Totals, months, seasons, students and what's still unpaid count **each lesson at its own rate**.
+- CSV export and backups gain a `rate` column (the rate's name), so a restore keeps each lesson's rate. Older files still import, on the default rate.
+- The PC link sends the rates, so karvo.rxsas.it shows and edits them too.
+
+### Changed
+- The old single hourly rate becomes a default rate called **Standard**.
+- Changing the default rate keeps what older lessons earn; deleting a rate moves its lessons to the default.
+- **Smoother quick tour**: the highlight waits for each page to settle instead of wandering over it, the card stays on screen and only its text changes, and the ring pulses softly. The highlighted button also clears the screen title.
+
 ## [3.7] — 2026-11-17
 
 ### Added
